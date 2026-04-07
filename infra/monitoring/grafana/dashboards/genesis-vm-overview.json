@@ -17,44 +17,30 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 0.7
-              },
-              {
-                "color": "red",
-                "value": 0.9
-              }
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 0.7 },
+              { "color": "red", "value": 0.9 }
             ]
           }
         }
       },
-      "gridPos": {
-        "h": 8,
-        "w": 6,
-        "x": 0,
-        "y": 0
-      },
+      "gridPos": { "h": 6, "w": 5, "x": 0, "y": 0 },
       "id": 1,
       "options": {
         "colorMode": "value",
+        "graphMode": "none",
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "textMode": "value"
       },
       "targets": [
         {
           "expr": "1 - avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m]))",
+          "instant": true,
           "refId": "A"
         }
       ],
@@ -72,44 +58,30 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 0.75
-              },
-              {
-                "color": "red",
-                "value": 0.9
-              }
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 0.75 },
+              { "color": "red", "value": 0.9 }
             ]
           }
         }
       },
-      "gridPos": {
-        "h": 8,
-        "w": 6,
-        "x": 6,
-        "y": 0
-      },
+      "gridPos": { "h": 6, "w": 5, "x": 5, "y": 0 },
       "id": 2,
       "options": {
         "colorMode": "value",
+        "graphMode": "none",
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "fields": "",
           "values": false
         },
-        "textMode": "auto"
+        "textMode": "value"
       },
       "targets": [
         {
           "expr": "1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)",
+          "instant": true,
           "refId": "A"
         }
       ],
@@ -123,144 +95,121 @@
       },
       "fieldConfig": {
         "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 0.7 },
+              { "color": "red", "value": 0.85 }
+            ]
+          }
+        }
+      },
+      "gridPos": { "h": 6, "w": 5, "x": 10, "y": 0 },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "expr": "1 - (node_filesystem_avail_bytes{mountpoint=\"/\",fstype!~\"tmpfs|overlay\"} / node_filesystem_size_bytes{mountpoint=\"/\",fstype!~\"tmpfs|overlay\"})",
+          "instant": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Root Disk Usage",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "orange", "value": 0.95 },
+              { "color": "green", "value": 1 }
+            ]
+          }
+        }
+      },
+      "gridPos": { "h": 6, "w": 5, "x": 15, "y": 0 },
+      "id": 4,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "expr": "avg(monitor_status{monitor_name=~\"shellr.net|shellr.net health|dma.shellr.net|docs.shellr.net|status.shellr.net\"})",
+          "instant": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Public Availability",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
           "unit": "short",
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {
-                "color": "red",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 1
-              },
-              {
-                "color": "green",
-                "value": 2
-              }
+              { "color": "red", "value": null },
+              { "color": "orange", "value": 4 },
+              { "color": "green", "value": 6 }
             ]
           }
         }
       },
-      "gridPos": {
-        "h": 8,
-        "w": 6,
-        "x": 12,
-        "y": 0
-      },
-      "id": 3,
-      "options": {
-        "colorMode": "value",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "value"
-      },
-      "targets": [
-        {
-          "expr": "sum(up) or vector(0)",
-          "refId": "A"
-        }
-      ],
-      "title": "Prometheus Targets Up",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "bytes",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 5368709120
-              },
-              {
-                "color": "green",
-                "value": 10737418240
-              }
-            ]
-          }
-        }
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 6,
-        "x": 18,
-        "y": 0
-      },
-      "id": 4,
-      "options": {
-        "colorMode": "value",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "value"
-      },
-      "targets": [
-        {
-          "expr": "node_filesystem_avail_bytes{fstype!~\"tmpfs|overlay\",mountpoint=\"/\"}",
-          "refId": "A"
-        }
-      ],
-      "title": "Disk Free /",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "bytes"
-        }
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 8
-      },
+      "gridPos": { "h": 6, "w": 4, "x": 20, "y": 0 },
       "id": 5,
       "options": {
-        "legend": {
-          "displayMode": "table",
-          "placement": "bottom"
+        "colorMode": "value",
+        "graphMode": "none",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
         },
-        "tooltip": {
-          "mode": "multi"
-        }
+        "textMode": "value"
       },
       "targets": [
         {
-          "expr": "node_filesystem_avail_bytes{fstype!~\"tmpfs|overlay\",mountpoint=\"/\"}",
-          "legendFormat": "Available /",
+          "expr": "count(max by (container_label_com_docker_compose_service) (container_last_seen{container_label_com_docker_compose_service!=\"\"})) or vector(0)",
+          "instant": true,
           "refId": "A"
         }
       ],
-      "title": "Disk Available",
-      "type": "timeseries"
+      "title": "Compose Services Seen",
+      "type": "stat"
     },
     {
       "datasource": {
@@ -269,15 +218,10 @@
       },
       "fieldConfig": {
         "defaults": {
-          "unit": "short"
+          "unit": "percentunit"
         }
       },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 8
-      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
       "id": 6,
       "options": {
         "legend": {
@@ -290,120 +234,23 @@
       },
       "targets": [
         {
-          "expr": "node_load1",
-          "legendFormat": "Load 1m",
+          "expr": "1 - avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m]))",
+          "legendFormat": "CPU usage",
           "refId": "A"
         },
         {
-          "expr": "node_load5",
-          "legendFormat": "Load 5m",
+          "expr": "1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)",
+          "legendFormat": "Memory usage",
           "refId": "B"
+        },
+        {
+          "expr": "1 - (node_filesystem_avail_bytes{mountpoint=\"/\",fstype!~\"tmpfs|overlay\"} / node_filesystem_size_bytes{mountpoint=\"/\",fstype!~\"tmpfs|overlay\"})",
+          "legendFormat": "Root disk usage",
+          "refId": "C"
         }
       ],
-      "title": "System Load",
+      "title": "Host Resource Trends",
       "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "gray",
-                "value": null
-              },
-              {
-                "color": "green",
-                "value": 1
-              }
-            ]
-          }
-        }
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 6,
-        "x": 0,
-        "y": 16
-      },
-      "id": 7,
-      "options": {
-        "colorMode": "background",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "value"
-      },
-      "targets": [
-        {
-          "expr": "sum(monitor_status == 1) or vector(0)",
-          "refId": "A"
-        }
-      ],
-      "title": "Kuma Monitors Up",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 1
-              }
-            ]
-          }
-        }
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 6,
-        "x": 6,
-        "y": 16
-      },
-      "id": 8,
-      "options": {
-        "colorMode": "background",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "value"
-      },
-      "targets": [
-        {
-          "expr": "sum(monitor_status == 0) or vector(0)",
-          "refId": "A"
-        }
-      ],
-      "title": "Kuma Monitors Down",
-      "type": "stat"
     },
     {
       "datasource": {
@@ -415,13 +262,8 @@
           "unit": "ms"
         }
       },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 16
-      },
-      "id": 9,
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
+      "id": 7,
       "options": {
         "legend": {
           "displayMode": "table",
@@ -433,21 +275,130 @@
       },
       "targets": [
         {
-          "expr": "monitor_response_time or vector(0)",
+          "expr": "monitor_response_time{monitor_name=~\"shellr.net|dma.shellr.net|docs.shellr.net|status.shellr.net|grafana internal health\"}",
           "legendFormat": "{{monitor_name}}",
           "refId": "A"
         }
       ],
-      "title": "Kuma Response Times",
+      "title": "Service Response Times",
       "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "green", "value": 1 }
+            ]
+          }
+        }
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 14 },
+      "id": 8,
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true
+      },
+      "targets": [
+        {
+          "expr": "max by (monitor_name) (monitor_status{monitor_name=~\"shellr.net|shellr.net health|dma.shellr.net|docs.shellr.net|status.shellr.net|grafana internal health\"})",
+          "instant": true,
+          "legendFormat": "{{monitor_name}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Service Status",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        }
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 14 },
+      "id": 9,
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(container_cpu_usage_seconds_total{container_label_com_docker_compose_service!=\"\"}[5m])) by (container_label_com_docker_compose_service)",
+          "instant": true,
+          "legendFormat": "{{container_label_com_docker_compose_service}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Container CPU Load",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes"
+        }
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 14 },
+      "id": 10,
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true
+      },
+      "targets": [
+        {
+          "expr": "sum(container_memory_working_set_bytes{container_label_com_docker_compose_service!=\"\"}) by (container_label_com_docker_compose_service)",
+          "instant": true,
+          "legendFormat": "{{container_label_com_docker_compose_service}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Container Memory Usage",
+      "type": "bargauge"
     }
   ],
-  "schemaVersion": 39,
+  "refresh": "30s",
+  "schemaVersion": 41,
   "style": "dark",
   "tags": [
-    "genesis",
-    "node-exporter",
-    "uptime-kuma"
+    "shellr",
+    "operations",
+    "prometheus",
+    "uptime-kuma",
+    "cadvisor"
   ],
   "templating": {
     "list": []
@@ -457,9 +408,9 @@
     "to": "now"
   },
   "timepicker": {},
-  "timezone": "browser",
-  "title": "Genesis VM Overview",
+  "timezone": "",
+  "title": "Shellr Operations Overview",
   "uid": "genesis-vm-overview",
-  "version": 2,
+  "version": 1,
   "weekStart": ""
 }

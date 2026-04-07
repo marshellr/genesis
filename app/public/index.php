@@ -3,11 +3,15 @@ declare(strict_types=1);
 
 $site = require __DIR__ . '/../config/site.php';
 
-$heroSignals = [
-    '4 vCPU / 8 GB Hetzner VM',
-    'Docker Compose runtime',
-    'Nginx + Let\'s Encrypt',
-    'Prometheus / Grafana / Loki',
+$platformSnapshot = [
+    ['title' => 'Host', 'body' => 'Single Hetzner VM with 4 vCPU, 8 GB RAM, and bounded disk usage.'],
+    ['title' => 'Runtime', 'body' => 'Service separation through Docker Compose instead of process sprawl on the host.'],
+    ['title' => 'Ingress', 'body' => 'Nginx handles hostname routing, HTTPS, redirects, and public surface boundaries.'],
+    ['title' => 'Delivery', 'body' => 'GitHub Actions builds staged releases and deploys over SSH with health-gated checks.'],
+    ['title' => 'Monitoring', 'body' => 'Prometheus, Grafana, Node Exporter, cAdvisor, and Uptime Kuma cover host and service visibility.'],
+    ['title' => 'Logging', 'body' => 'Loki and Promtail provide short-retention centralized logs without ELK overhead.'],
+    ['title' => 'Recovery', 'body' => 'Database dumps, project archives, and explicit restore scripts are part of the operating model.'],
+    ['title' => 'Docs', 'body' => 'Technical documentation is published through GitHub Pages, not served from the VM.'],
 ];
 
 $focusAreas = [
@@ -21,8 +25,12 @@ $featuredProjects = [
     [
         'title' => 'Genesis / DevOps Platform',
         'tag' => 'platform',
-        'lead' => 'A small platform with real operational logic on a single VM.',
-        'summary' => 'Genesis is the platform project behind shellr.net. The goal is not a large stack for its own sake, but a clean system with routing, HTTPS, deployment, monitoring, logging, and backup on limited resources. The important part is not only that services start, but that they can be operated, reviewed, and documented properly.',
+        'lead' => 'A single-VM platform built around operational clarity.',
+        'points' => [
+            'Runs the public entrypoints, application workloads, monitoring, logging, and backups on one host.',
+            'Uses explicit subdomains, Compose-managed services, and documented rollback and restore paths.',
+            'Prioritizes bounded retention and maintainability over adding more tooling than the host needs.',
+        ],
         'stack' => ['Linux', 'Docker Compose', 'Nginx', 'GitHub Actions'],
         'href' => $site['docs_url'],
         'label' => 'Open platform docs',
@@ -30,8 +38,12 @@ $featuredProjects = [
     [
         'title' => 'DMA Statistics Module',
         'tag' => 'live project',
-        'lead' => 'An existing web application moved into a controlled platform context.',
-        'summary' => 'DMA shows how a legacy PHP application can be moved into a cleaner runtime model. That includes its own container, its own subdomain, clearer database boundaries, defined healthchecks, and a reverse-proxy setup that remains maintainable after the first successful deployment.',
+        'lead' => 'A legacy PHP workload integrated as its own runtime surface.',
+        'points' => [
+            'Runs under its own subdomain and container instead of being buried inside the main site.',
+            'Uses separate database scope, healthchecks, and reverse-proxy routing that stay reviewable.',
+            'Turns an existing application into something that can be operated cleanly on the platform.',
+        ],
         'stack' => ['PHP', 'MariaDB', 'Docker', 'Subdomain routing'],
         'href' => $site['dma_url'],
         'label' => 'Open DMA live',
@@ -39,8 +51,12 @@ $featuredProjects = [
     [
         'title' => 'AWStats Reporting / Automation',
         'tag' => 'reporting',
-        'lead' => 'Reporting that turns logs into usable operational visibility.',
-        'summary' => 'In reporting work, the point is not only to collect data, but to turn it into something operationally useful. AWStats and related automation represent the part of my work where analysis, preparation, and repeatable workflows come together without overloading the system.',
+        'lead' => 'Reporting focused on visibility instead of raw log volume.',
+        'points' => [
+            'Collects and summarizes access and usage patterns into readable reporting outputs.',
+            'Uses repeatable shell-based automation instead of manual report generation.',
+            'Keeps reporting lightweight enough for a small host and a small platform team.',
+        ],
         'stack' => ['AWStats', 'Shell scripts', 'Cron', 'Reporting'],
         'href' => $site['docs_url'] . '/projects.html',
         'label' => 'Open project overview',
@@ -48,17 +64,25 @@ $featuredProjects = [
     [
         'title' => 'Web Platform Migration & Hardening',
         'tag' => 'migration',
-        'lead' => 'Taking over existing systems and bringing them onto a safer operational footing.',
-        'summary' => 'Real infrastructure work rarely starts on a blank machine. This area covers host hardening, SSH security, firewalling, reverse-proxy migration, TLS, cleaner deployment paths, and the controlled cleanup of technical debt that would otherwise stay invisible until something breaks.',
+        'lead' => 'Taking over existing systems and making them safer to run.',
+        'points' => [
+            'Covers SSH hardening, firewalling, TLS cleanup, and reverse-proxy restructuring.',
+            'Focuses on controlled migration steps instead of risky one-shot rewrites.',
+            'Treats operational debt as something to be reduced deliberately, not ignored.',
+        ],
         'stack' => ['Ubuntu', 'SSH', 'UFW', 'Fail2ban'],
         'href' => $site['docs_url'] . '/architecture.html',
-        'label' => 'View architecture',
+        'label' => 'Open architecture',
     ],
     [
         'title' => 'Inventory Tracking Application',
         'tag' => 'application',
-        'lead' => 'A lean CRUD workload used as an operationally useful application layer.',
-        'summary' => 'The inventory application is intentionally simple, but that is exactly what makes it useful in a platform context. It represents a typical web workload with database access, CRUD behaviour, and healthchecks, which makes deployment, monitoring, and recovery decisions visible under realistic conditions.',
+        'lead' => 'A compact CRUD workload used as an operational proving ground.',
+        'points' => [
+            'Represents a realistic PHP and MariaDB application with healthchecks and persistent state.',
+            'Makes deployment, backup, and monitoring choices visible under simple but real workload conditions.',
+            'Works as a clean example of app-level behavior inside the wider platform model.',
+        ],
         'stack' => ['PHP', 'MariaDB', 'CRUD', 'Healthchecks'],
         'href' => $site['docs_url'] . '/projects.html',
         'label' => 'Read project notes',
@@ -76,7 +100,7 @@ $platformSlices = [
     ],
     [
         'title' => 'Observability',
-        'body' => 'Prometheus, Grafana, Uptime Kuma, Loki, and Promtail are sized for the host instead of competing against it.',
+        'body' => 'Prometheus, Grafana, Uptime Kuma, Loki, Promtail, and cAdvisor provide host, service, and container visibility with bounded overhead.',
     ],
     [
         'title' => 'Recovery',
@@ -93,40 +117,32 @@ $workStyle = [
 
 $liveLinks = [
     [
-        'label' => 'Documentation',
+        'label' => 'Explore Platform',
         'href' => $site['docs_url'],
-        'meta' => 'Technical documentation, project overview, architecture, monitoring, logging, and backup.',
+        'meta' => 'Architecture, deployment flow, monitoring, logging, and backup design.',
     ],
     [
-        'label' => 'DMA',
+        'label' => 'View Live Systems',
         'href' => $site['dma_url'],
-        'meta' => 'A live application running as its own platform surface.',
+        'meta' => 'DMA as a live workload running inside the platform.',
     ],
     [
-        'label' => 'Status',
+        'label' => 'Check System Status',
         'href' => $site['status_url'],
-        'meta' => 'Public availability view for the main platform surfaces.',
+        'meta' => 'Public uptime surface for the main services and health checks.',
     ],
     [
-        'label' => 'Contact',
-        'href' => 'mailto:' . $site['contact_email'],
-        'meta' => $site['contact_email'],
+        'label' => 'GitHub',
+        'href' => $site['github_url'] !== '' ? $site['github_url'] : 'https://github.com/marshellr/genesis',
+        'meta' => 'Repository, technical source material, and project structure.',
     ],
 ];
-
-if ($site['github_url'] !== '') {
-    $liveLinks[] = [
-        'label' => 'GitHub',
-        'href' => $site['github_url'],
-        'meta' => 'Code, changes, and technical source material.',
-    ];
-}
 
 if ($site['grafana_url'] !== '') {
     $liveLinks[] = [
         'label' => 'Grafana',
         'href' => $site['grafana_url'],
-        'meta' => 'Protected operational access to the monitoring surface.',
+        'meta' => 'Protected operational metrics and logging access for the platform.',
     ];
 }
 
@@ -182,20 +198,13 @@ function host_label(string $url): string
         <h1>Build systems that can actually be operated.</h1>
         <p class="hero-summary">
           I am a systems integration apprentice focused on Linux-based platforms around Docker,
-          deployment, monitoring, reverse proxies, and web operations. shellr.net is not a placeholder
-          site. It is the frontdoor to a running platform with real services, explicit runtime
-          boundaries, and technical documentation.
+          deployment, monitoring, reverse proxies, and web operations. shellr.net is the public
+          frontdoor of a running single-VM platform, not a portfolio mockup without operational depth.
         </p>
 
-        <div class="hero-signal-row">
-          <?php foreach ($heroSignals as $signal): ?>
-          <span><?= e($signal) ?></span>
-          <?php endforeach; ?>
-        </div>
-
         <div class="hero-actions">
-          <a class="button primary" href="<?= e($site['docs_url']) ?>">Open documentation</a>
-          <a class="button secondary" href="#projects">Project overview</a>
+          <a class="button primary" href="#platform">Explore Platform</a>
+          <a class="button secondary" href="#links">View Live Systems</a>
         </div>
       </div>
 
@@ -223,25 +232,41 @@ function host_label(string $url): string
           <article>
             <span>frontdoor</span>
             <strong>shellr.net</strong>
-            <p>Personal landing page and technical starting point for the platform.</p>
+            <p>Landing page, role positioning, project access, and platform overview.</p>
           </article>
           <article>
             <span>application</span>
             <strong>dma.shellr.net</strong>
-            <p>Concrete live project with its own runtime and routing boundary.</p>
+            <p>Separate PHP runtime with its own boundary, database scope, and health behavior.</p>
           </article>
           <article>
-            <span>monitoring</span>
+            <span>status</span>
             <strong>status.shellr.net</strong>
-            <p>Public status view for the main platform surfaces.</p>
+            <p>Public uptime surface backed by the same monitoring logic used operationally.</p>
           </article>
           <article>
             <span>documentation</span>
             <strong>docs.shellr.net</strong>
-            <p>Technical docs, project overview, and operational notes on GitHub Pages.</p>
+            <p>Architecture, deployment, monitoring, logging, and recovery documentation on GitHub Pages.</p>
           </article>
         </div>
       </aside>
+    </section>
+
+    <section class="section snapshot-section" id="snapshot">
+      <div class="section-heading" data-reveal>
+        <p class="eyebrow">Platform Snapshot</p>
+        <h2>Operational proof at a glance.</h2>
+      </div>
+
+      <div class="snapshot-grid" data-reveal>
+        <?php foreach ($platformSnapshot as $item): ?>
+        <article class="snapshot-card">
+          <strong><?= e($item['title']) ?></strong>
+          <p><?= e($item['body']) ?></p>
+        </article>
+        <?php endforeach; ?>
+      </div>
     </section>
 
     <section class="section profile-section" id="profile">
@@ -253,11 +278,6 @@ function host_label(string $url): string
           runtimes, deployment, monitoring, and the stable operation of web platforms. What matters to
           me is not only how applications are built, but how they are delivered, observed, secured, and
           documented.
-        </p>
-        <p>
-          This platform is intentionally small. On a single VM, technical decisions become visible:
-          routing has to stay clean, logs have to stay bounded, backups have to stay readable, and
-          additional complexity has to justify itself.
         </p>
       </div>
 
@@ -274,7 +294,7 @@ function host_label(string $url): string
     <section class="section" id="projects">
       <div class="section-heading" data-reveal>
         <p class="eyebrow">Featured Projects</p>
-        <h2>Projects shaped by real operational constraints, not isolated demo logic.</h2>
+        <h2>Projects that show technical choices under real operating constraints.</h2>
       </div>
 
       <div class="project-grid">
@@ -285,7 +305,11 @@ function host_label(string $url): string
             <h3><?= e($project['title']) ?></h3>
           </div>
           <p class="project-lead"><?= e($project['lead']) ?></p>
-          <p><?= e($project['summary']) ?></p>
+          <ul class="project-points">
+            <?php foreach ($project['points'] as $point): ?>
+            <li><?= e($point) ?></li>
+            <?php endforeach; ?>
+          </ul>
           <ul class="project-stack">
             <?php foreach ($project['stack'] as $item): ?>
             <li><?= e($item) ?></li>
@@ -315,7 +339,7 @@ Nginx + TLS
   |-- shellr.net         -> Portfolio frontdoor
   |-- dma.shellr.net     -> DMA
   |-- grafana.shellr.net -> Grafana (protected)
-  |-- status.shellr.net  -> Uptime Kuma
+  |-- status.shellr.net  -> Public status page
   |
 Docker networks
   |-- frontend
@@ -347,8 +371,8 @@ Docker networks
             <li>Linux administration, host hardening, and service operations</li>
             <li>Docker Engine and Compose for reproducible runtime models</li>
             <li>Nginx, HTTPS, and subdomain routing for clean platform boundaries</li>
-            <li>Deployment with GitHub Actions, SSH, and health-gated release logic</li>
-            <li>Prometheus, Grafana, Uptime Kuma, Loki, and Promtail for platform visibility</li>
+            <li>GitHub Actions, SSH delivery, and health-gated deployment logic</li>
+            <li>Prometheus, Grafana, Uptime Kuma, Loki, Promtail, and cAdvisor for visibility</li>
           </ul>
         </article>
 
@@ -366,7 +390,7 @@ Docker networks
     <section class="section" id="links">
       <div class="section-heading" data-reveal>
         <p class="eyebrow">Live Links / System Access</p>
-        <h2>Direct entry points into the platform, live projects, and operational views.</h2>
+        <h2>Direct entry points into the platform, live workloads, and operational views.</h2>
       </div>
 
       <div class="link-grid">
@@ -383,16 +407,15 @@ Docker networks
     <section class="section cta-section">
       <div class="cta-panel" data-reveal>
         <p class="eyebrow">Contact / GitHub / Documentation</p>
-        <h2>The best starting point is the technical view of the system.</h2>
+        <h2>The technical path is the clearest path.</h2>
         <p>
-          If you want to see how I structure and operate systems, docs.shellr.net is the right place
-          to start. It contains the technical view of architecture, deployment, monitoring, logging,
-          backup, and lessons learned. For live workloads, the direct path is dma.shellr.net. For
-          availability, it is status.shellr.net. For code and change history, it is GitHub.
+          For architecture and operational decisions, start with docs.shellr.net. For the public health
+          view, use status.shellr.net. For repository structure and implementation details, use GitHub.
+          If you want to get in touch, write to <a class="inline-link" href="mailto:<?= e($site['contact_email']) ?>"><?= e($site['contact_email']) ?></a>.
         </p>
         <div class="hero-actions">
-          <a class="button primary" href="<?= e($site['docs_url']) ?>">Go to docs.shellr.net</a>
-          <a class="button secondary" href="<?= e($site['status_url']) ?>">Check status</a>
+          <a class="button primary" href="<?= e($site['docs_url'] . '/architecture.html') ?>">Open Architecture</a>
+          <a class="button secondary" href="<?= e($site['status_url']) ?>">Check System Status</a>
         </div>
       </div>
     </section>
