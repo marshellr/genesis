@@ -1,0 +1,67 @@
+# Environment files
+.env
+.env.local
+.env.*.local
+!.env.example
+infra/compose/.env
+infra/logging/.env
+infra/monitoring/.env
+
+# Secrets and credentials
+*.pem
+*.key
+*.crt
+*.pfx
+secrets/
+*.htpasswd
+infra/runtime/
+infra/nginx/certbot/
+
+# Logs
+*.log
+logs/
+tmp/
+
+# Backup artifacts
+*.bak
+*.backup
+*.dump
+*.sql
+*.sql.gz
+restic-cache/
+docs/publish/
+infra/backup/db/
+infra/backup/files/
+infra/backup/logs/
+infra/backup/restore/
+infra/backup/tmp/
+
+# Docker and local runtime artifacts
+docker-data/
+volumes/
+*.pid
+infra/docker/volumes/
+releases/
+
+# OS / editor files
+.DS_Store
+Thumbs.db
+Desktop.ini
+.idea/
+.vscode/
+
+# Node / frontend artifacts
+node_modules/
+dist/
+build/
+.next/
+coverage/
+
+# Python artifacts
+__pycache__/
+*.pyc
+
+# Terraform / infra tooling
+.terraform/
+*.tfstate
+*.tfstate.*

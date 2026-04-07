@@ -1,0 +1,170 @@
+services:
+  nginx:
+    image: nginx:1.28-alpine
+    container_name: ${COMPOSE_PROJECT_NAME:-genesis}-nginx
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_started
+      dma:
+        condition: service_started
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ${PROJECT_ROOT:-/projects/genesis}/infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ${PROJECT_ROOT:-/projects/genesis}/infra/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ${PROJECT_ROOT:-/projects/genesis}/infra/nginx/snippets:/etc/nginx/snippets:ro
+      - ${PROJECT_ROOT:-/projects/genesis}/infra/nginx/auth:/etc/nginx/auth:ro
+      - ${PROJECT_ROOT:-/projects/genesis}/infra/nginx/certbot/www:/var/www/certbot
+      - ${PROJECT_ROOT:-/projects/genesis}/infra/nginx/certbot/conf:/etc/letsencrypt
+    networks:
+      - frontend
+      - monitoring
+    healthcheck:
+      test: ["CMD-SHELL", "nginx -t || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    security_opt:
+      - no-new-privileges:true
+
+  db:
+    image: mariadb:11.4
+    container_name: ${COMPOSE_PROJECT_NAME:-genesis}-db
+    restart: unless-stopped
+    command:
+      - --transaction-isolation=READ-COMMITTED
+      - --binlog-format=ROW
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    environment:
+      MARIADB_DATABASE: ${DB_DATABASE}
+      MARIADB_USER: ${DB_USERNAME}
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      TZ: ${APP_TIMEZONE:-Europe/Berlin}
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ${PROJECT_ROOT:-/projects/genesis}/app/schema.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb-admin ping -h 127.0.0.1 -uroot -p$${MARIADB_ROOT_PASSWORD} --silent || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    security_opt:
+      - no-new-privileges:true
+
+  app:
+    image: ${APP_IMAGE_REPOSITORY:-genesis-app}:${APP_IMAGE_TAG:-manual}
+    build:
+      context: ${PROJECT_ROOT:-/projects/genesis}/app
+      dockerfile: Dockerfile
+    container_name: ${COMPOSE_PROJECT_NAME:-genesis}-app
+    restart: unless-stopped
+    environment:
+      PORTFOLIO_BRAND: ${PORTFOLIO_BRAND:-shellr}
+      PORTFOLIO_ROLE: ${PORTFOLIO_ROLE:-DevOps / System Engineer}
+      PORTFOLIO_LOCATION: ${PORTFOLIO_LOCATION:-Germany}
+      PORTFOLIO_CONTACT_EMAIL: ${PORTFOLIO_CONTACT_EMAIL:-admin@shellr.net}
+      PORTFOLIO_GITHUB_URL: ${PORTFOLIO_GITHUB_URL:-}
+      PORTFOLIO_DOCS_URL: ${PORTFOLIO_DOCS_URL:-https://docs.shellr.net}
+      PORTFOLIO_DMA_URL: ${PORTFOLIO_DMA_URL:-https://dma.shellr.net}
+      PORTFOLIO_STATUS_URL: ${PORTFOLIO_STATUS_URL:-https://status.shellr.net}
+      PORTFOLIO_GRAFANA_URL: ${PORTFOLIO_GRAFANA_URL:-https://grafana.shellr.net}
+    expose:
+      - "80"
+    networks:
+      - frontend
+    healthcheck:
+      test: ["CMD-SHELL", "php -r 'exit(@file_get_contents(\"http://127.0.0.1/health\") === false ? 1 : 0);'"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    security_opt:
+      - no-new-privileges:true
+
+  dma:
+    image: ${DMA_IMAGE_REPOSITORY:-genesis-dma}:${DMA_IMAGE_TAG:-manual}
+    build:
+      context: ${PROJECT_ROOT:-/projects/genesis}/dma
+      dockerfile: Dockerfile
+    container_name: ${COMPOSE_PROJECT_NAME:-genesis}-dma
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      RIOT_API_KEY: ${DMA_RIOT_API_KEY:-}
+      GAME_NAME: ${DMA_GAME_NAME:-}
+      TAG_LINE: ${DMA_TAG_LINE:-}
+      REGION_ROUTING: ${DMA_REGION_ROUTING:-europe}
+      PLATFORM: ${DMA_PLATFORM:-euw1}
+      PRIMEBOT_TEAM_ID: ${DMA_PRIMEBOT_TEAM_ID:-0}
+      PRIMEBOT_TOKEN: ${DMA_PRIMEBOT_TOKEN:-}
+      DB_HOST: db
+      DB_USER: ${DMA_DB_USER}
+      DB_PASS: ${DMA_DB_PASSWORD}
+      DB_NAME: ${DMA_DB_NAME}
+      DMA_COOKIE_PATH: ${DMA_COOKIE_PATH:-/}
+      MATCH_TIME_TOLERANCE: ${DMA_MATCH_TIME_TOLERANCE:-10800}
+      MIN_MATCH_DURATION: ${DMA_MIN_MATCH_DURATION:-15}
+      RIOT_SYNC_COOLDOWN: ${DMA_RIOT_SYNC_COOLDOWN:-300}
+      RIOT_MATCH_COUNT: ${DMA_RIOT_MATCH_COUNT:-10}
+    expose:
+      - "80"
+    networks:
+      - frontend
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "php -r 'exit(@file_get_contents(\"http://127.0.0.1/health.php\") === false ? 1 : 0);'"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  mariadb_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PROJECT_ROOT:-/projects/genesis}/infra/docker/volumes/mariadb
+
+networks:
+  frontend:
+    external: true
+    name: genesis_frontend
+  backend:
+    external: true
+    name: genesis_backend
+  monitoring:
+    external: true
+    name: genesis_monitoring

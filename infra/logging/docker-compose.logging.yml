@@ -1,0 +1,65 @@
+name: genesis-logging
+
+services:
+  loki:
+    image: grafana/loki:3.6.0
+    container_name: genesis-logging-loki
+    command:
+      - -config.file=/etc/loki/config.yml
+    restart: unless-stopped
+    volumes:
+      - ${PROJECT_ROOT:-/projects/genesis}/infra/logging/loki/config.yml:/etc/loki/config.yml:ro
+      - loki_data:/loki
+    networks:
+      - monitoring
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    security_opt:
+      - no-new-privileges:true
+
+  promtail:
+    image: grafana/promtail:3.6.0
+    container_name: genesis-logging-promtail
+    command:
+      - -config.file=/etc/promtail/config.yml
+    restart: unless-stopped
+    depends_on:
+      loki:
+        condition: service_started
+    volumes:
+      - ${PROJECT_ROOT:-/projects/genesis}/infra/logging/promtail/config.yml:/etc/promtail/config.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - promtail_positions:/positions
+    networks:
+      - monitoring
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+
+volumes:
+  loki_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PROJECT_ROOT:-/projects/genesis}/infra/docker/volumes/loki/data
+
+  promtail_positions:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PROJECT_ROOT:-/projects/genesis}/infra/docker/volumes/loki/promtail
+
+networks:
+  monitoring:
+    external: true
+    name: genesis_monitoring

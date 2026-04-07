@@ -1,0 +1,25 @@
+server {
+    listen 80;
+    listen [::]:80;
+    server_name shellr.net www.shellr.net;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+        try_files $uri =404;
+    }
+
+    location /dma/ {
+        default_type application/json;
+        return 503 '{"status":"pending","message":"DMA route is reserved and will be enabled later."}';
+    }
+
+    location = /dma {
+        return 301 /dma/;
+    }
+
+    location / {
+        include /etc/nginx/snippets/proxy_common.conf;
+        set $app_upstream http://app:80;
+        proxy_pass $app_upstream;
+    }
+}

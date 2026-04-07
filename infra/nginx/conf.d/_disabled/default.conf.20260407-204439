@@ -1,0 +1,76 @@
+server {
+    listen 80;
+    listen [::]:80;
+    server_name shellr.net www.shellr.net;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+        try_files $uri =404;
+    }
+
+    location / {
+        return 301 https://shellr.net$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+    server_name shellr.net;
+
+    ssl_certificate /etc/letsencrypt/live/shellr.net/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/shellr.net/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_session_timeout 1d;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_tickets off;
+    ssl_prefer_server_ciphers off;
+
+    include /etc/nginx/snippets/security_headers.conf;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+        try_files $uri =404;
+    }
+
+    location = /dma {
+        return 301 /dma/;
+    }
+
+    location ^~ /dma/assets/ {
+        include /etc/nginx/snippets/proxy_common.conf;
+        expires 7d;
+        access_log off;
+        proxy_pass http://dma:80/assets/;
+    }
+
+    location ^~ /dma/ {
+        include /etc/nginx/snippets/proxy_common.conf;
+        proxy_set_header X-Forwarded-Prefix /dma;
+        proxy_pass http://dma:80/;
+    }
+
+    location / {
+        include /etc/nginx/snippets/proxy_common.conf;
+        set $app_upstream http://app:80;
+        proxy_pass $app_upstream;
+    }
+}
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+    server_name www.shellr.net;
+
+    ssl_certificate /etc/letsencrypt/live/shellr.net/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/shellr.net/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_session_timeout 1d;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_tickets off;
+    ssl_prefer_server_ciphers off;
+
+    return 301 https://shellr.net$request_uri;
+}

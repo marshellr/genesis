@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Projects | shellr docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body data-page="projects">
+  <div class="site-shell">
+    <header class="site-header">
+      <a class="brand" href="./index.html">docs.shellr.net</a>
+      <nav class="site-nav" aria-label="Main">
+        <a href="./index.html" data-page="home">Home</a>
+        <a href="./projects.html" data-page="projects">Projects</a>
+        <a href="./architecture.html" data-page="architecture">Architecture</a>
+        <a href="./monitoring.html" data-page="monitoring">Monitoring</a>
+        <a href="./logging.html" data-page="logging">Logging</a>
+        <a href="./backup.html" data-page="backup">Backup</a>
+        <a href="./lessons.html" data-page="lessons">Lessons</a>
+      </nav>
+    </header>
+    <main class="content">
+      <article class="doc-panel">
+        <p class="eyebrow">Projects</p>
+        <h2>shellr platform</h2>
+        <p>
+          The main project is a single-VM platform with deliberate service boundaries: public routing through Nginx,
+          app runtimes in Docker containers, GitHub Actions deployment, observability, and backup. It is intentionally
+          sized for one host and intentionally documented like something that may need to be handed over later.
+        </p>
+      </article>
+      <section class="doc-grid">
+        <article>
+          <h3>shellr.net</h3>
+          <p>Portfolio landing page presenting role, platform, projects, and technical focus without framework overhead.</p>
+        </article>
+        <article>
+          <h3>dma.shellr.net</h3>
+          <p>Legacy PHP application integrated as a separate runtime surface instead of being coupled directly into the main site.</p>
+        </article>
+        <article>
+          <h3>grafana.shellr.net</h3>
+          <p>Protected observability UI with explicit access control, not an anonymously exposed admin surface.</p>
+        </article>
+        <article>
+          <h3>status.shellr.net</h3>
+          <p>Dedicated host for uptime visibility and service checks, kept separate from the main landing page.</p>
+        </article>
+      </section>
+    </main>
+  </div>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Logging | shellr docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body data-page="logging">
+  <div class="site-shell">
+    <header class="site-header">
+      <a class="brand" href="./index.html">docs.shellr.net</a>
+      <nav class="site-nav" aria-label="Main">
+        <a href="./index.html" data-page="home">Home</a>
+        <a href="./projects.html" data-page="projects">Projects</a>
+        <a href="./architecture.html" data-page="architecture">Architecture</a>
+        <a href="./monitoring.html" data-page="monitoring">Monitoring</a>
+        <a href="./logging.html" data-page="logging">Logging</a>
+        <a href="./backup.html" data-page="backup">Backup</a>
+        <a href="./lessons.html" data-page="lessons">Lessons</a>
+      </nav>
+    </header>
+    <main class="content">
+      <article class="doc-panel">
+        <p class="eyebrow">Logging</p>
+        <h2>Short-lived aggregation, not log warehousing.</h2>
+        <p>
+          Loki and Promtail are used for centralized log visibility on the VM. The design goal is incident support
+          and recent history, not long-term archival or analytics at ELK scale.
+        </p>
+        <pre>Docker containers -> Promtail -> Loki -> Grafana
+
+Retention stays intentionally short.
+Container logs are rotated before they become disk pressure.
+The VM is not used as a long-term logging backend.</pre>
+      </article>
+    </main>
+  </div>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

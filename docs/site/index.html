@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>shellr docs</title>
+  <meta name="description" content="Technical documentation for the shellr single-VM DevOps platform.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body data-page="home">
+  <div class="site-shell">
+    <header class="site-header">
+      <a class="brand" href="./index.html">docs.shellr.net</a>
+      <nav class="site-nav" aria-label="Main">
+        <a href="./index.html" data-page="home">Home</a>
+        <a href="./projects.html" data-page="projects">Projects</a>
+        <a href="./architecture.html" data-page="architecture">Architecture</a>
+        <a href="./monitoring.html" data-page="monitoring">Monitoring</a>
+        <a href="./logging.html" data-page="logging">Logging</a>
+        <a href="./backup.html" data-page="backup">Backup</a>
+        <a href="./lessons.html" data-page="lessons">Lessons</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <p class="eyebrow">Technical Documentation</p>
+      <h1>Operational documentation for the platform behind shellr.net.</h1>
+      <p class="hero-summary">
+        This site documents the `shellr` platform behind `shellr.net`: runtime boundaries, routing,
+        deployment flow, monitoring, logging, and backup on a single Hetzner VM. The aim is clarity,
+        not volume.
+      </p>
+      <div class="hero-meta">
+        <span>Hetzner VM</span>
+        <span>Docker Compose</span>
+        <span>Nginx</span>
+        <span>GitHub Pages</span>
+      </div>
+      <div class="button-row">
+        <a class="button" href="https://shellr.net">Open shellr.net</a>
+        <a class="button primary" href="./architecture.html">Open Architecture</a>
+        <a class="button" href="./projects.html">Open Projects</a>
+      </div>
+    </section>
+
+    <main class="main-layout">
+      <aside class="sidebar">
+        <p class="subtle-label">Contents</p>
+        <nav>
+          <a href="./projects.html">Projects</a>
+          <a href="./architecture.html">Architecture</a>
+          <a href="./monitoring.html">Monitoring</a>
+          <a href="./logging.html">Logging</a>
+          <a href="./backup.html">Backup</a>
+          <a href="./lessons.html">Lessons Learned</a>
+        </nav>
+      </aside>
+
+      <section class="content">
+        <article class="doc-panel">
+          <p class="eyebrow">Platform Summary</p>
+          <h2>Hostnames and runtime boundaries</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Hostname</th>
+                <th>Purpose</th>
+                <th>Target</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>shellr.net</code></td>
+                <td>Personal landing page and frontdoor</td>
+                <td>Portfolio app container</td>
+              </tr>
+              <tr>
+                <td><code>dma.shellr.net</code></td>
+                <td>DMA application</td>
+                <td>DMA PHP container</td>
+              </tr>
+              <tr>
+                <td><code>grafana.shellr.net</code></td>
+                <td>Metrics and logs UI</td>
+                <td>Grafana behind Nginx auth</td>
+              </tr>
+              <tr>
+                <td><code>status.shellr.net</code></td>
+                <td>Uptime surface</td>
+                <td>Uptime Kuma</td>
+              </tr>
+              <tr>
+                <td><code>docs.shellr.net</code></td>
+                <td>Static documentation</td>
+                <td>GitHub Pages</td>
+              </tr>
+            </tbody>
+          </table>
+        </article>
+
+        <section class="card-grid">
+          <article>
+            <h3>Projects</h3>
+            <p>Overview of the main platform and the DMA application, including how they are positioned operationally.</p>
+            <a href="./projects.html">Read more</a>
+          </article>
+          <article>
+            <h3>Architecture</h3>
+            <p>Topology, routing model, and deployment boundaries for the single-VM platform.</p>
+            <a href="./architecture.html">Read more</a>
+          </article>
+          <article>
+            <h3>Monitoring and Logging</h3>
+            <p>How visibility is implemented without turning the VM into an observability cluster.</p>
+            <a href="./monitoring.html">Read more</a>
+          </article>
+          <article>
+            <h3>Backup</h3>
+            <p>What is backed up, how rotation works, and how restore stays understandable.</p>
+            <a href="./backup.html">Read more</a>
+          </article>
+          <article>
+            <h3>Lessons Learned</h3>
+            <p>Operational decisions that changed after integrating real services on a small host.</p>
+            <a href="./lessons.html">Read more</a>
+          </article>
+          <article>
+            <h3>Source of truth</h3>
+            <p>The repo contains the same material as markdown under <code>/docs</code> for review and versioning.</p>
+            <a href="../README.md">Open markdown index</a>
+          </article>
+          <article>
+            <h3>Live surfaces</h3>
+            <p>Jump directly from the documentation to the public platform, DMA workload, or the uptime surface.</p>
+            <a href="https://status.shellr.net">Open status.shellr.net</a>
+          </article>
+        </section>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      Published through GitHub Pages so the production VM does not serve documentation content.
+    </footer>
+  </div>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,155 @@
+name: genesis-monitoring
+
+services:
+  prometheus:
+    image: prom/prometheus:v3.6.0
+    container_name: ${COMPOSE_PROJECT_NAME:-genesis}-prometheus
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus/data
+      - --storage.tsdb.retention.time=${PROMETHEUS_RETENTION:-7d}
+      - --storage.tsdb.retention.size=${PROMETHEUS_RETENTION_SIZE:-1GB}
+      - --web.enable-lifecycle
+    ports:
+      - 127.0.0.1:${PROMETHEUS_PORT:-9090}:9090
+    volumes:
+      - ${PROJECT_ROOT:-/projects/genesis}/infra/monitoring/prometheus:/etc/prometheus:ro
+      - prometheus_data:/prometheus
+    networks:
+      - monitoring
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:9090/-/healthy"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    security_opt:
+      - no-new-privileges:true
+
+  grafana:
+    image: grafana/grafana:12.2.0
+    container_name: ${COMPOSE_PROJECT_NAME:-genesis}-grafana
+    restart: unless-stopped
+    depends_on:
+      prometheus:
+        condition: service_healthy
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+      GF_SERVER_DOMAIN: ${GRAFANA_DOMAIN:-grafana.shellr.net}
+      GF_SERVER_ROOT_URL: https://${GRAFANA_DOMAIN:-grafana.shellr.net}/
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_SECURITY_COOKIE_SECURE: "true"
+      GF_SECURITY_COOKIE_SAMESITE: lax
+      GF_INSTALL_PLUGINS: ""
+    ports:
+      - 127.0.0.1:${GRAFANA_PORT:-3000}:3000
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ${PROJECT_ROOT:-/projects/genesis}/infra/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ${PROJECT_ROOT:-/projects/genesis}/infra/monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    networks:
+      - monitoring
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    security_opt:
+      - no-new-privileges:true
+
+  node-exporter:
+    image: prom/node-exporter:v1.9.1
+    container_name: ${COMPOSE_PROJECT_NAME:-genesis}-node-exporter
+    restart: unless-stopped
+    command:
+      - --path.rootfs=/host
+      - --path.procfs=/host/proc
+      - --path.sysfs=/host/sys
+      - --collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($|/)
+      - --collector.filesystem.fs-types-exclude=^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|fusectl|mqueue|nsfs|overlay|proc|pstore|securityfs|squashfs|sysfs|tracefs)$
+    volumes:
+      - /:/host:ro,rslave
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+    expose:
+      - "9100"
+    networks:
+      - monitoring
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:9100/metrics"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+
+  uptime-kuma:
+    image: louislam/uptime-kuma:1.23.16
+    container_name: ${COMPOSE_PROJECT_NAME:-genesis}-uptime-kuma
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:${UPTIME_KUMA_PORT:-3001}:3001
+    volumes:
+      - uptime_kuma_data:/app/data
+    networks:
+      - monitoring
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  grafana_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PROJECT_ROOT:-/projects/genesis}/infra/docker/volumes/grafana
+
+  prometheus_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PROJECT_ROOT:-/projects/genesis}/infra/docker/volumes/prometheus
+
+  uptime_kuma_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PROJECT_ROOT:-/projects/genesis}/infra/docker/volumes/uptime-kuma
+
+networks:
+  monitoring:
+    external: true
+    name: genesis_monitoring

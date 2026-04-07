@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lessons Learned | shellr docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body data-page="lessons">
+  <div class="site-shell">
+    <header class="site-header">
+      <a class="brand" href="./index.html">docs.shellr.net</a>
+      <nav class="site-nav" aria-label="Main">
+        <a href="./index.html" data-page="home">Home</a>
+        <a href="./projects.html" data-page="projects">Projects</a>
+        <a href="./architecture.html" data-page="architecture">Architecture</a>
+        <a href="./monitoring.html" data-page="monitoring">Monitoring</a>
+        <a href="./logging.html" data-page="logging">Logging</a>
+        <a href="./backup.html" data-page="backup">Backup</a>
+        <a href="./lessons.html" data-page="lessons">Lessons</a>
+      </nav>
+    </header>
+    <main class="content">
+      <article class="doc-panel">
+        <p class="eyebrow">Lessons Learned</p>
+        <h2>What changed once the platform became real.</h2>
+        <div class="doc-grid">
+          <article>
+            <h3>Hostnames beat subpaths for app separation</h3>
+            <p>Dedicated subdomains are easier to reason about than forcing unrelated applications into one path tree.</p>
+          </article>
+          <article>
+            <h3>Retention is part of reliability</h3>
+            <p>Short, explicit log and metric retention is healthier than collecting data the host cannot keep safely.</p>
+          </article>
+          <article>
+            <h3>Simple CI/CD ages better</h3>
+            <p>GitHub-hosted Actions plus SSH deploy are easier to audit and recover than an unnecessary local runner setup.</p>
+          </article>
+          <article>
+            <h3>Documentation is operational work</h3>
+            <p>Runbooks, DNS plans, routing maps, and rollback steps reduce ambiguity when the system changes later.</p>
+          </article>
+        </div>
+      </article>
+    </main>
+  </div>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Architecture | shellr docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body data-page="architecture">
+  <div class="site-shell">
+    <header class="site-header">
+      <a class="brand" href="./index.html">docs.shellr.net</a>
+      <nav class="site-nav" aria-label="Main">
+        <a href="./index.html" data-page="home">Home</a>
+        <a href="./projects.html" data-page="projects">Projects</a>
+        <a href="./architecture.html" data-page="architecture">Architecture</a>
+        <a href="./monitoring.html" data-page="monitoring">Monitoring</a>
+        <a href="./logging.html" data-page="logging">Logging</a>
+        <a href="./backup.html" data-page="backup">Backup</a>
+        <a href="./lessons.html" data-page="lessons">Lessons</a>
+      </nav>
+    </header>
+    <main class="content">
+      <article class="doc-panel">
+        <p class="eyebrow">Architecture</p>
+        <h2>Single host, explicit surfaces.</h2>
+        <p>
+          The core design choice is not to hide complexity behind orchestration layers that the host size does not justify.
+          Containers are used for isolation and deployability, while networking and runtime boundaries stay inspectable.
+        </p>
+        <div class="mermaid">
+flowchart TD
+    User["Client"] --> DNS["Public DNS"]
+    DNS --> Nginx["Nginx reverse proxy"]
+    Nginx --> Shellr["shellr.net"]
+    Nginx --> DMA["dma.shellr.net"]
+    Nginx --> Grafana["grafana.shellr.net"]
+    Nginx --> Status["status.shellr.net"]
+    Shellr --> App["Portfolio app container"]
+    DMA --> DMAApp["DMA app container"]
+    DMAApp --> DB["MariaDB"]
+    Grafana --> Metrics["Prometheus metrics"]
+    Grafana --> Logs["Loki logs"]
+    Status --> Kuma["Uptime Kuma"]
+    Docs["docs.shellr.net"] --> Pages["GitHub Pages"]
+        </div>
+      </article>
+
+      <article class="doc-panel">
+        <p class="eyebrow">Deployment Flow</p>
+        <h2>Build, stage, switch, verify.</h2>
+        <div class="mermaid">
+sequenceDiagram
+    participant Dev as Developer
+    participant GH as GitHub
+    participant Actions as Actions
+    participant VM as VM
+    Dev->>GH: push
+    GH->>Actions: workflow
+    Actions->>VM: transfer release
+    VM->>VM: validate config
+    VM->>VM: update containers
+    VM->>VM: run healthchecks
+    alt ok
+      VM->>Actions: success
+    else failed
+      VM->>VM: rollback
+    end
+        </div>
+      </article>
+    </main>
+  </div>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

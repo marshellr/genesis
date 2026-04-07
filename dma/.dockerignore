@@ -1,0 +1,10 @@
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+README.md
+backup_db.sql
+node_modules
+vendor
+coverage
