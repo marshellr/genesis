@@ -15,6 +15,8 @@ TIMESTAMP="$(date +%F-%H%M%S)"
 HOSTNAME_SHORT="$(hostname -s)"
 LOG_FILE="$LOG_DIR/backup.log"
 RUNTIME_STATE_DIR="$TMP_DIR/runtime-state"
+RESTIC_ENV_FILE="$PROJECT_ROOT/infra/backup/restic.env"
+RESTIC_CACHE_DIR="$PROJECT_ROOT/restic-cache"
 
 mkdir -p "$DB_BACKUP_DIR" "$FILES_BACKUP_DIR" "$LOG_DIR" "$TMP_DIR" "$RESTORE_ROOT"
 
@@ -39,6 +41,19 @@ read_env_value() {
     exit 1
   fi
   printf '%s' "$value"
+}
+
+read_optional_env_file() {
+  local path="$1"
+  if [[ ! -f "$path" ]]; then
+    return 1
+  fi
+
+  set -a
+  # shellcheck disable=SC1090
+  source "$path"
+  set +a
+  return 0
 }
 
 require_file "$COMPOSE_ENV"
@@ -135,6 +150,37 @@ sudo chown shellr:shellr "$FILES_ARCHIVE_FILE"
   echo "retention_days=$RETENTION_DAYS"
   sha256sum "$DB_DUMP_FILE" "$FILES_ARCHIVE_FILE"
 } > "$MANIFEST_FILE"
+
+if read_optional_env_file "$RESTIC_ENV_FILE" && [[ "${RESTIC_ENABLED:-false}" == "true" ]]; then
+  if ! command -v restic >/dev/null 2>&1; then
+    log "Offsite-Backup uebersprungen: restic ist nicht installiert."
+  elif [[ -z "${RESTIC_REPOSITORY:-}" || -z "${RESTIC_PASSWORD_FILE:-}" ]]; then
+    log "Offsite-Backup uebersprungen: RESTIC_REPOSITORY oder RESTIC_PASSWORD_FILE fehlt."
+  else
+    export RESTIC_CACHE_DIR
+    mkdir -p "$RESTIC_CACHE_DIR"
+    log "Starte optionales Offsite-Backup mit restic"
+    restic backup \
+      "$DB_DUMP_FILE" \
+      "$FILES_ARCHIVE_FILE" \
+      "$MANIFEST_FILE" \
+      --host "$HOSTNAME_SHORT" \
+      --tag genesis \
+      --tag shellr \
+      >> "$LOG_FILE" 2>&1
+
+    if [[ "${RESTIC_PRUNE:-true}" == "true" ]]; then
+      log "Bereinige Offsite-Snapshots nach Retention-Regeln"
+      restic forget --prune \
+        --keep-daily "${RESTIC_KEEP_DAILY:-7}" \
+        --keep-weekly "${RESTIC_KEEP_WEEKLY:-4}" \
+        --keep-monthly "${RESTIC_KEEP_MONTHLY:-3}" \
+        >> "$LOG_FILE" 2>&1
+    fi
+  fi
+else
+  log "Offsite-Backup ist nicht aktiviert."
+fi
 
 log "Raeume alte Backups auf: aelter als $RETENTION_DAYS Tage"
 find "$DB_BACKUP_DIR" -type f -mtime +"$RETENTION_DAYS" -delete

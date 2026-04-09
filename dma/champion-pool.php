@@ -242,7 +242,7 @@ require_once __DIR__.'/inc/header.php';
                 <span class="tier-badge" style="background: <?=get_tier_color($tier)?>"><?=$tier?></span>
               </span>
             <?php else: ?>
-              <span class="stat-item no-data">Keine Daten</span>
+              <span class="stat-item no-data" title="No current role-specific winrate data is available from the upstream stat source for this champion.">No live winrate data</span>
             <?php endif; ?>
           </div>
         </div>

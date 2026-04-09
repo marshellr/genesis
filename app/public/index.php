@@ -47,6 +47,45 @@ $startHere = [
     ],
 ];
 
+$proofLinks = [
+    [
+        'title' => 'Architecture map',
+        'body' => 'Review hostnames, container boundaries, and public versus private surfaces first.',
+        'href' => $site['docs_url'] . '/architecture.html',
+        'label' => 'Open architecture',
+    ],
+    [
+        'title' => 'Deployment runbook',
+        'body' => 'See the real release path: staged files, health-gated checks, and rollback expectations.',
+        'href' => $site['docs_url'] . '/deployment-flow.html',
+        'label' => 'Open deployment flow',
+    ],
+    [
+        'title' => 'Monitoring and alerts',
+        'body' => 'Metrics, status checks, container visibility, alert rules, and responder-first dashboards.',
+        'href' => $site['docs_url'] . '/monitoring.html',
+        'label' => 'Open monitoring',
+    ],
+    [
+        'title' => 'Backup and restore',
+        'body' => 'Daily dumps, runtime snapshots, optional offsite sync, and explicit restore steps.',
+        'href' => $site['docs_url'] . '/backup.html',
+        'label' => 'Open backup strategy',
+    ],
+    [
+        'title' => 'Case studies',
+        'body' => 'Concrete platform trade-offs with constraints, failure modes, and operating outcomes.',
+        'href' => $site['docs_url'] . '/case-studies.html',
+        'label' => 'Read case studies',
+    ],
+    [
+        'title' => 'Live source of truth',
+        'body' => 'Repository structure, runtime files, and the same source tree that is deployed on the VM.',
+        'href' => $site['github_url'] !== '' ? $site['github_url'] : 'https://github.com/marshellr/genesis',
+        'label' => 'Open repository',
+    ],
+];
+
 $focusAreas = [
     'Linux, containers, and web platforms with explicit operational boundaries',
     'Deployment, healthchecks, and recovery instead of build-only thinking',
@@ -265,7 +304,7 @@ function host_label(string $url): string
         </ul>
 
         <div class="hero-actions">
-          <a class="button primary" href="#start-here">Start Here</a>
+          <a class="button primary" href="#start-here">Explore Platform</a>
           <a class="button secondary" href="#links">View Live Systems</a>
         </div>
       </div>
@@ -341,6 +380,23 @@ function host_label(string $url): string
         <?php foreach ($startHere as $entry): ?>
         <article class="start-card" data-reveal>
           <h3><?= e($entry['title']) ?></h3>
+          <p><?= e($entry['body']) ?></p>
+          <a class="inline-link" href="<?= e($entry['href']) ?>"><?= e($entry['label']) ?></a>
+        </article>
+        <?php endforeach; ?>
+      </div>
+    </section>
+
+    <section class="section" id="proof-pack">
+      <div class="section-heading" data-reveal>
+        <p class="eyebrow">Proof Pack</p>
+        <h2>Follow the operational trail, not just the landing page.</h2>
+      </div>
+
+      <div class="link-grid">
+        <?php foreach ($proofLinks as $entry): ?>
+        <article class="link-card" data-reveal>
+          <strong><?= e($entry['title']) ?></strong>
           <p><?= e($entry['body']) ?></p>
           <a class="inline-link" href="<?= e($entry['href']) ?>"><?= e($entry['label']) ?></a>
         </article>

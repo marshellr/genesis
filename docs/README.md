@@ -12,6 +12,7 @@ Technical documentation for the `shellr` platform and portfolio environment.
 - [Routing and DNS](/docs/routing-dns.md)
 - [Backup and Restore](/docs/backup-restore.md)
 - [Lessons Learned](/docs/lessons-learned.md)
+- [Accessibility Review](/docs/accessibility.md)
 - [GitHub Pages](/docs/github-pages.md)
 
 ## Published Version

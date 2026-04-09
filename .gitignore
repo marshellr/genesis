@@ -6,6 +6,7 @@
 infra/compose/.env
 infra/logging/.env
 infra/monitoring/.env
+infra/backup/restic.env
 
 # Secrets and credentials
 *.pem
@@ -30,6 +31,7 @@ tmp/
 *.sql.gz
 restic-cache/
 docs/publish/
+infra/nginx/static/status/snapshot.html
 infra/backup/db/
 infra/backup/files/
 infra/backup/logs/

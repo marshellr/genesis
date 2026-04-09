@@ -28,6 +28,7 @@
         <a href="./logging.html" data-page="logging">Logging</a>
         <a href="./backup.html" data-page="backup">Backup</a>
         <a href="./lessons.html" data-page="lessons">Lessons</a>
+        <a href="./accessibility.html" data-page="accessibility">A11y</a>
       </nav>
     </header>
     <main class="content" id="main-content">
@@ -74,6 +75,17 @@
           <li><strong>Blind overwrite:</strong> the deployment path validates and checks health instead of treating container recreation as success.</li>
           <li><strong>Unclear rollback:</strong> releases are staged and rollback-aware, so a bad change does not require improvisation.</li>
           <li><strong>Operational drift:</strong> the same repo structure used for local review maps to the VM layout under <code>/projects/genesis</code>.</li>
+        </ul>
+      </article>
+
+      <article class="doc-panel">
+        <p class="eyebrow">Runbook</p>
+        <h2>The first checks after a release.</h2>
+        <ul class="plain-list">
+          <li>Confirm container health with <code>docker compose ps</code>.</li>
+          <li>Check the public surfaces: <code>shellr.net</code>, <code>dma.shellr.net</code>, and <code>status.shellr.net</code>.</li>
+          <li>Verify Prometheus targets and Grafana health if observability changed.</li>
+          <li>Rollback immediately if the health-gated checks fail instead of waiting for user reports.</li>
         </ul>
       </article>
 

@@ -1,0 +1,1 @@
+*/5 * * * * shellr /projects/genesis/scripts/render-status-snapshot.sh >> /projects/genesis/infra/backup/logs/status-snapshot.log 2>&1

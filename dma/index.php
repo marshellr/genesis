@@ -276,6 +276,10 @@ require_once __DIR__.'/inc/header.php';
         <p>KDA, kill participation, CS/min, vision score, and objective control by role and match.</p>
       </article>
       <article>
+        <strong>Update model</strong>
+        <p>Live syncs remain manual by design, while champion-pool stat caches are refreshed on a schedule for faster reads.</p>
+      </article>
+      <article>
         <strong>Operational limit</strong>
         <p>This is a focused team stats surface, not a public esports portal or a generalized data warehouse.</p>
       </article>

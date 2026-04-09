@@ -28,6 +28,7 @@
         <a href="./logging.html" data-page="logging">Logging</a>
         <a href="./backup.html" data-page="backup">Backup</a>
         <a href="./lessons.html" data-page="lessons">Lessons</a>
+        <a href="./accessibility.html" data-page="accessibility">A11y</a>
       </nav>
     </header>
     <main class="content" id="main-content">
@@ -47,6 +48,8 @@
         <ul>
           <li>Logical MariaDB dump for database recovery</li>
           <li>Project archive for configuration and application files</li>
+          <li>Runtime-state snapshots for Grafana and Uptime Kuma databases</li>
+          <li>Optional restic offsite sync when repository credentials are configured</li>
           <li>Day-based retention to protect disk on a 40 GB host</li>
           <li>Cron-based execution with local log files</li>
         </ul>
@@ -69,6 +72,16 @@
           <li><strong>Included:</strong> database dumps, project tree archives, and selected runtime data used by monitoring and status tooling.</li>
           <li><strong>Operational limit:</strong> this is a single-host strategy, not multi-site disaster recovery.</li>
           <li><strong>Practice:</strong> restore scripts exist because backup quality only matters if restore remains understandable.</li>
+        </ul>
+      </article>
+
+      <article class="doc-panel">
+        <p class="eyebrow">Failure Modes</p>
+        <h2>What this strategy still does not solve on its own.</h2>
+        <ul class="plain-list">
+          <li>A single-host backup strategy is still vulnerable if the VM and its local backup storage disappear together.</li>
+          <li>Offsite sync is prepared, but it still depends on external repository credentials being configured.</li>
+          <li>Short-retention observability data is intentionally not treated as long-term archival data.</li>
         </ul>
       </article>
     </main>

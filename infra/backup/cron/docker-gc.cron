@@ -1,0 +1,1 @@
+37 4 * * 0 shellr /projects/genesis/scripts/docker-gc.sh >> /projects/genesis/infra/backup/logs/docker-gc.log 2>&1

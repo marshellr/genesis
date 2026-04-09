@@ -1,0 +1,1 @@
+11 */6 * * * shellr /projects/genesis/scripts/prefetch-dma-stats.sh >> /projects/genesis/infra/backup/logs/dma-prefetch.log 2>&1

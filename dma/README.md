@@ -10,6 +10,7 @@ The project is intentionally kept separate from the main landing page so it can 
 - runs as its own container behind the shared Nginx reverse proxy
 - uses a dedicated database scope inside the shared MariaDB service
 - participates in platform monitoring and uptime checks
+- prefetches and caches champion-pool stat lookups so live requests stay lighter
 
 ## Runtime Architecture
 
@@ -53,6 +54,7 @@ Runtime secrets should not be committed. They belong in environment files or hos
 
 - DMA is exposed on its own subdomain instead of a subpath
 - health checks are part of the platform monitoring model
+- champion-pool winrates prefer the original source and fall back to a cached role-specific upstream lookup when needed
 - the workload is treated as a real runtime surface, not as a static portfolio artifact
 
 ## Related Links

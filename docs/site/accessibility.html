@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Accessibility | shellr docs</title>
+  <meta name="description" content="Accessibility baseline and review notes for shellr.net, dma.shellr.net, and docs.shellr.net.">
+  <link rel="canonical" href="https://docs.shellr.net/accessibility.html">
+  <link rel="icon" type="image/png" href="./favi.png">
+  <link rel="apple-touch-icon" href="./favi.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body data-page="accessibility">
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <div class="site-shell">
+    <header class="site-header">
+      <a class="brand" href="./index.html">docs.shellr.net</a>
+      <nav class="site-nav" aria-label="Main">
+        <a href="./index.html" data-page="home">Home</a>
+        <a href="./projects.html" data-page="projects">Projects</a>
+        <a href="./case-studies.html" data-page="case-studies">Cases</a>
+        <a href="./architecture.html" data-page="architecture">Architecture</a>
+        <a href="./deployment-flow.html" data-page="deployment-flow">Deploy</a>
+        <a href="./monitoring.html" data-page="monitoring">Monitoring</a>
+        <a href="./logging.html" data-page="logging">Logging</a>
+        <a href="./backup.html" data-page="backup">Backup</a>
+        <a href="./lessons.html" data-page="lessons">Lessons</a>
+        <a href="./accessibility.html" data-page="accessibility">A11y</a>
+      </nav>
+    </header>
+    <main class="content" id="main-content">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="./index.html">Docs</a>
+        <span>/</span>
+        <span>Accessibility</span>
+      </nav>
+      <article class="doc-panel">
+        <p class="eyebrow">Accessibility</p>
+        <h2>Operational quality, not just visual polish.</h2>
+        <div class="meta-strip">
+          <span>Last reviewed: April 2026</span>
+          <span>Scope: shellr, DMA, docs</span>
+          <span>Focus: keyboard, focus, mobile tables</span>
+        </div>
+        <div class="callout">
+          <strong>Why this matters</strong>
+          Public platform surfaces should remain usable under keyboard navigation, reduced motion, zoom, and mobile constraints. That is part of platform quality, not a separate design phase.
+        </div>
+      </article>
+      <article class="doc-panel">
+        <p class="eyebrow">Current Baseline</p>
+        <h2>What is already in place.</h2>
+        <ul class="plain-list">
+          <li>Skip links on the public-facing pages and docs site.</li>
+          <li>Visible focus indicators across navigation, buttons, and inputs.</li>
+          <li>Reduced-motion-safe reveal handling on the landing page.</li>
+          <li>Server-rendered status snapshot so the public status entry does not depend fully on JavaScript.</li>
+          <li>Scrollable DMA table containers to avoid clipped mobile layouts.</li>
+        </ul>
+      </article>
+      <article class="doc-panel">
+        <p class="eyebrow">Known Limits</p>
+        <h2>What still needs review whenever the UI changes.</h2>
+        <ul class="plain-list">
+          <li>DMA remains data-heavy, so dense tables still need manual mobile review after UI changes.</li>
+          <li>Uptime Kuma itself is still a JavaScript-heavy app behind the public snapshot layer.</li>
+          <li>Any new landing-page motion should continue to degrade cleanly under reduced motion and missing observer support.</li>
+        </ul>
+      </article>
+    </main>
+  </div>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

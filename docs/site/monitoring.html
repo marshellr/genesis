@@ -28,6 +28,7 @@
         <a href="./logging.html" data-page="logging">Logging</a>
         <a href="./backup.html" data-page="backup">Backup</a>
         <a href="./lessons.html" data-page="lessons">Lessons</a>
+        <a href="./accessibility.html" data-page="accessibility">A11y</a>
       </nav>
     </header>
     <main class="content" id="main-content">
@@ -70,6 +71,10 @@
             <h3>cAdvisor</h3>
             <p>Supplies container-level CPU and memory metrics so Grafana can show workload behavior instead of host metrics alone.</p>
           </article>
+          <article>
+            <h3>Alertmanager</h3>
+            <p>Receives Prometheus alerts and keeps routing explicit, even while notification receivers remain intentionally minimal.</p>
+          </article>
         </div>
       </article>
 
@@ -81,6 +86,17 @@
           <li>Open Grafana for host saturation, container CPU and memory, and public response-time trends.</li>
           <li>Use Prometheus targets to verify whether exporters and health endpoints are still up.</li>
           <li>Use Loki for short-term logs when a metric spike needs immediate context.</li>
+        </ul>
+      </article>
+
+      <article class="doc-panel">
+        <p class="eyebrow">Alert Coverage</p>
+        <h2>What the platform watches automatically.</h2>
+        <ul class="plain-list">
+          <li>Host availability through Node Exporter reachability.</li>
+          <li>High CPU, low memory, and low disk thresholds on the VM.</li>
+          <li>Public-service availability from the Uptime Kuma metrics stream.</li>
+          <li>Recent container restart activity through cAdvisor metrics.</li>
         </ul>
       </article>
     </main>

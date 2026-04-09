@@ -1,0 +1,64 @@
+groups:
+  - name: shellr-host
+    rules:
+      - alert: ShellrInstanceDown
+        expr: up{job="node-exporter"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: host
+        annotations:
+          summary: "Host metrics are unavailable"
+          description: "Node Exporter is not responding, which usually means the host or the exporter is down."
+
+      - alert: ShellrHighCpuUsage
+        expr: (100 - avg by (instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+        for: 10m
+        labels:
+          severity: warning
+          service: host
+        annotations:
+          summary: "CPU usage is high"
+          description: "CPU usage has been above 85% for at least 10 minutes."
+
+      - alert: ShellrLowMemory
+        expr: (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100 < 12
+        for: 10m
+        labels:
+          severity: warning
+          service: host
+        annotations:
+          summary: "Available memory is low"
+          description: "Available memory fell below 12% for at least 10 minutes."
+
+      - alert: ShellrLowDiskSpace
+        expr: (node_filesystem_avail_bytes{mountpoint="/",fstype!=""} / node_filesystem_size_bytes{mountpoint="/",fstype!=""}) * 100 < 15
+        for: 15m
+        labels:
+          severity: critical
+          service: host
+        annotations:
+          summary: "Root filesystem is getting full"
+          description: "Available space on / is below 15%."
+
+  - name: shellr-services
+    rules:
+      - alert: ShellrPublicServiceDown
+        expr: min_over_time(monitor_status{monitor_name=~"shellr.net|shellr.net health|dma.shellr.net|docs.shellr.net|status.shellr.net"}[5m]) < 1
+        for: 2m
+        labels:
+          severity: critical
+          service: public
+        annotations:
+          summary: "A public service is down"
+          description: "At least one public uptime monitor is reporting down."
+
+      - alert: ShellrContainerRestarting
+        expr: increase(container_start_time_seconds{name=~".+"}[30m]) > 0
+        for: 0m
+        labels:
+          severity: warning
+          service: containers
+        annotations:
+          summary: "A container restarted recently"
+          description: "cAdvisor reports a recent container restart event."

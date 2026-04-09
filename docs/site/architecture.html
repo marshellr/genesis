@@ -28,6 +28,7 @@
         <a href="./logging.html" data-page="logging">Logging</a>
         <a href="./backup.html" data-page="backup">Backup</a>
         <a href="./lessons.html" data-page="lessons">Lessons</a>
+        <a href="./accessibility.html" data-page="accessibility">A11y</a>
       </nav>
     </header>
     <main class="content" id="main-content">
@@ -79,6 +80,17 @@ flowchart TD
           <li><strong>Private paths:</strong> MariaDB, Prometheus, and internal service traffic stay on Docker networks and are not exposed on the host.</li>
           <li><strong>Failure model:</strong> a broken app container should not collapse the rest of the platform, and docs remain outside the production VM on GitHub Pages.</li>
           <li><strong>Review model:</strong> each hostname maps to a clear runtime responsibility, which keeps routing and incident analysis simpler.</li>
+        </ul>
+      </article>
+
+      <article class="doc-panel">
+        <p class="eyebrow">Trust and Failure Boundaries</p>
+        <h2>What is public, what is internal, and what fails together.</h2>
+        <ul class="plain-list">
+          <li><strong>Public ingress:</strong> only Nginx binds to host ports 80 and 443.</li>
+          <li><strong>Loopback-only services:</strong> Grafana, Prometheus, Alertmanager, and Uptime Kuma stay on loopback or internal Docker networks.</li>
+          <li><strong>Cross-host separation:</strong> <code>docs.shellr.net</code> is intentionally outside the VM so documentation does not disappear with an app incident.</li>
+          <li><strong>Shared-risk boundary:</strong> app, DMA, monitoring, and logging still share one VM, so retention and recovery paths are designed with that limit in mind.</li>
         </ul>
       </article>
 
