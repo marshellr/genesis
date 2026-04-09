@@ -27,6 +27,16 @@
       <article class="doc-panel">
         <p class="eyebrow">Monitoring</p>
         <h2>Host and service visibility with a small footprint.</h2>
+        <div class="meta-strip">
+          <span>Last reviewed: April 2026</span>
+          <span>Primary source: Prometheus</span>
+          <span>Public surface: status.shellr.net</span>
+        </div>
+        <div class="callout">
+          <strong>Why this matters</strong>
+          Monitoring is not there to look impressive. It exists so someone reviewing or operating the platform can answer
+          three questions quickly: Is the host healthy? Are the services reachable? Where should I look first?
+        </div>
         <div class="doc-grid">
           <article>
             <h3>Prometheus</h3>
@@ -44,7 +54,22 @@
             <h3>Uptime Kuma</h3>
             <p>Used for availability checks and a dedicated status surface on its own hostname.</p>
           </article>
+          <article>
+            <h3>cAdvisor</h3>
+            <p>Supplies container-level CPU and memory metrics so Grafana can show workload behavior instead of host metrics alone.</p>
+          </article>
         </div>
+      </article>
+
+      <article class="doc-panel">
+        <p class="eyebrow">Responder Path</p>
+        <h2>What gets checked first.</h2>
+        <ul class="checklist">
+          <li>Open `status.shellr.net` to confirm whether the issue is public and service-wide.</li>
+          <li>Open Grafana for host saturation, container CPU and memory, and public response-time trends.</li>
+          <li>Use Prometheus targets to verify whether exporters and health endpoints are still up.</li>
+          <li>Use Loki for short-term logs when a metric spike needs immediate context.</li>
+        </ul>
       </article>
     </main>
   </div>

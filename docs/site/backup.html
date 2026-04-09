@@ -27,16 +27,37 @@
       <article class="doc-panel">
         <p class="eyebrow">Backup</p>
         <h2>Simple enough to understand under pressure.</h2>
+        <div class="meta-strip">
+          <span>Last reviewed: April 2026</span>
+          <span>Retention: day-based</span>
+          <span>Restore model: procedural</span>
+        </div>
         <ul>
           <li>Logical MariaDB dump for database recovery</li>
           <li>Project archive for configuration and application files</li>
           <li>Day-based retention to protect disk on a 40 GB host</li>
           <li>Cron-based execution with local log files</li>
         </ul>
+        <div class="callout">
+          <strong>Why this choice</strong>
+          For a single VM, readable restore steps are more valuable than another backup product. The aim is to recover
+          calmly and predictably, not to hide the process behind more tooling.
+        </div>
         <p>
           The restore model stays procedural on purpose. A small environment benefits more from readable restore steps
           than from another management layer.
         </p>
+      </article>
+
+      <article class="doc-panel">
+        <p class="eyebrow">Restore Focus</p>
+        <h2>What recovery is expected to achieve.</h2>
+        <ul class="plain-list">
+          <li><strong>Goal:</strong> restore application state, platform files, and key operational data without guessing where critical files live.</li>
+          <li><strong>Included:</strong> database dumps, project tree archives, and selected runtime data used by monitoring and status tooling.</li>
+          <li><strong>Operational limit:</strong> this is a single-host strategy, not multi-site disaster recovery.</li>
+          <li><strong>Practice:</strong> restore scripts exist because backup quality only matters if restore remains understandable.</li>
+        </ul>
       </article>
     </main>
   </div>

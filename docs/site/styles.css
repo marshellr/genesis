@@ -131,6 +131,22 @@ h1 {
   font-size: 1.04rem;
 }
 
+.meta-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.meta-strip span {
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.56);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
 .hero-meta {
   display: flex;
   flex-wrap: wrap;
@@ -209,6 +225,36 @@ h1 {
 .doc-grid h3 {
   margin-bottom: 10px;
   font-size: 1.08rem;
+}
+
+.callout {
+  margin-top: 18px;
+  padding: 16px 18px;
+  border: 1px solid rgba(15, 118, 110, 0.22);
+  background: rgba(15, 118, 110, 0.08);
+}
+
+.callout strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.checklist,
+.plain-list {
+  margin: 16px 0 0;
+  padding-left: 18px;
+}
+
+.checklist li,
+.plain-list li {
+  margin-bottom: 8px;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.section-stack {
+  display: grid;
+  gap: 20px;
 }
 
 .button-row {

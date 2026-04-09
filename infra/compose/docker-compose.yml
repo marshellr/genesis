@@ -16,6 +16,7 @@ services:
       - ${PROJECT_ROOT:-/projects/genesis}/infra/nginx/conf.d:/etc/nginx/conf.d:ro
       - ${PROJECT_ROOT:-/projects/genesis}/infra/nginx/snippets:/etc/nginx/snippets:ro
       - ${PROJECT_ROOT:-/projects/genesis}/infra/nginx/auth:/etc/nginx/auth:ro
+      - ${PROJECT_ROOT:-/projects/genesis}/infra/nginx/static:/usr/share/nginx/html/shellr:ro
       - ${PROJECT_ROOT:-/projects/genesis}/infra/nginx/certbot/www:/var/www/certbot
       - ${PROJECT_ROOT:-/projects/genesis}/infra/nginx/certbot/conf:/etc/letsencrypt
     networks:

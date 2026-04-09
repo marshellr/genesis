@@ -36,6 +36,63 @@ main.container {
     display: block;
 }
 
+.context-panel {
+    display: grid;
+    gap: 1.25rem;
+    margin: 0 auto 2rem;
+    max-width: 1200px;
+    padding: 1.4rem 1.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    background:
+        radial-gradient(circle at top right, rgba(59, 130, 246, 0.12), transparent 26%),
+        var(--background-secondary);
+    box-shadow: 0 18px 34px rgba(7, 13, 22, 0.35);
+}
+
+.context-copy h2 {
+    margin: 0;
+    font-size: 1.35rem;
+    line-height: 1.2;
+}
+
+.context-copy p:last-child {
+    margin: 0.9rem 0 0;
+    color: var(--font-secondary);
+}
+
+.context-eyebrow {
+    margin: 0 0 0.75rem;
+    color: var(--accent-blue);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.context-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+}
+
+.context-grid article {
+    padding: 1rem 1.1rem;
+    border: 1px solid rgba(59, 130, 246, 0.14);
+    border-radius: 12px;
+    background: rgba(10, 14, 19, 0.62);
+}
+
+.context-grid strong {
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.context-grid p {
+    margin: 0;
+    color: var(--font-secondary);
+}
+
 /* --- Header & Navigation --- */
 header {
     background: rgba(17, 24, 39, 0.92);
@@ -719,6 +776,7 @@ select:focus, input[type="text"]:focus {
     .brand-title { font-size: 1.25rem; }
     .container { padding: 0 1.25rem 2rem; }
     main.container { margin-top: 1.75rem; }
+    .context-panel { padding: 1.1rem; }
     .sync-area { max-width: 100%; padding: 1rem; }
     .pool-grid { grid-template-columns: 1fr; }
 }

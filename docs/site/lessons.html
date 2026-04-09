@@ -27,22 +27,26 @@
       <article class="doc-panel">
         <p class="eyebrow">Lessons Learned</p>
         <h2>What changed once the platform became real.</h2>
+        <div class="meta-strip">
+          <span>Last reviewed: April 2026</span>
+          <span>Focus: trade-offs, not slogans</span>
+        </div>
         <div class="doc-grid">
           <article>
             <h3>Hostnames beat subpaths for app separation</h3>
-            <p>Dedicated subdomains are easier to reason about than forcing unrelated applications into one path tree.</p>
+            <p>We started with path-based thinking, but dedicated subdomains made routing, cookies, redirects, and ownership much easier to reason about.</p>
           </article>
           <article>
             <h3>Retention is part of reliability</h3>
-            <p>Short, explicit log and metric retention is healthier than collecting data the host cannot keep safely.</p>
+            <p>Keeping too much data on a 40 GB host is not observability maturity. Short, explicit retention is part of staying healthy.</p>
           </article>
           <article>
             <h3>Simple CI/CD ages better</h3>
-            <p>GitHub-hosted Actions plus SSH deploy are easier to audit and recover than an unnecessary local runner setup.</p>
+            <p>GitHub-hosted Actions plus SSH deploy proved easier to audit, review, and recover than a local runner would have been for this size of platform.</p>
           </article>
           <article>
             <h3>Documentation is operational work</h3>
-            <p>Runbooks, DNS plans, routing maps, and rollback steps reduce ambiguity when the system changes later.</p>
+            <p>Runbooks, routing maps, and rollback notes reduce ambiguity later. Documentation is not extra polish once the platform is live.</p>
           </article>
         </div>
       </article>

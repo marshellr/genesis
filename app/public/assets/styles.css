@@ -229,6 +229,33 @@ main,
   font-size: 1.05rem;
 }
 
+.outcome-list {
+  display: grid;
+  gap: 10px;
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.outcome-list li {
+  position: relative;
+  padding-left: 18px;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.outcome-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.58em;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--accent);
+  box-shadow: 0 0 0 4px rgba(128, 222, 108, 0.12);
+}
+
 .hero-signal-row,
 .hero-actions,
 .project-stack {
@@ -412,6 +439,12 @@ main,
   gap: 16px;
 }
 
+.start-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
 .snapshot-card {
   padding: 18px;
   border: 1px solid var(--line);
@@ -431,6 +464,26 @@ main,
   margin: 0;
   color: var(--muted);
   line-height: 1.6;
+}
+
+.start-card {
+  padding: 20px;
+  border: 1px solid var(--line);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0)),
+    var(--panel);
+  box-shadow: var(--shadow-soft);
+}
+
+.start-card h3 {
+  margin: 0 0 10px;
+  font-size: 1rem;
+}
+
+.start-card p {
+  margin: 0 0 14px;
+  color: var(--muted);
+  line-height: 1.65;
 }
 
 .profile-section {
@@ -716,6 +769,7 @@ main,
   }
 
   .snapshot-grid,
+  .start-grid,
   .link-grid,
   .project-grid,
   .slice-grid {
@@ -757,6 +811,7 @@ main,
 
   .focus-grid,
   .snapshot-grid,
+  .start-grid,
   .project-grid,
   .slice-grid,
   .link-grid {

@@ -29,10 +29,16 @@
       <p class="eyebrow">Technical Documentation</p>
       <h1>Operational documentation for the platform behind shellr.net.</h1>
       <p class="hero-summary">
-        This site documents the `shellr` platform behind `shellr.net`: runtime boundaries, routing,
-        deployment flow, monitoring, logging, and backup on a single Hetzner VM. The aim is clarity,
-        not volume.
+        This site documents the live platform behind `shellr.net` from an operations perspective:
+        runtime boundaries, routing, deployment, monitoring, logging, backup, and recovery on a single
+        Hetzner VM. The goal is not tool hype. The goal is a system that stays understandable when it changes,
+        fails, or has to be handed over.
       </p>
+      <div class="meta-strip">
+        <span>Last reviewed: April 2026</span>
+        <span>Audience: reviewer, recruiter, operator</span>
+        <span>Focus: deployable, observable, recoverable</span>
+      </div>
       <div class="hero-meta">
         <span>Hetzner VM</span>
         <span>Docker Compose</span>
@@ -63,6 +69,11 @@
         <article class="doc-panel">
           <p class="eyebrow">Platform Summary</p>
           <h2>Hostnames and runtime boundaries</h2>
+          <div class="callout">
+            <strong>Why this matters</strong>
+            Each public hostname maps to a deliberate runtime surface. That separation makes the platform easier to
+            deploy, monitor, secure, and explain under review.
+          </div>
           <table>
             <thead>
               <tr>
@@ -103,28 +114,33 @@
 
         <section class="card-grid">
           <article>
+            <h3>Start here</h3>
+            <p>Review the architecture first, then the deployment path, then monitoring and backup. That sequence explains how the platform stays operable.</p>
+            <a href="./architecture.html">Open architecture</a>
+          </article>
+          <article>
             <h3>Projects</h3>
-            <p>Overview of the main platform and the DMA application, including how they are positioned operationally.</p>
+            <p>Overview of the platform, the DMA workload, and the reasons each public surface is separated the way it is.</p>
             <a href="./projects.html">Read more</a>
           </article>
           <article>
             <h3>Architecture</h3>
-            <p>Topology, routing model, and deployment boundaries for the single-VM platform.</p>
+            <p>Topology, routing, public vs. private surfaces, and why the platform remains intentionally single-host.</p>
             <a href="./architecture.html">Read more</a>
           </article>
           <article>
             <h3>Monitoring and Logging</h3>
-            <p>How visibility is implemented without turning the VM into an observability cluster.</p>
+            <p>How metrics, uptime checks, and short-retention logs provide visibility without turning the VM into an observability cluster.</p>
             <a href="./monitoring.html">Read more</a>
           </article>
           <article>
             <h3>Backup</h3>
-            <p>What is backed up, how rotation works, and how restore stays understandable.</p>
+            <p>What is backed up, what is excluded on purpose, and how restore remains procedural under pressure.</p>
             <a href="./backup.html">Read more</a>
           </article>
           <article>
             <h3>Lessons Learned</h3>
-            <p>Operational decisions that changed after integrating real services on a small host.</p>
+            <p>Trade-offs that changed once the platform moved from planning to real services and real operational constraints.</p>
             <a href="./lessons.html">Read more</a>
           </article>
           <article>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>shellr status</title>
+  <meta name="description" content="Public status entrypoint for the shellr platform.">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #071012;
+      --panel: #0d171a;
+      --line: rgba(255,255,255,0.1);
+      --text: #edf3f2;
+      --muted: #9eb0ad;
+      --accent: #80de6c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(128, 222, 108, 0.12), transparent 28%),
+        linear-gradient(180deg, #050708, var(--bg));
+    }
+    main {
+      width: min(960px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 56px 0;
+    }
+    .panel {
+      padding: 28px;
+      border: 1px solid var(--line);
+      background: rgba(13, 23, 26, 0.94);
+    }
+    .eyebrow {
+      margin: 0 0 12px;
+      color: var(--accent);
+      font-size: 0.82rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    h1, h2 { margin: 0; }
+    h1 { font-size: clamp(2.2rem, 5vw, 4.4rem); line-height: 0.94; max-width: 12ch; }
+    p, li { color: var(--muted); line-height: 1.7; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 22px;
+    }
+    .card {
+      padding: 18px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.02);
+    }
+    .links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 22px;
+    }
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      padding: 0 16px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+    }
+    .button.primary {
+      background: linear-gradient(135deg, var(--accent), #63c853);
+      border-color: transparent;
+      color: #07100a;
+      font-weight: 700;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      color: var(--text);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="panel">
+      <p class="eyebrow">Public Status Entry</p>
+      <h1>shellr platform status</h1>
+      <p>
+        This is the public status entrypoint for the live shellr platform. For the current uptime view,
+        open the public status dashboard. The services listed below are the public surfaces visitors are expected to use.
+      </p>
+
+      <div class="grid">
+        <article class="card">
+          <h2>Current status view</h2>
+          <p>The detailed uptime board is published through Uptime Kuma and kept on a separate path.</p>
+        </article>
+        <article class="card">
+          <h2>Public services</h2>
+          <p><code>shellr.net</code>, <code>dma.shellr.net</code>, <code>docs.shellr.net</code>, and the public status surface itself.</p>
+        </article>
+        <article class="card">
+          <h2>Last update source</h2>
+          <p>Status details are generated from the same monitoring stack used operationally on the platform.</p>
+        </article>
+      </div>
+
+      <div class="links">
+        <a class="button primary" href="/status/shellr">Open Public Status</a>
+        <a class="button" href="/dashboard">Open Admin Dashboard</a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

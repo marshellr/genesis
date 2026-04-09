@@ -252,6 +252,35 @@ require_once __DIR__.'/inc/header.php';
 <?php endif; ?>
 
 <main class="container">
+  <section class="context-panel">
+    <div class="context-copy">
+      <p class="context-eyebrow">Public Context</p>
+      <h2>DMA is a live statistics surface for a Prime League team environment.</h2>
+      <p>
+        This application aggregates match and role-based performance views across recorded games.
+        It is both a usable stats tool and a platform case: a legacy PHP workload isolated behind its
+        own subdomain, runtime boundary, health model, and database scope.
+      </p>
+    </div>
+    <div class="context-grid">
+      <article>
+        <strong>Who it is for</strong>
+        <p>Players, staff, and reviewers who need role-based match summaries instead of raw match history.</p>
+      </article>
+      <article>
+        <strong>Data sources</strong>
+        <p>Prime League scheduling data and Riot match data when sync credentials are configured.</p>
+      </article>
+      <article>
+        <strong>Key metrics</strong>
+        <p>KDA, kill participation, CS/min, vision score, and objective control by role and match.</p>
+      </article>
+      <article>
+        <strong>Operational limit</strong>
+        <p>This is a focused team stats surface, not a public esports portal or a generalized data warehouse.</p>
+      </article>
+    </div>
+  </section>
   
   <div class="sync-area">
       <form method="get" style="display:inline;">

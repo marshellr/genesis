@@ -14,6 +14,39 @@ $platformSnapshot = [
     ['title' => 'Docs', 'body' => 'Technical documentation is published through GitHub Pages, not served from the VM.'],
 ];
 
+$outcomes = [
+    'Deployable through staged SSH releases and health-gated checks.',
+    'Observable through metrics, logs, and a public uptime surface.',
+    'Recoverable through backups, restore scripts, and rollback-aware changes.',
+];
+
+$startHere = [
+    [
+        'title' => 'Open Architecture',
+        'body' => 'Start with the public surfaces, trust boundaries, and container responsibilities on the single host.',
+        'href' => $site['docs_url'] . '/architecture.html',
+        'label' => 'View architecture',
+    ],
+    [
+        'title' => 'Review Deployment Flow',
+        'body' => 'See how releases are built, transferred, switched, and verified before a deployment is considered done.',
+        'href' => $site['docs_url'] . '/deployment-flow.html',
+        'label' => 'Open deployment flow',
+    ],
+    [
+        'title' => 'Check Live Status',
+        'body' => 'Use the public status surface to verify service health without needing internal access.',
+        'href' => $site['status_url'],
+        'label' => 'Open status',
+    ],
+    [
+        'title' => 'Browse Source and Notes',
+        'body' => 'Inspect repository structure, live documentation, and the decisions behind the current platform shape.',
+        'href' => $site['github_url'] !== '' ? $site['github_url'] : 'https://github.com/marshellr/genesis',
+        'label' => 'Open GitHub',
+    ],
+];
+
 $focusAreas = [
     'Linux, containers, and web platforms with explicit operational boundaries',
     'Deployment, healthchecks, and recovery instead of build-only thinking',
@@ -163,13 +196,35 @@ function host_label(string $url): string
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>shellr | DevOps / System Engineer</title>
-  <meta name="description" content="Personal engineer website of Marlin Scheler with a focus on Linux, Docker, deployment, monitoring, infrastructure, and production-like single-VM platforms.">
+  <meta name="description" content="Marlin Scheler builds and operates small Linux-based web platforms with Docker, monitoring, deployment, backup, and documented recovery paths.">
+  <link rel="canonical" href="https://shellr.net/">
   <link rel="icon" type="image/png" href="/assets/favi.png">
   <link rel="apple-touch-icon" href="/assets/favi.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/styles.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Person",
+        "name": "Marlin Scheler",
+        "jobTitle": "Junior DevOps Engineer / System Engineer",
+        "url": "https://shellr.net/",
+        "sameAs": [
+          "<?= e($site['github_url'] !== '' ? $site['github_url'] : 'https://github.com/marshellr/genesis') ?>"
+        ]
+      },
+      {
+        "@type": "WebSite",
+        "name": "shellr",
+        "url": "https://shellr.net/"
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
   <div class="site-noise" aria-hidden="true"></div>
@@ -197,13 +252,19 @@ function host_label(string $url): string
         <p class="eyebrow">Marlin Scheler &middot; Junior DevOps / System Engineer</p>
         <h1>Build systems that can actually be operated.</h1>
         <p class="hero-summary">
-          I am a systems integration apprentice focused on Linux-based platforms around Docker,
-          deployment, monitoring, reverse proxies, and web operations. shellr.net is the public
-          frontdoor of a running single-VM platform, not a portfolio mockup without operational depth.
+          I build and operate small Linux-based web platforms with deployment, monitoring, backup,
+          and recovery designed in from day one. shellr.net is a live operating environment with
+          public services, internal observability, and documented operational constraints.
         </p>
 
+        <ul class="outcome-list">
+          <?php foreach ($outcomes as $outcome): ?>
+          <li><?= e($outcome) ?></li>
+          <?php endforeach; ?>
+        </ul>
+
         <div class="hero-actions">
-          <a class="button primary" href="#platform">Explore Platform</a>
+          <a class="button primary" href="#start-here">Start Here</a>
           <a class="button secondary" href="#links">View Live Systems</a>
         </div>
       </div>
@@ -269,15 +330,31 @@ function host_label(string $url): string
       </div>
     </section>
 
+    <section class="section start-section" id="start-here">
+      <div class="section-heading" data-reveal>
+        <p class="eyebrow">Start Here</p>
+        <h2>Follow the same path a technical reviewer would.</h2>
+      </div>
+
+      <div class="start-grid">
+        <?php foreach ($startHere as $entry): ?>
+        <article class="start-card" data-reveal>
+          <h3><?= e($entry['title']) ?></h3>
+          <p><?= e($entry['body']) ?></p>
+          <a class="inline-link" href="<?= e($entry['href']) ?>"><?= e($entry['label']) ?></a>
+        </article>
+        <?php endforeach; ?>
+      </div>
+    </section>
+
     <section class="section profile-section" id="profile">
       <div class="section-copy" data-reveal>
         <p class="eyebrow">Profile</p>
-        <h2>Focused on infrastructure, operations, and technical clarity.</h2>
+        <h2>Focused on infrastructure, delivery, and operational clarity.</h2>
         <p>
-          I position myself as a junior DevOps / system engineer with a focus on Linux, container
-          runtimes, deployment, monitoring, and the stable operation of web platforms. What matters to
-          me is not only how applications are built, but how they are delivered, observed, secured, and
-          documented.
+          I am training as a systems integration specialist and moving toward a junior DevOps or systems role.
+          The work I care about most starts where deployment, routing, monitoring, and failure handling overlap.
+          My goal is to build systems that remain understandable, supportable, and reviewable after they go live.
         </p>
       </div>
 

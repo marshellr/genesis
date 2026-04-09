@@ -31,6 +31,16 @@
           The core design choice is not to hide complexity behind orchestration layers that the host size does not justify.
           Containers are used for isolation and deployability, while networking and runtime boundaries stay inspectable.
         </p>
+        <div class="meta-strip">
+          <span>Last reviewed: April 2026</span>
+          <span>Public surfaces: 5</span>
+          <span>Primary ingress: Nginx + TLS</span>
+        </div>
+        <div class="callout">
+          <strong>Why this choice</strong>
+          The platform is intentionally small enough to stay reviewable. Container boundaries, hostnames, and reverse-proxy rules
+          are easier to reason about here than a larger orchestration layer would be.
+        </div>
         <div class="mermaid">
 flowchart TD
     User["Client"] --> DNS["Public DNS"]
@@ -47,6 +57,17 @@ flowchart TD
     Status --> Kuma["Uptime Kuma"]
     Docs["docs.shellr.net"] --> Pages["GitHub Pages"]
         </div>
+      </article>
+
+      <article class="doc-panel">
+        <p class="eyebrow">Operational Boundaries</p>
+        <h2>Public, private, and failure-sensitive paths.</h2>
+        <ul class="plain-list">
+          <li><strong>Public surfaces:</strong> `shellr.net`, `dma.shellr.net`, `status.shellr.net`, and protected `grafana.shellr.net` terminate at Nginx.</li>
+          <li><strong>Private paths:</strong> MariaDB, Prometheus, and internal service traffic stay on Docker networks and are not exposed on the host.</li>
+          <li><strong>Failure model:</strong> a broken app container should not collapse the rest of the platform, and docs remain outside the production VM on GitHub Pages.</li>
+          <li><strong>Review model:</strong> each hostname maps to a clear runtime responsibility, which keeps routing and incident analysis simpler.</li>
+        </ul>
       </article>
 
       <article class="doc-panel">
@@ -70,6 +91,11 @@ sequenceDiagram
       VM->>VM: rollback
     end
         </div>
+        <ul class="plain-list">
+          <li><strong>Failure mode:</strong> deployments are not considered complete until health checks pass.</li>
+          <li><strong>Rollback path:</strong> staged releases and backup copies exist so a bad change can be reverted without improvisation.</li>
+          <li><strong>Operational limit:</strong> this stays intentionally SSH- and Compose-based instead of adding a local runner or control plane.</li>
+        </ul>
       </article>
     </main>
   </div>
