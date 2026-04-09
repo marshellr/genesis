@@ -227,6 +227,7 @@ function host_label(string $url): string
   </script>
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
   <div class="site-noise" aria-hidden="true"></div>
   <div class="site-orb site-orb-a" aria-hidden="true"></div>
   <div class="site-orb site-orb-b" aria-hidden="true"></div>
@@ -246,7 +247,7 @@ function host_label(string $url): string
     </nav>
   </header>
 
-  <main>
+  <main id="main-content">
     <section class="hero" id="top">
       <div class="hero-copy" data-reveal>
         <p class="eyebrow">Marlin Scheler &middot; Junior DevOps / System Engineer</p>

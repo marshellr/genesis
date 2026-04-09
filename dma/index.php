@@ -251,7 +251,7 @@ require_once __DIR__.'/inc/header.php';
 </div>
 <?php endif; ?>
 
-<main class="container">
+<main class="container" id="main-content">
   <section class="context-panel">
     <div class="context-copy">
       <p class="context-eyebrow">Public Context</p>

@@ -96,7 +96,7 @@ $pageTitle = 'Gesamtstatistiken';
 require_once __DIR__.'/inc/header.php';
 ?>
 
-<main class="container">
+<main class="container" id="main-content">
   <div class="overall-winrate">
     <h2>Gesamte Winrate (<?=safe((string)$totalGames)?> Spiele)</h2>
     <span class="stat-value"><?=safe((string)$overallWinrate)?>%</span>

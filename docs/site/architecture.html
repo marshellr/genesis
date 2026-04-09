@@ -4,12 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Architecture | shellr docs</title>
+  <meta name="description" content="Architecture documentation for the shellr platform, including runtime boundaries, public surfaces, private paths, and deployment design.">
+  <link rel="canonical" href="https://docs.shellr.net/architecture.html">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body data-page="architecture">
+  <a class="skip-link" href="#main-content">Skip to content</a>
   <div class="site-shell">
     <header class="site-header">
       <a class="brand" href="./index.html">docs.shellr.net</a>
@@ -17,13 +20,19 @@
         <a href="./index.html" data-page="home">Home</a>
         <a href="./projects.html" data-page="projects">Projects</a>
         <a href="./architecture.html" data-page="architecture">Architecture</a>
+        <a href="./deployment-flow.html" data-page="deployment-flow">Deploy</a>
         <a href="./monitoring.html" data-page="monitoring">Monitoring</a>
         <a href="./logging.html" data-page="logging">Logging</a>
         <a href="./backup.html" data-page="backup">Backup</a>
         <a href="./lessons.html" data-page="lessons">Lessons</a>
       </nav>
     </header>
-    <main class="content">
+    <main class="content" id="main-content">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="./index.html">Docs</a>
+        <span>/</span>
+        <span>Architecture</span>
+      </nav>
       <article class="doc-panel">
         <p class="eyebrow">Architecture</p>
         <h2>Single host, explicit surfaces.</h2>

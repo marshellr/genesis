@@ -14,6 +14,7 @@ $bodyAttrString = $bodyAttributes !== '' ? ' '.$bodyAttributes : '';
 <link rel="icon" href="assets/favicon.png" type="image/x-icon">
 </head>
 <body<?=$bodyAttrString?>>
+<a class="skip-link" href="#main-content">Skip to content</a>
 
 <header>
   <div class="header-content">

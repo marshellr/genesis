@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Deployment Flow | shellr docs</title>
+  <meta name="description" content="Deployment flow for the shellr platform, including build, transfer, verification, rollback, and operational limits.">
+  <link rel="canonical" href="https://docs.shellr.net/deployment-flow.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body data-page="deployment-flow">
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <div class="site-shell">
+    <header class="site-header">
+      <a class="brand" href="./index.html">docs.shellr.net</a>
+      <nav class="site-nav" aria-label="Main">
+        <a href="./index.html" data-page="home">Home</a>
+        <a href="./projects.html" data-page="projects">Projects</a>
+        <a href="./architecture.html" data-page="architecture">Architecture</a>
+        <a href="./deployment-flow.html" data-page="deployment-flow">Deploy</a>
+        <a href="./monitoring.html" data-page="monitoring">Monitoring</a>
+        <a href="./logging.html" data-page="logging">Logging</a>
+        <a href="./backup.html" data-page="backup">Backup</a>
+        <a href="./lessons.html" data-page="lessons">Lessons</a>
+      </nav>
+    </header>
+    <main class="content" id="main-content">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="./index.html">Docs</a>
+        <span>/</span>
+        <span>Deployment Flow</span>
+      </nav>
+
+      <article class="doc-panel">
+        <p class="eyebrow">Deployment Flow</p>
+        <h2>Build, stage, switch, verify.</h2>
+        <p>
+          The deployment path is intentionally simple: build on GitHub Actions, transfer a release to the VM,
+          validate configuration, update containers, and verify health before a release is treated as complete.
+        </p>
+        <div class="meta-strip">
+          <span>Last reviewed: April 2026</span>
+          <span>Trigger: GitHub Actions</span>
+          <span>Gate: health checks</span>
+        </div>
+        <div class="callout">
+          <strong>Why this choice</strong>
+          For a single VM, a readable SSH-based delivery path is easier to review and recover than introducing
+          more moving parts than the platform actually needs.
+        </div>
+      </article>
+
+      <article class="doc-panel">
+        <p class="eyebrow">Sequence</p>
+        <h2>What happens during a release.</h2>
+        <ul class="plain-list">
+          <li>Changes are pushed to GitHub and picked up by the deployment workflow.</li>
+          <li>Artifacts and images are prepared and transferred to the VM.</li>
+          <li>Compose configuration is validated before the live stack is updated.</li>
+          <li>Services are recreated and health endpoints are checked before the run is considered successful.</li>
+        </ul>
+      </article>
+
+      <article class="doc-panel">
+        <p class="eyebrow">Failure Modes</p>
+        <h2>What the process is designed to avoid.</h2>
+        <ul class="plain-list">
+          <li><strong>Blind overwrite:</strong> the deployment path validates and checks health instead of treating container recreation as success.</li>
+          <li><strong>Unclear rollback:</strong> releases are staged and rollback-aware, so a bad change does not require improvisation.</li>
+          <li><strong>Operational drift:</strong> the same repo structure used for local review maps to the VM layout under <code>/projects/genesis</code>.</li>
+        </ul>
+      </article>
+
+      <article class="doc-panel">
+        <p class="eyebrow">Operational Limits</p>
+        <h2>What this deployment model does not try to be.</h2>
+        <ul class="plain-list">
+          <li>It is not blue-green or multi-node orchestration.</li>
+          <li>It does not hide the production topology behind a control plane.</li>
+          <li>It is intentionally optimized for maintainability on one VM and one operator path.</li>
+        </ul>
+      </article>
+    </main>
+  </div>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

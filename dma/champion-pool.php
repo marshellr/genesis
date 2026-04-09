@@ -183,7 +183,7 @@ require_once __DIR__.'/inc/header.php';
     </div>
 </div>
 
-<main class="container">
+<main class="container" id="main-content">
   <div class="pool-grid">
     <?php foreach(['Top', 'Jungle', 'Mid', 'ADC', 'Supp'] as $role): ?>
     <div class="role-column" data-role="<?=$role?>">

@@ -31,6 +31,28 @@ a {
   color: inherit;
 }
 
+a:focus-visible,
+button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.skip-link {
+  position: absolute;
+  left: 16px;
+  top: -48px;
+  z-index: 10;
+  padding: 10px 14px;
+  background: var(--accent);
+  color: #f5fffd;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.skip-link:focus {
+  top: 14px;
+}
+
 code,
 pre,
 .eyebrow,
@@ -315,6 +337,20 @@ pre {
   margin-top: 28px;
   color: var(--muted);
   font-size: 0.88rem;
+}
+
+.breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+  color: var(--muted);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.82rem;
+}
+
+.breadcrumb a {
+  text-decoration: none;
 }
 
 @media (max-width: 960px) {
