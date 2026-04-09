@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Projects | shellr docs</title>
-  <meta name="description" content="Project overview for the shellr platform, including public surfaces, workload boundaries, and operational reasoning.">
+  <meta name="description" content="Project overview for shellr, covering the live platform, DMA workload, reporting automation, migration work, private hosting, and planned security automation.">
   <link rel="canonical" href="https://docs.shellr.net/projects.html">
   <link rel="icon" type="image/png" href="./favi.png">
   <link rel="apple-touch-icon" href="./favi.png">
@@ -39,39 +39,94 @@
       </nav>
       <article class="doc-panel">
         <p class="eyebrow">Projects</p>
-        <h2>shellr platform</h2>
+        <h2>Projects aligned with the current portfolio and resume track.</h2>
         <p>
-          The main project is a single-VM platform with deliberate service boundaries: public routing through Nginx,
-          app runtimes in Docker containers, GitHub Actions deployment, observability, and backup. It is intentionally
-          sized for one host and intentionally documented like something that may need to be handed over later.
+          The project set around shellr combines live platform operations, application work, reporting automation,
+          migration and hardening, self-hosted websites, and a planned security-focused completion project. The goal
+          is to show a realistic path from practical systems work to structured platform ownership.
         </p>
         <div class="meta-strip">
           <span>Last reviewed: April 2026</span>
-          <span>Scope: live services + docs</span>
+          <span>Scope: current, historical, planned</span>
           <span>Review angle: problem, boundary, outcome</span>
         </div>
         <div class="callout">
-          <strong>How to read these projects</strong>
-          Each project is treated as a runtime decision, not just a code exercise. The relevant questions are what problem
-          it solves, how it is isolated, and how it behaves operationally once deployed.
+          <strong>How to read this page</strong>
+          Not every project is a full standalone product. Some are live surfaces, some are operational building blocks,
+          and one is a planned final project. Together they show the progression from self-hosted systems work toward
+          platform, monitoring, and automation responsibilities.
         </div>
       </article>
       <section class="doc-grid">
         <article>
-          <h3>shellr.net</h3>
-          <p>Public frontdoor that explains the platform, links to live surfaces, and makes the operating model legible for reviewers.</p>
+          <h3>Genesis / self-hosted platform</h3>
+          <p><strong>Status:</strong> current</p>
+          <p>Single-VM platform on Hetzner with Docker Compose, Nginx, TLS, monitoring, logging, backup, and documented recovery.</p>
+          <ul class="plain-list">
+            <li>Public entrypoints routed through Nginx with clear hostname boundaries.</li>
+            <li>Compose-managed separation for app, DMA, monitoring, logging, and stateful services.</li>
+            <li>Operational continuation of earlier private hosting and migration work.</li>
+          </ul>
         </article>
         <article>
-          <h3>dma.shellr.net</h3>
-          <p>Legacy PHP application isolated on its own subdomain and runtime path instead of being embedded into the main site.</p>
+          <h3>DMA statistics module</h3>
+          <p><strong>Status:</strong> live</p>
+          <p>API-based dashboard for match and performance analysis implemented as its own PHP runtime on <code>dma.shellr.net</code>.</p>
+          <ul class="plain-list">
+            <li>Aggregates JSON data from external sources into player and champion views.</li>
+            <li>Runs with separate routing, health behavior, and database scope.</li>
+            <li>Acts as a real workload inside the wider platform model.</li>
+          </ul>
         </article>
         <article>
-          <h3>grafana.shellr.net</h3>
-          <p>Protected observability UI used to inspect host, container, and uptime signals without exposing an admin surface publicly.</p>
+          <h3>Automated web analytics with AWStats</h3>
+          <p><strong>Status:</strong> operational workflow</p>
+          <p>Automated reporting path for access and usage data derived from webserver logs.</p>
+          <ul class="plain-list">
+            <li>Generates static reports without needing a heavy analytics stack.</li>
+            <li>Automates log processing and structured report output.</li>
+            <li>Fits the resource model of a single host and a small operational setup.</li>
+          </ul>
         </article>
         <article>
-          <h3>status.shellr.net</h3>
-          <p>Dedicated host for uptime visibility and service checks, kept separate from the main landing page and usable as a public status surface.</p>
+          <h3>Web platform migration and hardening</h3>
+          <p><strong>Status:</strong> completed / ongoing practice</p>
+          <p>Migration of web workloads onto Linux-based infrastructure with stronger security and clearer operations.</p>
+          <ul class="plain-list">
+            <li>Includes host hardening, access control, and stable service reachability.</li>
+            <li>Focuses on controlled change steps instead of risky rewrites.</li>
+            <li>Directly informs the structure of the current public platform.</li>
+          </ul>
+        </article>
+        <article>
+          <h3>Inventory tracking application</h3>
+          <p><strong>Status:</strong> application workload</p>
+          <p>Web-based inventory software used as a practical CRUD workload for the platform.</p>
+          <ul class="plain-list">
+            <li>Built with PHP, JavaScript, and a relational database.</li>
+            <li>Manages and presents stock data in a structured UI.</li>
+            <li>Provides a simple but realistic app layer for deployment and backup decisions.</li>
+          </ul>
+        </article>
+        <article>
+          <h3>Private web projects / hosting</h3>
+          <p><strong>Status:</strong> foundational experience</p>
+          <p>Several self-hosted websites operated on privately managed Linux infrastructure.</p>
+          <ul class="plain-list">
+            <li>Covered setup, deployment, and maintenance of multiple web applications.</li>
+            <li>Included Apache configuration and HTTPS with Let's Encrypt.</li>
+            <li>Created the practical baseline that later evolved into the structured platform on shellr.net.</li>
+          </ul>
+        </article>
+        <article>
+          <h3>Automated vulnerability management</h3>
+          <p><strong>Status:</strong> planned final project</p>
+          <p>Planned completion project focused on vulnerability ingestion and relevance matching.</p>
+          <ul class="plain-list">
+            <li>Uses the ENISA EUVD API as upstream data source.</li>
+            <li>Compares vulnerability data with an asset inventory to identify relevant systems.</li>
+            <li>Targets the reduction of manual analysis work through automation.</li>
+          </ul>
         </article>
       </section>
     </main>

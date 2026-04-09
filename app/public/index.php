@@ -95,13 +95,13 @@ $focusAreas = [
 
 $featuredProjects = [
     [
-        'title' => 'Genesis / DevOps Platform',
+        'title' => 'Genesis / Self-Hosted Platform',
         'tag' => 'platform',
-        'lead' => 'A single-VM platform built around operational clarity.',
+        'lead' => 'The current platform layer built on top of private hosting experience and operational hardening.',
         'points' => [
-            'Runs the public entrypoints, application workloads, monitoring, logging, and backups on one host.',
-            'Uses explicit subdomains, Compose-managed services, and documented rollback and restore paths.',
-            'Prioritizes bounded retention and maintainability over adding more tooling than the host needs.',
+            'Runs the public entrypoints, application workloads, monitoring, logging, and backups on one Hetzner VM.',
+            'Combines subdomain-based routing, Compose-managed services, and documented rollback and restore paths.',
+            'Acts as the operational continuation of earlier private web hosting and migration work instead of being a disconnected demo.',
         ],
         'stack' => ['Linux', 'Docker Compose', 'Nginx', 'GitHub Actions'],
         'href' => $site['docs_url'],
@@ -110,24 +110,24 @@ $featuredProjects = [
     [
         'title' => 'DMA Statistics Module',
         'tag' => 'live project',
-        'lead' => 'A legacy PHP workload integrated as its own runtime surface.',
+        'lead' => 'An API-based dashboard for match and performance data, isolated as its own runtime surface.',
         'points' => [
-            'Runs under its own subdomain and container instead of being buried inside the main site.',
-            'Uses separate database scope, healthchecks, and reverse-proxy routing that stay reviewable.',
-            'Turns an existing application into something that can be operated cleanly on the platform.',
+            'Collects, aggregates, and renders JSON-based match data from external sources as a PHP web application.',
+            'Runs under its own subdomain and container with separate database scope, healthchecks, and reviewable routing.',
+            'Turns a stats-heavy legacy workload into something that can be monitored and operated cleanly on the platform.',
         ],
-        'stack' => ['PHP', 'MariaDB', 'Docker', 'Subdomain routing'],
+        'stack' => ['PHP', 'JavaScript', 'JSON APIs', 'MariaDB'],
         'href' => $site['dma_url'],
         'label' => 'Open DMA live',
     ],
     [
-        'title' => 'AWStats Reporting / Automation',
+        'title' => 'Automated Web Analytics with AWStats',
         'tag' => 'reporting',
-        'lead' => 'Reporting focused on visibility instead of raw log volume.',
+        'lead' => 'Static web analytics reports generated automatically from webserver logs.',
         'points' => [
-            'Collects and summarizes access and usage patterns into readable reporting outputs.',
-            'Uses repeatable shell-based automation instead of manual report generation.',
-            'Keeps reporting lightweight enough for a small host and a small platform team.',
+            'Processes access logs into structured reports that can be reviewed without live dashboard overhead.',
+            'Uses repeatable shell-based automation and scheduled generation instead of manual report builds.',
+            'Keeps web analytics lightweight enough for a small host and a small operational footprint.',
         ],
         'stack' => ['AWStats', 'Shell scripts', 'Cron', 'Reporting'],
         'href' => $site['docs_url'] . '/projects.html',
@@ -158,6 +158,32 @@ $featuredProjects = [
         'stack' => ['PHP', 'MariaDB', 'CRUD', 'Healthchecks'],
         'href' => $site['docs_url'] . '/projects.html',
         'label' => 'Read project notes',
+    ],
+    [
+        'title' => 'Private Web Projects / Hosting',
+        'tag' => 'operations',
+        'lead' => 'Multiple self-hosted websites operated on private Linux infrastructure.',
+        'points' => [
+            'Covers the setup, deployment, and maintenance of several web projects on self-managed servers.',
+            'Includes webserver configuration, HTTPS setup, and the day-to-day realities of keeping small sites reachable.',
+            'Forms the practical foundation that later evolved into the more structured Genesis platform.',
+        ],
+        'stack' => ['Linux', 'Apache', 'HTTPS', 'Self-hosting'],
+        'href' => $site['docs_url'] . '/projects.html',
+        'label' => 'Read hosting overview',
+    ],
+    [
+        'title' => 'Automated Vulnerability Management',
+        'tag' => 'planned project',
+        'lead' => 'A planned final project focused on automating vulnerability intake and triage.',
+        'points' => [
+            'Designed around the ENISA EUVD API and an asset inventory to identify actually relevant systems.',
+            'Focuses on reducing manual triage work through structured ingestion and automated matching.',
+            'Represents the next step from platform operations toward repeatable security operations.',
+        ],
+        'stack' => ['API integration', 'Asset inventory', 'Automation', 'Security ops'],
+        'href' => $site['docs_url'] . '/projects.html',
+        'label' => 'Read project outline',
     ],
 ];
 
