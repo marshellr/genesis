@@ -81,7 +81,7 @@ services:
       PORTFOLIO_BRAND: ${PORTFOLIO_BRAND:-shellr}
       PORTFOLIO_ROLE: ${PORTFOLIO_ROLE:-DevOps / System Engineer}
       PORTFOLIO_LOCATION: ${PORTFOLIO_LOCATION:-Germany}
-      PORTFOLIO_CONTACT_EMAIL: ${PORTFOLIO_CONTACT_EMAIL:-admin@shellr.net}
+      PORTFOLIO_CONTACT_EMAIL: ${PORTFOLIO_CONTACT_EMAIL:-marlin.scheler@shellr.net}
       PORTFOLIO_GITHUB_URL: ${PORTFOLIO_GITHUB_URL:-}
       PORTFOLIO_DOCS_URL: ${PORTFOLIO_DOCS_URL:-https://docs.shellr.net}
       PORTFOLIO_DMA_URL: ${PORTFOLIO_DMA_URL:-https://dma.shellr.net}

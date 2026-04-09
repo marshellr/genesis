@@ -746,6 +746,129 @@ main,
   text-transform: uppercase;
 }
 
+.site-footer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.site-footer p {
+  margin: 0;
+}
+
+.site-footer-nav {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.site-footer-nav a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.site-footer-nav a:hover {
+  color: var(--text);
+}
+
+.legal-shell {
+  width: min(920px, calc(100% - 32px));
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.legal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  padding: 26px 0 12px;
+}
+
+.legal-main {
+  padding: 36px 0 0;
+}
+
+.legal-hero,
+.legal-panel {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  box-shadow: var(--shadow-soft);
+}
+
+.legal-hero {
+  padding: 30px;
+  background:
+    linear-gradient(155deg, rgba(128, 222, 108, 0.08), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.022), rgba(255, 255, 255, 0));
+}
+
+.legal-hero h1,
+.legal-panel h2 {
+  margin: 0;
+  letter-spacing: -0.04em;
+}
+
+.legal-hero h1 {
+  font-size: clamp(2.4rem, 5vw, 4.4rem);
+}
+
+.legal-summary,
+.legal-panel p,
+.legal-panel li,
+.legal-meta span,
+.legal-panel address {
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.legal-summary {
+  margin: 16px 0 0;
+  max-width: 62ch;
+}
+
+.legal-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.legal-meta span {
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.8rem;
+}
+
+.legal-stack {
+  display: grid;
+  gap: 18px;
+  margin-top: 24px;
+}
+
+.legal-panel {
+  padding: 24px;
+}
+
+.legal-panel ul {
+  margin: 14px 0 0;
+  padding-left: 18px;
+}
+
+.legal-panel li {
+  margin-bottom: 10px;
+}
+
+.legal-panel address {
+  margin: 14px 0 0;
+  font-style: normal;
+}
+
 [data-reveal] {
   opacity: 1;
   transform: none;
@@ -805,6 +928,11 @@ main,
     align-items: flex-start;
   }
 
+  .legal-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
   .brand {
     flex-direction: column;
     align-items: flex-start;
@@ -854,5 +982,10 @@ main,
 
   .logo-card img {
     width: min(100%, 220px);
+  }
+
+  .site-footer-row {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

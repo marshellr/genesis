@@ -283,6 +283,7 @@ function host_label(string $url): string
       <a href="#projects">Projects</a>
       <a href="#platform">Platform</a>
       <a href="#links">Live Links</a>
+      <a href="/imprint.php">Imprint</a>
     </nav>
   </header>
 
@@ -556,7 +557,14 @@ Docker networks
   </main>
 
   <footer class="site-footer">
-    <p>Marlin Scheler &middot; Junior DevOps / System Engineer &middot; Linux, containers, platform operations, observability</p>
+    <div class="site-footer-row">
+      <p>Marlin Scheler &middot; Junior DevOps / System Engineer &middot; Linux, containers, platform operations, observability</p>
+      <nav class="site-footer-nav" aria-label="Legal">
+        <a href="/imprint.php">Imprint</a>
+        <a href="/privacy.php">Privacy Policy</a>
+        <a href="mailto:<?= e($site['contact_email']) ?>"><?= e($site['contact_email']) ?></a>
+      </nav>
+    </div>
   </footer>
 
   <script src="/assets/app.js"></script>
