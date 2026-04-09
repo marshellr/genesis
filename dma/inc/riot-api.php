@@ -271,6 +271,266 @@ function metasrc_get_champion_stats(string $elo = 'emerald_plus'): array
 }
 
 /**
+ * League of Graphs als Fallback für Champion-spezifische Rollen-Winrates.
+ * Diese Funktion wird nur genutzt, wenn MetaSrc keine Daten mehr liefert.
+ */
+function leagueofgraphs_get_champion_stats_for_pools(array $championPools, string $elo = 'emerald_plus'): array
+{
+    $stats = [];
+    $processed = [];
+
+    foreach ($championPools as $entry) {
+        $championId = (int)($entry['champion_id'] ?? 0);
+        $role = (string)($entry['role'] ?? '');
+
+        if ($championId <= 0 || $role === '') {
+            continue;
+        }
+
+        $cacheKey = $championId . ':' . $role;
+        if (isset($processed[$cacheKey])) {
+            continue;
+        }
+
+        $processed[$cacheKey] = true;
+        $roleStats = leagueofgraphs_get_champion_role_stats($championId, $role, $elo);
+
+        if ($roleStats !== null) {
+            $stats[$championId][$role] = $roleStats;
+        }
+    }
+
+    error_log('LeagueOfGraphs: Total unique champion stats extracted: ' . count($stats));
+
+    return $stats;
+}
+
+function leagueofgraphs_get_champion_role_stats(int $championId, string $role, string $elo): ?array
+{
+    $champion = riot_get_champion_by_id($championId);
+    if (!$champion) {
+        return null;
+    }
+
+    $slug = leagueofgraphs_get_champion_slug($champion);
+    if ($slug === null) {
+        error_log("LeagueOfGraphs: No slug found for champion ID {$championId} ({$champion['name']}).");
+        return null;
+    }
+
+    $rolePaths = [
+        'Top' => ['top'],
+        'Jungle' => ['jungle'],
+        'Mid' => ['middle', 'mid'],
+        'ADC' => ['adc', 'bottom'],
+        'Supp' => ['support', 'supp'],
+    ];
+
+    $rankPaths = [
+        'emerald_plus' => ['emerald', 'diamond', 'master'],
+        'diamond_plus' => ['diamond', 'master'],
+        'master_plus' => ['master'],
+    ];
+
+    $rolesToTry = $rolePaths[$role] ?? [strtolower($role)];
+    $ranksToTry = $rankPaths[$elo] ?? ['emerald', 'diamond', 'master'];
+    $ranksToTry[] = null;
+
+    foreach ($rolesToTry as $rolePath) {
+        foreach ($ranksToTry as $rankPath) {
+            $cachedStats = leagueofgraphs_get_cached_role_stats($slug, $rolePath, $rankPath);
+            if ($cachedStats !== null) {
+                return $cachedStats;
+            }
+
+            $url = "https://www.leagueofgraphs.com/champions/tier-list/{$slug}/{$rolePath}";
+            if ($rankPath !== null) {
+                $url .= "/{$rankPath}";
+            }
+
+            $html = leagueofgraphs_fetch_html($url);
+            if ($html === null) {
+                continue;
+            }
+
+            $winrate = leagueofgraphs_extract_winrate($html);
+            if ($winrate === null) {
+                continue;
+            }
+
+            $stats = [
+                'winrate' => round($winrate, 2),
+                'tier' => calculate_tier($winrate),
+                'role_percent' => 100.0,
+            ];
+
+            leagueofgraphs_store_cached_role_stats($slug, $rolePath, $rankPath, $stats);
+
+            return $stats;
+        }
+    }
+
+    return null;
+}
+
+function leagueofgraphs_get_champion_slug(array $champion): ?string
+{
+    static $slugMap = null;
+
+    if ($slugMap === null) {
+        $slugMap = leagueofgraphs_get_champion_slug_map();
+    }
+
+    $normalizedName = leagueofgraphs_normalize_name($champion['name'] ?? '');
+    if ($normalizedName !== '' && isset($slugMap[$normalizedName])) {
+        return $slugMap[$normalizedName];
+    }
+
+    $normalizedKey = leagueofgraphs_normalize_name($champion['key'] ?? '');
+    if ($normalizedKey !== '' && isset($slugMap[$normalizedKey])) {
+        return $slugMap[$normalizedKey];
+    }
+
+    return null;
+}
+
+function leagueofgraphs_get_champion_slug_map(): array
+{
+    $cacheFile = sys_get_temp_dir() . '/leagueofgraphs_slug_map.json';
+
+    if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < 86400) {
+        $cached = json_decode((string)file_get_contents($cacheFile), true);
+        if (is_array($cached) && !empty($cached)) {
+            return $cached;
+        }
+    }
+
+    $html = leagueofgraphs_fetch_html('https://www.leagueofgraphs.com/champions/stats');
+    if ($html === null) {
+        return [];
+    }
+
+    $map = [];
+    $dom = new DOMDocument();
+    libxml_use_internal_errors(true);
+    @$dom->loadHTML($html);
+    $xpath = new DOMXPath($dom);
+
+    foreach ($xpath->query('//li[@data-name]') as $item) {
+        $name = (string)$item->getAttribute('data-name');
+        if ($name === '') {
+            continue;
+        }
+
+        $link = $xpath->query('.//a[starts-with(@href, "/champions/stats/")]', $item)->item(0);
+        if (!$link instanceof DOMElement) {
+            continue;
+        }
+
+        $href = (string)$link->getAttribute('href');
+        if (!preg_match('~^/champions/stats/([^/?#]+)$~', $href, $match)) {
+            continue;
+        }
+
+        $normalized = leagueofgraphs_normalize_name($name);
+        $slug = strtolower(trim($match[1]));
+
+        if ($normalized !== '' && $slug !== '') {
+            $map[$normalized] = $slug;
+        }
+    }
+
+    if (!empty($map)) {
+        file_put_contents($cacheFile, json_encode($map));
+    }
+
+    return $map;
+}
+
+function leagueofgraphs_fetch_html(string $url): ?string
+{
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT => 15,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTPHEADER => [
+            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
+            'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+            'Accept-Language: en-US,en;q=0.9',
+        ],
+    ]);
+
+    $html = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+    $error = curl_error($ch);
+    curl_close($ch);
+
+    if ($html === false || $httpCode !== 200 || empty($html)) {
+        error_log("LeagueOfGraphs: Fetch failed for {$url} (HTTP {$httpCode}) {$error}");
+        return null;
+    }
+
+    return $html;
+}
+
+function leagueofgraphs_extract_winrate(string $html): ?float
+{
+    if (preg_match('#id="graphDD2"[^>]*>\s*([0-9]+(?:\.[0-9]+)?)%\s*</div>\s*<div[^>]*>\s*Winrate\s*</div>#si', $html, $matches)) {
+        return (float)$matches[1];
+    }
+
+    if (preg_match('#id="graphDD2"[^>]*>\s*([0-9]+(?:\.[0-9]+)?)%\s*</div>#si', $html, $matches)) {
+        return (float)$matches[1];
+    }
+
+    return null;
+}
+
+function leagueofgraphs_get_cached_role_stats(string $slug, string $rolePath, ?string $rankPath): ?array
+{
+    $cacheFile = leagueofgraphs_get_role_cache_file($slug, $rolePath, $rankPath);
+    if (!file_exists($cacheFile)) {
+        return null;
+    }
+
+    $cached = json_decode((string)file_get_contents($cacheFile), true);
+    if (!is_array($cached) || !isset($cached['stats']) || !is_array($cached['stats'])) {
+        return null;
+    }
+
+    $maxAge = 21600;
+    if ((time() - filemtime($cacheFile)) > $maxAge) {
+        return $cached['stats'] ?: null;
+    }
+
+    return $cached['stats'];
+}
+
+function leagueofgraphs_store_cached_role_stats(string $slug, string $rolePath, ?string $rankPath, array $stats): void
+{
+    $cacheFile = leagueofgraphs_get_role_cache_file($slug, $rolePath, $rankPath);
+    file_put_contents($cacheFile, json_encode([
+        'cached_at' => time(),
+        'stats' => $stats,
+    ]));
+}
+
+function leagueofgraphs_get_role_cache_file(string $slug, string $rolePath, ?string $rankPath): string
+{
+    $rankSegment = $rankPath ?? 'default';
+    $cacheKey = md5($slug . '_' . $rolePath . '_' . $rankSegment);
+    return sys_get_temp_dir() . "/leagueofgraphs_stats_{$cacheKey}.json";
+}
+
+function leagueofgraphs_normalize_name(string $value): string
+{
+    $value = html_entity_decode($value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    $value = preg_replace('/[^a-zA-Z0-9]/', '', $value) ?? '';
+    return strtolower($value);
+}
+
+/**
  * MetaSrc JSON API als Fallback
  * (Manchmal haben sie eine interne API die man finden kann)
  */

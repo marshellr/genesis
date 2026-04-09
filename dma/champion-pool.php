@@ -112,8 +112,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 //------------------------------------------------
 // Daten laden
 //------------------------------------------------
-$championStats = metasrc_get_champion_stats($selectedElo);
 $championPools = db_get_champion_pools();
+$championStats = metasrc_get_champion_stats($selectedElo);
+if (empty($championStats) && !empty($championPools)) {
+    error_log("Champion Pool: MetaSrc returned no stats, switching to LeagueOfGraphs fallback.");
+    $championStats = leagueofgraphs_get_champion_stats_for_pools($championPools, $selectedElo);
+}
 $allChampions = db_get_all_champions();
 
 // Gruppiere nach Role
