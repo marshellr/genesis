@@ -255,7 +255,7 @@ require_once __DIR__.'/inc/header.php';
   <section class="context-panel">
     <div class="context-copy">
       <p class="context-eyebrow">Public Context</p>
-      <h2>DMA is a live statistics surface for a Prime League team environment.</h2>
+      <h1>DMA is a live statistics surface for a Prime League team environment.</h1>
       <p>
         This application aggregates match and role-based performance views across recorded games.
         It is both a usable stats tool and a platform case: a legacy PHP workload isolated behind its
@@ -264,23 +264,23 @@ require_once __DIR__.'/inc/header.php';
     </div>
     <div class="context-grid">
       <article>
-        <strong>Who it is for</strong>
+        <p class="context-card-title">Who it is for</p>
         <p>Players, staff, and reviewers who need role-based match summaries instead of raw match history.</p>
       </article>
       <article>
-        <strong>Data sources</strong>
+        <p class="context-card-title">Data sources</p>
         <p>Prime League scheduling data and Riot match data when sync credentials are configured.</p>
       </article>
       <article>
-        <strong>Key metrics</strong>
+        <p class="context-card-title">Key metrics</p>
         <p>KDA, kill participation, CS/min, vision score, and objective control by role and match.</p>
       </article>
       <article>
-        <strong>Update model</strong>
+        <p class="context-card-title">Update model</p>
         <p>Live syncs remain manual by design, while champion-pool stat caches are refreshed on a schedule for faster reads.</p>
       </article>
       <article>
-        <strong>Operational limit</strong>
+        <p class="context-card-title">Operational limit</p>
         <p>This is a focused team stats surface, not a public esports portal or a generalized data warehouse.</p>
       </article>
     </div>
@@ -298,7 +298,7 @@ require_once __DIR__.'/inc/header.php';
   <?php if (!empty($primeMatches)): ?>
   <section class="collapsible-section">
     <button class="collapsible-toggle" onclick="this.parentElement.classList.toggle('open')">
-      <h2>Prime League Spiele</h2>
+      <span class="collapsible-title">Prime League Spiele</span>
       <span class="toggle-icon"></span>
     </button>
     <div class="collapsible-content">
@@ -325,7 +325,7 @@ require_once __DIR__.'/inc/header.php';
 
 <section class="match-section">
   <div class="match-header">
-    <h2>Spieltag <?=$matchDay?> - vs <?=safe($opponent)?></h2>
+    <p class="match-title">Spieltag <?=$matchDay?> - vs <?=safe($opponent)?></p>
     <span class="result-badge"><?=safe($result)?:'—'?></span>
   </div>
 
@@ -370,7 +370,7 @@ require_once __DIR__.'/inc/header.php';
   
   <div class="game-block">
     <div class="game-header">
-      <h3>Game <?=$gameNum?></h3>
+      <p class="game-title">Game <?=$gameNum?></p>
       <span class="game-result <?=$won?'win':'loss'?>"><?=$won?'Win':'Loss'?></span>
     </div>
 

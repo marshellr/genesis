@@ -98,7 +98,7 @@ require_once __DIR__.'/inc/header.php';
 
 <main class="container" id="main-content">
   <div class="overall-winrate">
-    <h2>Gesamte Winrate (<?=safe((string)$totalGames)?> Spiele)</h2>
+    <h1>Gesamte Winrate (<?=safe((string)$totalGames)?> Spiele)</h1>
     <span class="stat-value"><?=safe((string)$overallWinrate)?>%</span>
     <div class="winrate-meta">
       <span class="meta-pill">Siege: <?=safe((string)$totalWins)?></span>

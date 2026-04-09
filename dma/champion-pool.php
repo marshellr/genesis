@@ -188,6 +188,15 @@ require_once __DIR__.'/inc/header.php';
 </div>
 
 <main class="container" id="main-content">
+  <section class="page-intro">
+    <p class="context-eyebrow">Champion Pool</p>
+    <h1>Manage the team champion pool with live role-based stat context.</h1>
+    <p>
+      This view is used to maintain role-specific champion lists and compare them against current
+      upstream winrate data. It is a focused operations view, not a general public stats page.
+    </p>
+  </section>
+
   <div class="pool-grid">
     <?php foreach(['Top', 'Jungle', 'Mid', 'ADC', 'Supp'] as $role): ?>
     <div class="role-column" data-role="<?=$role?>">

@@ -74,6 +74,7 @@ main.container {
     box-shadow: 0 18px 34px rgba(7, 13, 22, 0.35);
 }
 
+.context-copy h1,
 .context-copy h2 {
     margin: 0;
     font-size: 1.35rem;
@@ -107,8 +108,61 @@ main.container {
     background: rgba(10, 14, 19, 0.62);
 }
 
-.context-grid strong {
+.context-card-title {
     display: block;
+    margin: 0 0 0.5rem;
+    font-weight: 600;
+    color: var(--font-primary);
+}
+
+.page-intro {
+    max-width: 1200px;
+    margin: 0 auto 1.5rem;
+    padding: 1.3rem 1.4rem;
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    background: rgba(17, 24, 39, 0.72);
+    box-shadow: 0 14px 28px rgba(7, 13, 22, 0.32);
+}
+
+.page-intro h1 {
+    margin: 0;
+    font-size: 1.45rem;
+    line-height: 1.2;
+}
+
+.page-intro p:last-child {
+    margin: 0.9rem 0 0;
+    color: var(--font-secondary);
+}
+
+.collapsible-title,
+.match-title,
+.game-title {
+    margin: 0;
+    font-weight: 600;
+    color: var(--font-primary);
+}
+
+.collapsible-title {
+    font-size: 1.1rem;
+}
+
+.match-title {
+    font-size: 1.2rem;
+}
+
+.game-title {
+    font-size: 1.05rem;
+}
+
+.overall-winrate h1 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.overall-winrate h2 {
     margin-bottom: 0.5rem;
 }
 
@@ -381,12 +435,6 @@ select:focus, input[type="text"]:focus {
     border-bottom: 1px solid var(--border-color);
 }
 
-.match-header h2 {
-    margin: 0;
-    font-size: 1.2rem;
-    font-weight: 600;
-}
-
 .game-block {
     background: var(--background-primary);
     border-radius: 14px;
@@ -609,7 +657,6 @@ select:focus, input[type="text"]:focus {
     box-shadow: 0 18px 35px rgba(7, 12, 20, 0.45);
 }
 
-.overall-winrate h2 { margin: 0; font-size: 1.2rem; font-weight: 600; }
 .overall-winrate .stat-value { font-size: 2.4rem; font-weight: 700; color: var(--accent-blue); }
 .winrate-meta {
     display: flex;
