@@ -4,6 +4,9 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends libcurl4-openssl-dev libxml2-dev \
     && docker-php-ext-install mysqli curl dom \
     && a2enmod rewrite headers \
+    && printf 'ServerTokens Prod\nServerSignature Off\nTraceEnable Off\nHeader always unset X-Powered-By\n' > /etc/apache2/conf-available/hardening.conf \
+    && printf 'expose_php=Off\n' > /usr/local/etc/php/conf.d/hide-php.ini \
+    && a2enconf hardening \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /var/www/html
