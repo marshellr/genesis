@@ -6,6 +6,8 @@
   <title>Lessons Learned | shellr docs</title>
   <meta name="description" content="Lessons learned from running the shellr platform on a single VM, with trade-offs around routing, retention, CI/CD, and documentation.">
   <link rel="canonical" href="https://docs.shellr.net/lessons.html">
+  <link rel="icon" type="image/png" href="./favi.png">
+  <link rel="apple-touch-icon" href="./favi.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
@@ -19,6 +21,7 @@
       <nav class="site-nav" aria-label="Main">
         <a href="./index.html" data-page="home">Home</a>
         <a href="./projects.html" data-page="projects">Projects</a>
+        <a href="./case-studies.html" data-page="case-studies">Cases</a>
         <a href="./architecture.html" data-page="architecture">Architecture</a>
         <a href="./deployment-flow.html" data-page="deployment-flow">Deploy</a>
         <a href="./monitoring.html" data-page="monitoring">Monitoring</a>
@@ -56,6 +59,31 @@
           <article>
             <h3>Documentation is operational work</h3>
             <p>Runbooks, routing maps, and rollback notes reduce ambiguity later. Documentation is not extra polish once the platform is live.</p>
+          </article>
+        </div>
+      </article>
+
+      <article class="doc-panel">
+        <p class="eyebrow">Incident Patterns</p>
+        <h2>Failures that changed the platform shape.</h2>
+        <div class="incident-grid">
+          <article class="incident-card">
+            <h3>Frontend content hidden by reveal styling</h3>
+            <p><strong>Trigger:</strong> the public landing page loaded with animation-dependent visibility rules while the intended JS path was not guaranteed.</p>
+            <p><strong>What changed:</strong> visibility now defaults to readable content, and animation only enhances the page when the JS path actually succeeds.</p>
+            <p><strong>Why it matters:</strong> the public surface should degrade gracefully instead of treating presentation logic as a hard dependency.</p>
+          </article>
+          <article class="incident-card">
+            <h3>Operational tools need a public-friendly entrypoint</h3>
+            <p><strong>Trigger:</strong> a raw tool surface is fine for an operator, but weak for visitors, previews, and no-JS scenarios.</p>
+            <p><strong>What changed:</strong> `status.shellr.net` now has a static public entry page before the deeper Kuma interface.</p>
+            <p><strong>Why it matters:</strong> operational proof is stronger when the public layer stays readable under reduced client capability.</p>
+          </article>
+          <article class="incident-card">
+            <h3>Production proof has to be translated, not just implemented</h3>
+            <p><strong>Trigger:</strong> real routing, monitoring, and backup existed, but the public documentation and landing pages initially exposed too much internal jargon.</p>
+            <p><strong>What changed:</strong> the platform now surfaces guided entry points, case studies, and clearer reviewer-facing language.</p>
+            <p><strong>Why it matters:</strong> technical substance only becomes a trust signal when visitors can decode it quickly.</p>
           </article>
         </div>
       </article>

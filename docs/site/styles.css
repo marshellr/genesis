@@ -279,6 +279,56 @@ h1 {
   gap: 20px;
 }
 
+.case-study-grid {
+  display: grid;
+  gap: 18px;
+}
+
+.case-study {
+  padding: 22px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.case-study header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.case-study-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.case-study-meta span {
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.56);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.incident-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.incident-card {
+  padding: 20px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.42);
+}
+
+.incident-card h3 {
+  margin-bottom: 10px;
+}
+
 .button-row {
   display: flex;
   flex-wrap: wrap;
