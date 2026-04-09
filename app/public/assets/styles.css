@@ -36,6 +36,12 @@ body {
     linear-gradient(180deg, #040506 0%, #07090a 38%, #0c1113 100%);
 }
 
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
 a {
   color: inherit;
 }
@@ -926,6 +932,7 @@ main,
   .site-header {
     flex-direction: column;
     align-items: flex-start;
+    padding: 20px 0 8px;
   }
 
   .legal-header {
@@ -934,12 +941,17 @@ main,
   }
 
   .brand {
-    flex-direction: column;
+    flex-direction: row;
     align-items: flex-start;
+    width: 100%;
   }
 
   .brand-lockup img {
     height: 30px;
+  }
+
+  .brand-caption {
+    display: none;
   }
 
   .hero-copy,
@@ -970,10 +982,24 @@ main,
 
   .site-nav {
     width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
   }
 
   .site-nav a {
-    padding-left: 0;
+    padding: 10px 12px;
+    text-align: center;
+    border-color: var(--line);
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .hero-actions {
+    flex-direction: column;
+  }
+
+  .hero-actions .button {
+    width: 100%;
   }
 
   .logo-card {
@@ -987,5 +1013,27 @@ main,
   .site-footer-row {
     flex-direction: column;
     align-items: flex-start;
+  }
+}
+
+@media (max-width: 520px) {
+  .site-header,
+  main,
+  .site-footer,
+  .legal-shell {
+    width: min(100% - 20px, 1220px);
+  }
+
+  .site-nav {
+    grid-template-columns: 1fr;
+  }
+
+  .section {
+    padding-top: 56px;
+  }
+
+  .hero {
+    gap: 18px;
+    padding-top: 28px;
   }
 }

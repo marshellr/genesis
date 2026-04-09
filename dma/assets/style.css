@@ -24,6 +24,12 @@ body {
     min-height: 100vh;
 }
 
+img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
 a:focus-visible,
 button:focus-visible,
 select:focus-visible,
@@ -851,9 +857,47 @@ select:focus, input[type="text"]:focus {
     .brand-link { gap: 0.6rem; }
     .site-logo { width: 38px; height: 38px; }
     .brand-title { font-size: 1.25rem; }
+    .main-nav {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .nav-btn {
+        text-align: center;
+        padding: 0.75rem 0.55rem;
+    }
     .container { padding: 0 1.25rem 2rem; }
     main.container { margin-top: 1.75rem; }
     .context-panel { padding: 1.1rem; }
+    .context-grid { grid-template-columns: 1fr; }
     .sync-area { max-width: 100%; padding: 1rem; }
+    .controls-container {
+        padding: 0 1.25rem;
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .filter-label {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .match-header,
+    .game-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
     .pool-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 560px) {
+    .main-nav {
+        grid-template-columns: 1fr;
+    }
+
+    .sync-area form {
+        flex-basis: 100%;
+    }
+
+    .stats-table table {
+        min-width: 640px;
+    }
 }

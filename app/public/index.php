@@ -300,7 +300,7 @@ function host_label(string $url): string
   <header class="site-header">
     <a class="brand" href="/" aria-label="shellr home">
       <span class="brand-lockup">
-        <img src="/assets/logo.png" alt="shellr" width="188" height="72">
+        <img src="/assets/logo-small.png" srcset="/assets/logo-small.png 160w, /assets/logo.png 320w" sizes="(max-width: 720px) 120px, 160px" alt="shellr" width="160" height="155" decoding="async">
       </span>
       <span class="brand-caption">platform frontdoor</span>
     </a>
@@ -339,7 +339,7 @@ function host_label(string $url): string
       <aside class="hero-panel" data-reveal>
         <div class="logo-panel">
           <div class="logo-card">
-            <img src="/assets/logo.png" alt="shellr wordmark" width="260" height="102">
+            <img src="/assets/logo.png" srcset="/assets/logo-small.png 160w, /assets/logo.png 320w" sizes="(max-width: 720px) 220px, 320px" alt="shellr wordmark" width="320" height="311" decoding="async">
           </div>
           <div class="logo-copy">
             <span>identity</span>

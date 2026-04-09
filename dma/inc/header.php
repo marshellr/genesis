@@ -11,7 +11,7 @@ $bodyAttrString = $bodyAttributes !== '' ? ' '.$bodyAttributes : '';
 <title><?=safe($pageTitle)?></title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
-<link rel="icon" href="assets/favicon.png" type="image/x-icon">
+<link rel="icon" href="assets/favicon.png" type="image/png">
 </head>
 <body<?=$bodyAttrString?>>
 <a class="skip-link" href="#main-content">Skip to content</a>
@@ -21,7 +21,7 @@ $bodyAttrString = $bodyAttributes !== '' ? ' '.$bodyAttributes : '';
     <div class="brand">
       <a href="index.php" class="brand-link">
         <img src="assets/logo.png" alt="Prime League Stats Logo" class="site-logo">
-        <h1 class="brand-title">DMA Stat Sheet</h1>
+        <span class="brand-title">DMA Stat Sheet</span>
       </a>
     </div>
     <nav class="main-nav">

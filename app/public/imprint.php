@@ -32,7 +32,7 @@ function e(string $value): string
   <header class="legal-header legal-shell">
     <a class="brand" href="/" aria-label="shellr home">
       <span class="brand-lockup">
-        <img src="/assets/logo.png" alt="shellr" width="188" height="72">
+        <img src="/assets/logo-small.png" srcset="/assets/logo-small.png 160w, /assets/logo.png 320w" sizes="(max-width: 720px) 120px, 160px" alt="shellr" width="160" height="155" decoding="async">
       </span>
       <span class="brand-caption">legal</span>
     </a>
