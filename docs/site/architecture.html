@@ -39,7 +39,7 @@
       </nav>
       <article class="doc-panel">
         <p class="eyebrow">Architecture</p>
-        <h2>Single host, explicit surfaces.</h2>
+        <h1>Single host, explicit surfaces.</h1>
         <p>
           The core design choice is not to hide complexity behind orchestration layers that the host size does not justify.
           Containers are used for isolation and deployability, while networking and runtime boundaries stay inspectable.
@@ -76,7 +76,7 @@ flowchart TD
         <p class="eyebrow">Operational Boundaries</p>
         <h2>Public, private, and failure-sensitive paths.</h2>
         <ul class="plain-list">
-          <li><strong>Public surfaces:</strong> `shellr.net`, `dma.shellr.net`, `status.shellr.net`, and protected `grafana.shellr.net` terminate at Nginx.</li>
+          <li><strong>Public surfaces:</strong> <code>shellr.net</code>, <code>dma.shellr.net</code>, <code>status.shellr.net</code>, and protected <code>grafana.shellr.net</code> terminate at Nginx.</li>
           <li><strong>Private paths:</strong> MariaDB, Prometheus, and internal service traffic stay on Docker networks and are not exposed on the host.</li>
           <li><strong>Failure model:</strong> a broken app container should not collapse the rest of the platform, and docs remain outside the production VM on GitHub Pages.</li>
           <li><strong>Review model:</strong> each hostname maps to a clear runtime responsibility, which keeps routing and incident analysis simpler.</li>

@@ -1,14 +1,16 @@
 <?php
-$pageTitle = $pageTitle ?? 'Prime League Stats';
+$pageTitle = $pageTitle ?? 'DMA Stat Sheet';
+$pageDescription = $pageDescription ?? 'Live team statistics and match review workspace for DMA.';
 $bodyAttributes = isset($bodyAttributes) ? trim((string)$bodyAttributes) : '';
 $bodyAttrString = $bodyAttributes !== '' ? ' '.$bodyAttributes : '';
 ?>
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><?=safe($pageTitle)?></title>
+<meta name="description" content="<?=safe($pageDescription)?>">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
 <link rel="icon" href="assets/favicon.png" type="image/png">

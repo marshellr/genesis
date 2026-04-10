@@ -40,10 +40,10 @@ $startHere = [
         'label' => 'Open status',
     ],
     [
-        'title' => 'Browse Source and Notes',
-        'body' => 'Inspect repository structure, live documentation, and the decisions behind the current platform shape.',
-        'href' => $site['github_url'] !== '' ? $site['github_url'] : 'https://github.com/marshellr/genesis',
-        'label' => 'Open GitHub',
+        'title' => 'Read Case Studies',
+        'body' => 'See concrete platform decisions with constraints, trade-offs, failure modes, and operational outcomes.',
+        'href' => $site['docs_url'] . '/case-studies.html',
+        'label' => 'Read case studies',
     ],
 ];
 
@@ -220,6 +220,11 @@ $liveLinks = [
         'meta' => 'Architecture, deployment flow, monitoring, logging, and backup design.',
     ],
     [
+        'label' => 'Read Case Studies',
+        'href' => $site['docs_url'] . '/case-studies.html',
+        'meta' => 'Concrete decisions, constraints, and operator-facing trade-offs across the platform.',
+    ],
+    [
         'label' => 'View Live Systems',
         'href' => $site['dma_url'],
         'meta' => 'DMA as a live workload running inside the platform.',
@@ -235,14 +240,6 @@ $liveLinks = [
         'meta' => 'Repository, technical source material, and project structure.',
     ],
 ];
-
-if ($site['grafana_url'] !== '') {
-    $liveLinks[] = [
-        'label' => 'Grafana',
-        'href' => $site['grafana_url'],
-        'meta' => 'Protected operational metrics and logging access for the platform.',
-    ];
-}
 
 function e(string $value): string
 {
@@ -308,8 +305,8 @@ function host_label(string $url): string
       <a href="#profile">Profile</a>
       <a href="#projects">Projects</a>
       <a href="#platform">Platform</a>
+      <a href="https://docs.shellr.net">Docs</a>
       <a href="#links">Live Links</a>
-      <a href="/imprint.php">Imprint</a>
     </nav>
   </header>
 
@@ -319,9 +316,9 @@ function host_label(string $url): string
         <p class="eyebrow">Marlin Scheler &middot; Junior DevOps / System Engineer</p>
         <h1>Build systems that can actually be operated.</h1>
         <p class="hero-summary">
-          I build and operate small Linux-based web platforms with deployment, monitoring, backup,
-          and recovery designed in from day one. shellr.net is a live operating environment with
-          public services, internal observability, and documented operational constraints.
+          I build and operate Linux-based web platforms that stay deployable, observable, and recoverable.
+          shellr.net is not a static portfolio mock-up. It is the frontdoor of a live single-VM platform
+          with public services, protected operations tooling, and written runbooks.
         </p>
 
         <ul class="outcome-list">

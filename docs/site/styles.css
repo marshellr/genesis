@@ -138,6 +138,12 @@ h1 {
   line-height: 0.94;
 }
 
+.doc-panel h1 {
+  max-width: none;
+  font-size: 1.8rem;
+  line-height: 1.1;
+}
+
 .hero p:last-child,
 .doc-panel p,
 .doc-panel li,

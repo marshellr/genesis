@@ -24,6 +24,10 @@ body {
     min-height: 100vh;
 }
 
+a {
+    color: inherit;
+}
+
 img {
     display: block;
     max-width: 100%;
@@ -260,6 +264,42 @@ header {
     color: white;
     font-weight: 600;
     box-shadow: 0 10px 18px rgba(37, 99, 235, 0.35);
+}
+
+.site-footer {
+    margin-top: 3rem;
+    border-top: 1px solid var(--border-color);
+    background: rgba(17, 24, 39, 0.82);
+}
+
+.footer-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1.1rem 2rem 1.4rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.footer-content p {
+    margin: 0;
+    color: var(--font-secondary);
+}
+
+.footer-nav {
+    display: flex;
+    gap: 0.9rem;
+    flex-wrap: wrap;
+}
+
+.footer-nav a {
+    color: var(--font-secondary);
+    text-decoration: none;
+}
+
+.footer-nav a:hover {
+    color: var(--font-primary);
 }
 
 /* --- Buttons & Formulare --- */
@@ -886,6 +926,7 @@ select:focus, input[type="text"]:focus {
         align-items: flex-start;
     }
     .pool-grid { grid-template-columns: 1fr; }
+    .footer-content { padding: 1rem 1.25rem 1.3rem; }
 }
 
 @media (max-width: 560px) {
