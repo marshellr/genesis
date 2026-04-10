@@ -39,7 +39,7 @@ rsync -av --delete \
   "$SOURCE_DIR"/ \
   "$TARGET_REPO_DIR"/
 
-if git -C "$TARGET_REPO_DIR" diff --quiet && git -C "$TARGET_REPO_DIR" diff --cached --quiet; then
+if [[ -z "$(git -C "$TARGET_REPO_DIR" status --porcelain)" ]]; then
   echo "Keine Aenderungen fuer docs.shellr.net"
   exit 0
 fi
