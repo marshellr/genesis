@@ -292,11 +292,11 @@ require_once __DIR__ . '/inc/header.php';
   <section class="context-panel">
     <div class="context-copy">
       <p class="context-eyebrow">Public Context</p>
-      <h1>DMA is a live statistics surface for a Prime League team environment.</h1>
+      <h1>DMA is a live statistics surface for a Prime League roster.</h1>
       <p>
         This application aggregates match and role-based performance views across recorded games.
-        It is both a usable stats tool and a platform case: a legacy PHP workload isolated behind its
-        own subdomain, runtime boundary, health model, and database scope.
+        It is both a usable stats tool and a platform case: a legacy PHP workload running on its
+        own subdomain, in its own service container, with monitored health checks and isolated database scope.
       </p>
     </div>
     <div class="context-grid">

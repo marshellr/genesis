@@ -21,23 +21,23 @@
       <nav class="site-nav" aria-label="Main">
         <a href="./index.html" data-page="home">Home</a>
         <a href="./projects.html" data-page="projects">Projects</a>
-        <a href="./case-studies.html" data-page="case-studies">Cases</a>
+        <a href="./case-studies.html" data-page="case-studies">Case Studies</a>
         <a href="./architecture.html" data-page="architecture">Architecture</a>
-        <a href="./deployment-flow.html" data-page="deployment-flow">Deploy</a>
+        <a href="./deployment-flow.html" data-page="deployment-flow">Deployment</a>
         <a href="./monitoring.html" data-page="monitoring">Monitoring</a>
         <a href="./logging.html" data-page="logging">Logging</a>
         <a href="./backup.html" data-page="backup">Backup</a>
         <a href="./lessons.html" data-page="lessons">Lessons</a>
-        <a href="./accessibility.html" data-page="accessibility">A11y</a>
+        <a href="./accessibility.html" data-page="accessibility">Accessibility</a>
       </nav>
     </header>
 
     <section class="hero">
       <p class="eyebrow">Technical Documentation</p>
-      <h1>Operational documentation for the platform behind shellr.net.</h1>
+      <h1>Operational documentation for the live platform behind shellr.net.</h1>
       <p class="hero-summary">
         This site documents the live platform behind <code>shellr.net</code> from an operations perspective:
-        runtime boundaries, routing, deployment, monitoring, logging, backup, and recovery on a single
+        service boundaries, routing, deployment, monitoring, logging, backup, and recovery on a single
         Hetzner VM. The goal is not tool hype. The goal is a system that stays understandable when it changes,
         fails, or has to be handed over.
       </p>
@@ -77,10 +77,10 @@
       <section class="content">
         <article class="doc-panel">
           <p class="eyebrow">Platform Summary</p>
-          <h2>Hostnames and runtime boundaries</h2>
+          <h2>Hostnames and service boundaries</h2>
           <div class="callout">
             <strong>Why this matters</strong>
-            Each public hostname maps to a deliberate runtime surface. That separation makes the platform easier to
+            Each public hostname maps to one service boundary. That separation makes the platform easier to
             deploy, monitor, secure, and explain under review.
           </div>
           <table>
@@ -129,7 +129,7 @@
           </article>
           <article>
             <h3>Case studies</h3>
-            <p>Walk through concrete platform decisions with problem, constraints, approach, and operational outcome.</p>
+            <p>Walk through concrete platform decisions with problem, constraints, implementation, and operational outcome.</p>
             <a href="./case-studies.html">Read case studies</a>
           </article>
           <article>
@@ -139,7 +139,7 @@
           </article>
           <article>
             <h3>Architecture</h3>
-            <p>Topology, routing, public vs. private surfaces, and why the platform remains intentionally single-host.</p>
+            <p>Routing, service boundaries, public vs. private surfaces, and why the platform remains intentionally single-host.</p>
             <a href="./architecture.html">Review architecture</a>
           </article>
           <article>

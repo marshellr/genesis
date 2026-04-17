@@ -173,6 +173,8 @@ $docsIncludes = [
     'Backup and restore strategy',
 ];
 
+$githubUrl = $site['github_url'] !== '' ? $site['github_url'] : 'https://github.com/marshellr/genesis';
+
 function e(string $value): string
 {
     return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
@@ -367,13 +369,13 @@ function e(string $value): string
             <strong>one ingress layer, containerized services, monitored operations</strong>
           </div>
           <pre>Internet
-   ↓
+   |
 Nginx (Ingress)
-   ↓
+   |
 Docker Services (App / Monitoring)
-   ↓
+   |
 Metrics + Logs (Prometheus / Grafana)
-   ↓
+   |
 Backup System</pre>
         </div>
       </div>
@@ -429,6 +431,7 @@ Backup System</pre>
           <a class="button primary" href="<?= e($site['docs_url']) ?>">Read Documentation</a>
           <a class="button secondary" href="<?= e($site['docs_url'] . '/architecture.html') ?>">View Architecture</a>
           <a class="button secondary" href="<?= e($site['status_url']) ?>">Open Status</a>
+          <a class="button secondary" href="<?= e($githubUrl) ?>">Open Repository</a>
         </div>
       </div>
     </section>

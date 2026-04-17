@@ -29,7 +29,7 @@ $bodyAttrString = $bodyAttributes !== '' ? ' '.$bodyAttributes : '';
     <nav class="main-nav">
       <a href="index.php" class="nav-btn <?= ($activePage === 'dashboard') ? 'active' : '' ?>">Dashboard</a>
       <a href="champion-pool.php" class="nav-btn <?= ($activePage === 'champion-pool') ? 'active' : '' ?>">Champion Pool</a>
-      <a href="overall-stats.php" class="nav-btn <?= ($activePage === 'overall-stats') ? 'active' : '' ?>">Alltime Stats</a>
+      <a href="overall-stats.php" class="nav-btn <?= ($activePage === 'overall-stats') ? 'active' : '' ?>">All-Time Stats</a>
     </nav>
   </div>
 </header>

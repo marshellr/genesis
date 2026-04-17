@@ -21,14 +21,14 @@
       <nav class="site-nav" aria-label="Main">
         <a href="./index.html" data-page="home">Home</a>
         <a href="./projects.html" data-page="projects">Projects</a>
-        <a href="./case-studies.html" data-page="case-studies">Cases</a>
+        <a href="./case-studies.html" data-page="case-studies">Case Studies</a>
         <a href="./architecture.html" data-page="architecture">Architecture</a>
-        <a href="./deployment-flow.html" data-page="deployment-flow">Deploy</a>
+        <a href="./deployment-flow.html" data-page="deployment-flow">Deployment</a>
         <a href="./monitoring.html" data-page="monitoring">Monitoring</a>
         <a href="./logging.html" data-page="logging">Logging</a>
         <a href="./backup.html" data-page="backup">Backup</a>
         <a href="./lessons.html" data-page="lessons">Lessons</a>
-        <a href="./accessibility.html" data-page="accessibility">A11y</a>
+        <a href="./accessibility.html" data-page="accessibility">Accessibility</a>
       </nav>
     </header>
     <main class="content" id="main-content">
@@ -44,11 +44,11 @@
         <p>
           These case studies describe the platform as an operating system, not as a design exercise.
           Each one focuses on a real problem, the constraints on a small single-VM host, the technical
-          choice that was made, and the operational outcome.
+          implementation choice that was made, and the operational outcome.
         </p>
         <div class="meta-strip">
           <span>Last reviewed: April 2026</span>
-          <span>Format: problem, constraints, approach, outcome</span>
+          <span>Format: problem, constraints, implementation, outcome</span>
         </div>
       </article>
 
@@ -67,7 +67,7 @@
           </header>
           <p><strong>Problem:</strong> A portfolio landing page can look polished and still say very little about whether the operator understands delivery, failure handling, or runtime separation.</p>
           <p><strong>Constraints:</strong> One VM, limited disk, no orchestration layer, and no room for decorative infrastructure.</p>
-          <p><strong>Approach:</strong> The main site became the public frontdoor of a live platform with links to architecture, status, source, and running services instead of staying a static self-description.</p>
+          <p><strong>Implementation:</strong> The main site became the public frontdoor of a live platform with links to architecture, status, source, and running services instead of staying a static self-description.</p>
           <p><strong>Outcome:</strong> Reviewers can move from positioning to proof: architecture, deployment flow, live status, and repository structure are all visible from the first layer.</p>
         </article>
 
@@ -85,7 +85,7 @@
           </header>
           <p><strong>Problem:</strong> Legacy PHP workloads become operational blind spots when they are embedded into a wider site without clear boundaries.</p>
           <p><strong>Constraints:</strong> Existing codebase, existing data model, and a need to preserve usefulness while improving runtime clarity.</p>
-          <p><strong>Approach:</strong> DMA was moved behind its own subdomain, container, cookie scope, database boundary, and health behavior instead of being treated as a path-level add-on.</p>
+          <p><strong>Implementation:</strong> DMA was moved behind its own subdomain, container, cookie scope, database boundary, and health behavior instead of being treated as a path-level add-on.</p>
           <p><strong>Outcome:</strong> The application is easier to route, test, monitor, and reason about, while still remaining usable as a live statistics tool.</p>
         </article>
 
@@ -103,7 +103,7 @@
           </header>
           <p><strong>Problem:</strong> Small hosts still need visibility, but full observability stacks quickly become disproportionate in memory, disk, and maintenance effort.</p>
           <p><strong>Constraints:</strong> 8 GB RAM, 40 GB disk, and a goal of staying understandable for one operator path.</p>
-          <p><strong>Approach:</strong> Prometheus, Grafana, Uptime Kuma, cAdvisor, Loki, and Promtail were kept on intentionally short retention and bounded storage instead of aiming for long-term analytics.</p>
+          <p><strong>Implementation:</strong> Prometheus, Grafana, Uptime Kuma, cAdvisor, Loki, and Promtail were kept on intentionally short retention and bounded storage instead of aiming for long-term analytics.</p>
           <p><strong>Outcome:</strong> The platform stays observable enough for incidents and review without pretending to be a multi-team observability platform.</p>
         </article>
       </section>
