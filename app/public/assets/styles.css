@@ -257,6 +257,22 @@ main,
   font-size: 1.05rem;
 }
 
+.hero-note,
+.docs-note {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.hero-note-title {
+  margin: 0 0 12px;
+  color: var(--text);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.84rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .outcome-list {
   display: grid;
   gap: 10px;
@@ -282,6 +298,18 @@ main,
   border-radius: 999px;
   background: var(--accent);
   box-shadow: 0 0 0 4px rgba(128, 222, 108, 0.12);
+}
+
+.hero-guide-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+}
+
+.hero-guide-list li {
+  line-height: 1.6;
 }
 
 .hero-signal-row,

@@ -3,253 +3,179 @@ declare(strict_types=1);
 
 $site = require __DIR__ . '/../config/site.php';
 
+$heroHighlights = [
+    'Deployable through staged releases and health checks',
+    'Observable through metrics, logs, and uptime tracking',
+    'Recoverable through backups, restores, and rollback strategies',
+];
+
+$heroGuide = [
+    'Explore the architecture',
+    'View live system components',
+    'Review operational decisions and trade-offs',
+];
+
+$liveComponents = [
+    [
+        'title' => 'shellr.net',
+        'body' => 'Entry point and overview',
+        'href' => 'https://shellr.net',
+    ],
+    [
+        'title' => 'dma.shellr.net',
+        'body' => 'Application runtime',
+        'href' => $site['dma_url'],
+    ],
+    [
+        'title' => 'status.shellr.net',
+        'body' => 'Public uptime monitoring',
+        'href' => $site['status_url'],
+    ],
+    [
+        'title' => 'grafana.shellr.net',
+        'body' => 'Metrics and logs (restricted)',
+        'href' => '',
+    ],
+    [
+        'title' => 'docs.shellr.net',
+        'body' => 'Full technical documentation',
+        'href' => $site['docs_url'],
+    ],
+];
+
 $platformSnapshot = [
     ['title' => 'Host', 'body' => 'Single Hetzner VM with 4 vCPU, 8 GB RAM, and bounded disk usage.'],
-    ['title' => 'Runtime', 'body' => 'Service separation through Docker Compose instead of process sprawl on the host.'],
-    ['title' => 'Ingress', 'body' => 'Nginx handles hostname routing, HTTPS, redirects, and public surface boundaries.'],
-    ['title' => 'Delivery', 'body' => 'GitHub Actions builds staged releases and deploys over SSH with health-gated checks.'],
+    ['title' => 'Runtime', 'body' => 'Services run in separate containers instead of sharing one unmanaged host setup.'],
+    ['title' => 'Ingress', 'body' => 'Nginx handles HTTPS, redirects, and hostname-based routing for public services.'],
+    ['title' => 'Delivery', 'body' => 'GitHub Actions deploys staged releases over SSH and checks service health before completion.'],
     ['title' => 'Monitoring', 'body' => 'Prometheus, Grafana, Node Exporter, cAdvisor, and Uptime Kuma cover host and service visibility.'],
-    ['title' => 'Logging', 'body' => 'Loki and Promtail provide short-retention centralized logs without ELK overhead.'],
-    ['title' => 'Recovery', 'body' => 'Database dumps, project archives, and explicit restore scripts are part of the operating model.'],
-    ['title' => 'Docs', 'body' => 'Technical documentation is published through GitHub Pages, not served from the VM.'],
+    ['title' => 'Recovery', 'body' => 'Database dumps, project archives, and restore scripts are part of normal operations.'],
 ];
 
-$outcomes = [
-    'Deployable through staged SSH releases and health-gated checks.',
-    'Observable through metrics, logs, and a public uptime surface.',
-    'Recoverable through backups, restore scripts, and rollback-aware changes.',
+$operationalMetrics = [
+    ['title' => 'Public Surfaces', 'body' => '5 public hostnames routed through one ingress layer.'],
+    ['title' => 'Network Segments', 'body' => '3 Docker networks separating frontend, backend, and monitoring traffic.'],
+    ['title' => 'Backup Cadence', 'body' => 'Daily database and runtime backup jobs with defined retention.'],
+    ['title' => 'Monitoring Coverage', 'body' => 'Host, container, and application checks are included in the stack.'],
 ];
 
-$startHere = [
+$securityModel = [
     [
-        'title' => 'Open Architecture',
-        'body' => 'Start with the public surfaces, trust boundaries, and container responsibilities on the single host.',
-        'href' => $site['docs_url'] . '/architecture.html',
-        'label' => 'View architecture',
+        'title' => 'Ingress Control',
+        'points' => [
+            'TLS termination via Nginx (HTTPS only)',
+            'Redirect enforcement and hostname routing',
+            'Basic request filtering and rate limiting',
+        ],
     ],
     [
-        'title' => 'Review Deployment Flow',
-        'body' => 'See how releases are built, transferred, switched, and verified before a deployment is considered done.',
-        'href' => $site['docs_url'] . '/deployment-flow.html',
-        'label' => 'Open deployment flow',
+        'title' => 'Access Control',
+        'points' => [
+            'Grafana and internal tools behind authentication',
+            'No direct public exposure of internal services',
+        ],
     ],
     [
-        'title' => 'Check Live Status',
-        'body' => 'Use the public status surface to verify service health without needing internal access.',
-        'href' => $site['status_url'],
-        'label' => 'Open status',
+        'title' => 'Isolation',
+        'points' => [
+            'Service separation via Docker networks',
+            'Distinct boundaries between frontend, app, and monitoring',
+        ],
     ],
     [
-        'title' => 'Read Case Studies',
-        'body' => 'See concrete platform decisions with constraints, trade-offs, failure modes, and operational outcomes.',
-        'href' => $site['docs_url'] . '/case-studies.html',
-        'label' => 'Read case studies',
-    ],
-];
-
-$proofLinks = [
-    [
-        'title' => 'Architecture map',
-        'body' => 'Review hostnames, container boundaries, and public versus private surfaces first.',
-        'href' => $site['docs_url'] . '/architecture.html',
-        'label' => 'Open architecture',
-    ],
-    [
-        'title' => 'Deployment runbook',
-        'body' => 'See the real release path: staged files, health-gated checks, and rollback expectations.',
-        'href' => $site['docs_url'] . '/deployment-flow.html',
-        'label' => 'Open deployment flow',
-    ],
-    [
-        'title' => 'Monitoring and alerts',
-        'body' => 'Metrics, status checks, container visibility, alert rules, and responder-first dashboards.',
-        'href' => $site['docs_url'] . '/monitoring.html',
-        'label' => 'Open monitoring',
-    ],
-    [
-        'title' => 'Backup and restore',
-        'body' => 'Daily dumps, runtime snapshots, optional offsite sync, and explicit restore steps.',
-        'href' => $site['docs_url'] . '/backup.html',
-        'label' => 'Open backup strategy',
-    ],
-    [
-        'title' => 'Case studies',
-        'body' => 'Concrete platform trade-offs with constraints, failure modes, and operating outcomes.',
-        'href' => $site['docs_url'] . '/case-studies.html',
-        'label' => 'Read case studies',
-    ],
-    [
-        'title' => 'Live source of truth',
-        'body' => 'Repository structure, runtime files, and the same source tree that is deployed on the VM.',
-        'href' => $site['github_url'] !== '' ? $site['github_url'] : 'https://github.com/marshellr/genesis',
-        'label' => 'Open repository',
+        'title' => 'Recovery',
+        'points' => [
+            'Regular backups with defined retention',
+            'Restore scripts tested against real workloads',
+        ],
     ],
 ];
 
-$focusAreas = [
-    'Linux, containers, and web platforms with explicit operational boundaries',
-    'Deployment, healthchecks, and recovery instead of build-only thinking',
-    'Monitoring, logging, and documentation as part of the platform itself',
-    'Technical decisions that stay explainable on a single VM',
+$operationalFocus = [
+    'Incidents can be detected via metrics and uptime checks',
+    'Logs provide traceability across services',
+    'Deployments are gated by health checks',
+    'Recovery paths are defined and tested',
 ];
 
 $featuredProjects = [
     [
         'title' => 'Genesis / Self-Hosted Platform',
         'tag' => 'platform',
-        'lead' => 'The current platform layer built on top of private hosting experience and operational hardening.',
+        'lead' => 'Platform used to validate operational decisions under real conditions instead of theoretical setups.',
         'points' => [
-            'Runs the public entrypoints, application workloads, monitoring, logging, and backups on one Hetzner VM.',
-            'Combines subdomain-based routing, Compose-managed services, and documented rollback and restore paths.',
-            'Acts as the operational continuation of earlier private web hosting and migration work instead of being a disconnected demo.',
+            'Focus: Deployability',
+            'Focus: Observability',
+            'Focus: Recoverability',
         ],
         'stack' => ['Linux', 'Docker Compose', 'Nginx', 'GitHub Actions'],
-        'href' => $site['docs_url'],
-        'label' => 'Open platform docs',
+        'href' => $site['docs_url'] . '/case-studies.html',
+        'label' => 'Read case studies',
     ],
     [
         'title' => 'DMA Statistics Module',
-        'tag' => 'live project',
-        'lead' => 'An API-based dashboard for match and performance data, isolated as its own runtime surface.',
+        'tag' => 'live application',
+        'lead' => 'Simulates a stateful application to test deployment, monitoring, and recovery under realistic conditions.',
         'points' => [
-            'Collects, aggregates, and renders JSON-based match data from external sources as a PHP web application.',
-            'Runs under its own subdomain and container with separate database scope, healthchecks, and reviewable routing.',
-            'Turns a stats-heavy legacy workload into something that can be monitored and operated cleanly on the platform.',
+            'Includes: Database persistence',
+            'Includes: Application runtime isolation',
+            'Includes: Health-based monitoring and alerting',
         ],
-        'stack' => ['PHP', 'JavaScript', 'JSON APIs', 'MariaDB'],
+        'stack' => ['PHP', 'MariaDB', 'Health checks', 'Monitoring'],
         'href' => $site['dma_url'],
-        'label' => 'Open DMA live',
+        'label' => 'Open live system',
     ],
     [
         'title' => 'Automated Web Analytics with AWStats',
         'tag' => 'reporting',
-        'lead' => 'Static web analytics reports generated automatically from webserver logs.',
+        'lead' => 'Generates lightweight reporting from webserver logs without adding a heavy analytics stack.',
         'points' => [
-            'Processes access logs into structured reports that can be reviewed without live dashboard overhead.',
-            'Uses repeatable shell-based automation and scheduled generation instead of manual report builds.',
-            'Keeps web analytics lightweight enough for a small host and a small operational footprint.',
+            'Turns raw access logs into readable reports',
+            'Runs on a scheduled shell-based workflow',
+            'Fits the resource limits of a small single-host platform',
         ],
         'stack' => ['AWStats', 'Shell scripts', 'Cron', 'Reporting'],
         'href' => $site['docs_url'] . '/projects.html',
-        'label' => 'Open project overview',
+        'label' => 'Read project overview',
     ],
     [
-        'title' => 'Web Platform Migration & Hardening',
-        'tag' => 'migration',
-        'lead' => 'Taking over existing systems and making them safer to run.',
+        'title' => 'Web Platform Migration and Hardening',
+        'tag' => 'operations',
+        'lead' => 'Moves existing web workloads into a safer operating model with cleaner routing and tighter access control.',
         'points' => [
-            'Covers SSH hardening, firewalling, TLS cleanup, and reverse-proxy restructuring.',
-            'Focuses on controlled migration steps instead of risky one-shot rewrites.',
-            'Treats operational debt as something to be reduced deliberately, not ignored.',
+            'Improves SSH, TLS, firewalling, and reverse proxy structure',
+            'Reduces cross-impact between services',
+            'Turns inherited setups into supportable systems',
         ],
-        'stack' => ['Ubuntu', 'SSH', 'UFW', 'Fail2ban'],
+        'stack' => ['Ubuntu', 'SSH', 'UFW', 'Nginx'],
         'href' => $site['docs_url'] . '/architecture.html',
-        'label' => 'Open architecture',
+        'label' => 'View architecture',
     ],
     [
         'title' => 'Inventory Tracking Application',
-        'tag' => 'application',
-        'lead' => 'A compact CRUD workload used as an operational proving ground.',
+        'tag' => 'stateful application',
+        'lead' => 'Simulates a stateful application to test deployment, monitoring, and recovery under realistic conditions.',
         'points' => [
-            'Represents a realistic PHP and MariaDB application with healthchecks and persistent state.',
-            'Makes deployment, backup, and monitoring choices visible under simple but real workload conditions.',
-            'Works as a clean example of app-level behavior inside the wider platform model.',
+            'Includes: Database persistence',
+            'Includes: Application runtime isolation',
+            'Includes: Health-based monitoring and alerting',
         ],
-        'stack' => ['PHP', 'MariaDB', 'CRUD', 'Healthchecks'],
+        'stack' => ['PHP', 'MariaDB', 'CRUD', 'Health checks'],
         'href' => $site['docs_url'] . '/projects.html',
         'label' => 'Read project notes',
     ],
-    [
-        'title' => 'Private Web Projects / Hosting',
-        'tag' => 'operations',
-        'lead' => 'Multiple self-hosted websites operated on private Linux infrastructure.',
-        'points' => [
-            'Covers the setup, deployment, and maintenance of several web projects on self-managed servers.',
-            'Includes webserver configuration, HTTPS setup, and the day-to-day realities of keeping small sites reachable.',
-            'Forms the practical foundation that later evolved into the more structured Genesis platform.',
-        ],
-        'stack' => ['Linux', 'Apache', 'HTTPS', 'Self-hosting'],
-        'href' => $site['docs_url'] . '/projects.html',
-        'label' => 'Read hosting overview',
-    ],
-    [
-        'title' => 'Automated Vulnerability Management',
-        'tag' => 'planned project',
-        'lead' => 'A planned final project focused on automating vulnerability intake and triage.',
-        'points' => [
-            'Designed around the ENISA EUVD API and an asset inventory to identify actually relevant systems.',
-            'Focuses on reducing manual triage work through structured ingestion and automated matching.',
-            'Represents the next step from platform operations toward repeatable security operations.',
-        ],
-        'stack' => ['API integration', 'Asset inventory', 'Automation', 'Security ops'],
-        'href' => $site['docs_url'] . '/projects.html',
-        'label' => 'Read project outline',
-    ],
 ];
 
-$platformSlices = [
-    [
-        'title' => 'Ingress',
-        'body' => 'A central Nginx entrypoint handles host routing, HTTPS, redirects, and the separation of public surfaces.',
-    ],
-    [
-        'title' => 'Runtime',
-        'body' => 'The landing page, DMA, database, monitoring, and logging run in containers with clear responsibilities instead of becoming an unstructured host mix.',
-    ],
-    [
-        'title' => 'Observability',
-        'body' => 'Prometheus, Grafana, Uptime Kuma, Loki, Promtail, and cAdvisor provide host, service, and container visibility with bounded overhead.',
-    ],
-    [
-        'title' => 'Recovery',
-        'body' => 'Backups, restore scripts, and rollback-aware deployments are treated as part of the system, not as optional extras.',
-    ],
-];
-
-$workStyle = [
-    'Tools only matter when they improve the way a system is actually operated.',
-    'I prefer explicit boundaries and readable structures over hidden magic.',
-    'Monitoring, logging, and backup belong in the platform design, not as afterthoughts.',
-    'Operational decisions should still be understandable weeks later.',
-];
-
-$liveLinks = [
-    [
-        'label' => 'Explore Platform',
-        'href' => $site['docs_url'],
-        'meta' => 'Architecture, deployment flow, monitoring, logging, and backup design.',
-    ],
-    [
-        'label' => 'Read Case Studies',
-        'href' => $site['docs_url'] . '/case-studies.html',
-        'meta' => 'Concrete decisions, constraints, and operator-facing trade-offs across the platform.',
-    ],
-    [
-        'label' => 'View Live Systems',
-        'href' => $site['dma_url'],
-        'meta' => 'DMA as a live workload running inside the platform.',
-    ],
-    [
-        'label' => 'Check System Status',
-        'href' => $site['status_url'],
-        'meta' => 'Public uptime surface for the main services and health checks.',
-    ],
-    [
-        'label' => 'GitHub',
-        'href' => $site['github_url'] !== '' ? $site['github_url'] : 'https://github.com/marshellr/genesis',
-        'meta' => 'Repository, technical source material, and project structure.',
-    ],
+$docsIncludes = [
+    'Architecture',
+    'Deployment flow',
+    'Monitoring setup',
+    'Backup and restore strategy',
 ];
 
 function e(string $value): string
 {
     return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
-}
-
-function host_label(string $url): string
-{
-    $host = parse_url($url, PHP_URL_HOST);
-    return is_string($host) && $host !== '' ? $host : $url;
 }
 ?>
 <!DOCTYPE html>
@@ -258,7 +184,7 @@ function host_label(string $url): string
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>shellr | DevOps / System Engineer</title>
-  <meta name="description" content="Marlin Scheler builds and operates small Linux-based web platforms with Docker, monitoring, deployment, backup, and documented recovery paths.">
+  <meta name="description" content="Self-hosted platform demonstrating real-world system operation with deployment, monitoring, logging, and recovery built into the operating model.">
   <link rel="canonical" href="https://shellr.net/">
   <link rel="icon" type="image/png" href="/assets/favi.png">
   <link rel="apple-touch-icon" href="/assets/favi.png">
@@ -266,27 +192,6 @@ function host_label(string $url): string
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/styles.css">
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "Person",
-        "name": "Marlin Scheler",
-        "jobTitle": "Junior DevOps Engineer / System Engineer",
-        "url": "https://shellr.net/",
-        "sameAs": [
-          "<?= e($site['github_url'] !== '' ? $site['github_url'] : 'https://github.com/marshellr/genesis') ?>"
-        ]
-      },
-      {
-        "@type": "WebSite",
-        "name": "shellr",
-        "url": "https://shellr.net/"
-      }
-    ]
-  }
-  </script>
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to content</a>
@@ -302,11 +207,11 @@ function host_label(string $url): string
       <span class="brand-caption">platform frontdoor</span>
     </a>
     <nav class="site-nav" aria-label="Primary">
-      <a href="#profile">Profile</a>
+      <a href="#live-components">Live Systems</a>
+      <a href="#metrics">Metrics</a>
+      <a href="#security-model">Security</a>
       <a href="#projects">Projects</a>
-      <a href="#platform">Platform</a>
-      <a href="https://docs.shellr.net">Docs</a>
-      <a href="#links">Live Links</a>
+      <a href="#documentation">Docs</a>
     </nav>
   </header>
 
@@ -314,74 +219,85 @@ function host_label(string $url): string
     <section class="hero" id="top">
       <div class="hero-copy" data-reveal>
         <p class="eyebrow">Marlin Scheler &middot; Junior DevOps / System Engineer</p>
-        <h1>Build systems that can actually be operated.</h1>
-        <p class="hero-summary">
-          I build and operate Linux-based web platforms that stay deployable, observable, and recoverable.
-          shellr.net is not a static portfolio mock-up. It is the frontdoor of a live single-VM platform
-          with public services, protected operations tooling, and written runbooks.
-        </p>
+        <h1>Self-hosted platform demonstrating real-world system operation.</h1>
 
         <ul class="outcome-list">
-          <?php foreach ($outcomes as $outcome): ?>
-          <li><?= e($outcome) ?></li>
+          <?php foreach ($heroHighlights as $item): ?>
+          <li><?= e($item) ?></li>
           <?php endforeach; ?>
         </ul>
 
+        <div class="hero-note">
+          <p class="hero-note-title">What you can do here:</p>
+          <ul class="hero-guide-list">
+            <?php foreach ($heroGuide as $item): ?>
+            <li><?= e($item) ?></li>
+            <?php endforeach; ?>
+          </ul>
+        </div>
+
         <div class="hero-actions">
-          <a class="button primary" href="#start-here">Explore Platform</a>
-          <a class="button secondary" href="#links">View Live Systems</a>
+          <a class="button primary" href="<?= e($site['docs_url'] . '/architecture.html') ?>">View Architecture</a>
+          <a class="button secondary" href="<?= e($site['dma_url']) ?>">Open Live System</a>
+          <a class="button secondary" href="<?= e($site['docs_url']) ?>">Read Documentation</a>
         </div>
       </div>
 
       <aside class="hero-panel" data-reveal>
-        <div class="logo-panel">
-          <div class="logo-card">
-            <img src="/assets/logo.png" srcset="/assets/logo-small.png 160w, /assets/logo.png 320w" sizes="(max-width: 720px) 220px, 320px" alt="shellr wordmark" width="320" height="311" decoding="async">
-          </div>
-          <div class="logo-copy">
-            <span>identity</span>
-            <strong>clear form, clear operational boundaries</strong>
-            <p>
-              The visual system follows the same idea as the platform itself: a dark base layer,
-              clean structure, one signal color, and as little unnecessary noise as possible.
-            </p>
-          </div>
-        </div>
-
         <div class="hero-panel-header">
-          <span>live surfaces</span>
-          <strong>platform entry points</strong>
+          <span>platform scope</span>
+          <strong>real services, measured responsibility</strong>
         </div>
 
         <div class="surface-list">
           <article>
-            <span>frontdoor</span>
-            <strong>shellr.net</strong>
-            <p>Landing page, role positioning, project access, and platform overview.</p>
+            <span>runtime</span>
+            <strong>Single-VM platform</strong>
+            <p>One host, containerized services, documented recovery, and bounded infrastructure choices.</p>
           </article>
           <article>
-            <span>application</span>
-            <strong>dma.shellr.net</strong>
-            <p>Separate PHP runtime with its own boundary, database scope, and health behavior.</p>
-          </article>
-          <article>
-            <span>status</span>
-            <strong>status.shellr.net</strong>
-            <p>Public uptime surface backed by the same monitoring logic used operationally.</p>
+            <span>operations</span>
+            <strong>Monitoring and logging included</strong>
+            <p>Host, service, and application visibility are built into the platform instead of added later.</p>
           </article>
           <article>
             <span>documentation</span>
-            <strong>docs.shellr.net</strong>
-            <p>Architecture, deployment, monitoring, logging, and recovery documentation on GitHub Pages.</p>
+            <strong>Reviewer-friendly path</strong>
+            <p>Architecture, deployment, monitoring, and backup documentation are linked directly from the landing page.</p>
           </article>
         </div>
       </aside>
     </section>
 
+    <section class="section" id="live-components">
+      <div class="section-heading" data-reveal>
+        <p class="eyebrow">Live System Components</p>
+        <h2>Public entry points and restricted operations surfaces.</h2>
+      </div>
+
+      <div class="link-grid">
+        <?php foreach ($liveComponents as $component): ?>
+        <?php if ($component['href'] !== ''): ?>
+        <a class="link-card" href="<?= e($component['href']) ?>" data-reveal>
+          <span>live component</span>
+          <strong><?= e($component['title']) ?></strong>
+          <p><?= e($component['body']) ?></p>
+        </a>
+        <?php else: ?>
+        <article class="link-card" data-reveal>
+          <span>restricted</span>
+          <strong><?= e($component['title']) ?></strong>
+          <p><?= e($component['body']) ?></p>
+        </article>
+        <?php endif; ?>
+        <?php endforeach; ?>
+      </div>
+    </section>
+
     <section class="section snapshot-section" id="snapshot">
       <div class="section-heading" data-reveal>
         <p class="eyebrow">Platform Snapshot</p>
-        <h2>Operational proof at a glance.</h2>
+        <h2>Concrete operating characteristics of the platform.</h2>
       </div>
 
       <div class="snapshot-grid" data-reveal>
@@ -394,65 +310,79 @@ function host_label(string $url): string
       </div>
     </section>
 
-    <section class="section start-section" id="start-here">
+    <section class="section" id="metrics">
       <div class="section-heading" data-reveal>
-        <p class="eyebrow">Start Here</p>
-        <h2>Follow the same path a technical reviewer would.</h2>
+        <p class="eyebrow">Operational Metrics</p>
+        <h2>Measured platform scope and operational coverage.</h2>
       </div>
 
-      <div class="start-grid">
-        <?php foreach ($startHere as $entry): ?>
-        <article class="start-card" data-reveal>
-          <h3><?= e($entry['title']) ?></h3>
-          <p><?= e($entry['body']) ?></p>
-          <a class="inline-link" href="<?= e($entry['href']) ?>"><?= e($entry['label']) ?></a>
+      <div class="snapshot-grid" data-reveal>
+        <?php foreach ($operationalMetrics as $item): ?>
+        <article class="snapshot-card">
+          <strong><?= e($item['title']) ?></strong>
+          <p><?= e($item['body']) ?></p>
         </article>
         <?php endforeach; ?>
       </div>
     </section>
 
-    <section class="section" id="proof-pack">
+    <section class="section" id="security-model">
       <div class="section-heading" data-reveal>
-        <p class="eyebrow">Proof Pack</p>
-        <h2>Follow the operational trail, not just the landing page.</h2>
+        <p class="eyebrow">Security Model</p>
+        <h2>Security is treated as part of system design, not a side note.</h2>
       </div>
 
-      <div class="link-grid">
-        <?php foreach ($proofLinks as $entry): ?>
-        <article class="link-card" data-reveal>
-          <strong><?= e($entry['title']) ?></strong>
-          <p><?= e($entry['body']) ?></p>
-          <a class="inline-link" href="<?= e($entry['href']) ?>"><?= e($entry['label']) ?></a>
+      <div class="work-grid">
+        <?php foreach ($securityModel as $group): ?>
+        <article class="work-panel" data-reveal>
+          <h3><?= e($group['title']) ?></h3>
+          <ul>
+            <?php foreach ($group['points'] as $point): ?>
+            <li><?= e($point) ?></li>
+            <?php endforeach; ?>
+          </ul>
         </article>
         <?php endforeach; ?>
       </div>
     </section>
 
-    <section class="section profile-section" id="profile">
-      <div class="section-copy" data-reveal>
-        <p class="eyebrow">Profile</p>
-        <h2>Focused on infrastructure, delivery, and operational clarity.</h2>
-        <p>
-          I am training as a systems integration specialist and moving toward a junior DevOps or systems role.
-          The work I care about most starts where deployment, routing, monitoring, and failure handling overlap.
-          My goal is to build systems that remain understandable, supportable, and reviewable after they go live.
-        </p>
+    <section class="section" id="operations">
+      <div class="section-heading" data-reveal>
+        <p class="eyebrow">Operational Focus</p>
+        <h2>This platform is designed to be operated, not just deployed.</h2>
       </div>
 
-      <div class="focus-grid" data-reveal>
-        <?php foreach ($focusAreas as $focus): ?>
-        <article class="focus-card">
-          <span></span>
-          <p><?= e($focus) ?></p>
+      <div class="platform-grid">
+        <article class="work-panel" data-reveal>
+          <ul>
+            <?php foreach ($operationalFocus as $item): ?>
+            <li><?= e($item) ?></li>
+            <?php endforeach; ?>
+          </ul>
         </article>
-        <?php endforeach; ?>
+
+        <div class="platform-diagram" data-reveal>
+          <div class="platform-diagram-header">
+            <span>service map</span>
+            <strong>one ingress layer, containerized services, monitored operations</strong>
+          </div>
+          <pre>Internet
+   ↓
+Nginx (Ingress)
+   ↓
+Docker Services (App / Monitoring)
+   ↓
+Metrics + Logs (Prometheus / Grafana)
+   ↓
+Backup System</pre>
+        </div>
       </div>
     </section>
 
     <section class="section" id="projects">
       <div class="section-heading" data-reveal>
-        <p class="eyebrow">Featured Projects</p>
-        <h2>Projects that show technical choices under real operating constraints.</h2>
+        <p class="eyebrow">Projects</p>
+        <h2>Projects framed by concrete system behavior and operational value.</h2>
       </div>
 
       <div class="project-grid">
@@ -479,101 +409,26 @@ function host_label(string $url): string
       </div>
     </section>
 
-    <section class="section" id="platform">
-      <div class="section-heading" data-reveal>
-        <p class="eyebrow">Platform / Infrastructure</p>
-        <h2>A running platform, not a static list of projects.</h2>
-      </div>
-
-      <div class="platform-grid">
-        <div class="platform-diagram" data-reveal>
-          <div class="platform-diagram-header">
-            <span>runtime topology</span>
-            <strong>explicit separation instead of unnecessary platform breadth</strong>
-          </div>
-          <pre>Internet
-  |
-Nginx + TLS
-  |-- shellr.net         -> Portfolio frontdoor
-  |-- dma.shellr.net     -> DMA
-  |-- grafana.shellr.net -> Grafana (protected)
-  |-- status.shellr.net  -> Public status page
-  |
-Docker networks
-  |-- frontend
-  |-- backend
-  |-- monitoring</pre>
-        </div>
-
-        <div class="slice-grid">
-          <?php foreach ($platformSlices as $slice): ?>
-          <article class="slice-card" data-reveal>
-            <h3><?= e($slice['title']) ?></h3>
-            <p><?= e($slice['body']) ?></p>
-          </article>
-          <?php endforeach; ?>
-        </div>
-      </div>
-    </section>
-
-    <section class="section" id="working-style">
-      <div class="section-heading" data-reveal>
-        <p class="eyebrow">Technologies & Working Style</p>
-        <h2>Technology only matters when it improves operations.</h2>
-      </div>
-
-      <div class="work-grid">
-        <article class="work-panel" data-reveal>
-          <h3>Technical Focus</h3>
-          <ul>
-            <li>Linux administration, host hardening, and service operations</li>
-            <li>Docker Engine and Compose for reproducible runtime models</li>
-            <li>Nginx, HTTPS, and subdomain routing for clean platform boundaries</li>
-            <li>GitHub Actions, SSH delivery, and health-gated deployment logic</li>
-            <li>Prometheus, Grafana, Uptime Kuma, Loki, Promtail, and cAdvisor for visibility</li>
-          </ul>
-        </article>
-
-        <article class="work-panel" data-reveal>
-          <h3>Working Style</h3>
-          <ul>
-            <?php foreach ($workStyle as $item): ?>
+    <section class="section cta-section" id="documentation">
+      <div class="cta-panel" data-reveal>
+        <p class="eyebrow">Documentation</p>
+        <h2>Full documentation available: docs.shellr.net</h2>
+        <p>
+          The documentation site is the full technical record for the platform. It connects the landing page
+          with architecture, deployment, monitoring, and recovery details.
+        </p>
+        <div class="docs-note">
+          <p class="hero-note-title">Includes:</p>
+          <ul class="hero-guide-list">
+            <?php foreach ($docsIncludes as $item): ?>
             <li><?= e($item) ?></li>
             <?php endforeach; ?>
           </ul>
-        </article>
-      </div>
-    </section>
-
-    <section class="section" id="links">
-      <div class="section-heading" data-reveal>
-        <p class="eyebrow">Live Links / System Access</p>
-        <h2>Direct entry points into the platform, live workloads, and operational views.</h2>
-      </div>
-
-      <div class="link-grid">
-        <?php foreach ($liveLinks as $link): ?>
-        <a class="link-card" href="<?= e($link['href']) ?>" data-reveal>
-          <span><?= e($link['label']) ?></span>
-          <strong><?= e(host_label($link['href'])) ?></strong>
-          <p><?= e($link['meta']) ?></p>
-        </a>
-        <?php endforeach; ?>
-      </div>
-    </section>
-
-    <section class="section cta-section">
-      <div class="cta-panel" data-reveal>
-        <p class="eyebrow">Contact / GitHub / Documentation</p>
-        <h2>The technical path is the clearest path.</h2>
-        <p>
-          For architecture and operational decisions, start with docs.shellr.net. For the public health
-          view, use status.shellr.net. For repository structure and implementation details, use GitHub.
-          If you want to get in touch, write to <a class="inline-link" href="mailto:<?= e($site['contact_email']) ?>"><?= e($site['contact_email']) ?></a>.
-        </p>
+        </div>
         <div class="hero-actions">
-          <a class="button primary" href="<?= e($site['docs_url'] . '/architecture.html') ?>">Open Architecture</a>
-          <a class="button secondary" href="<?= e($site['status_url']) ?>">Check System Status</a>
+          <a class="button primary" href="<?= e($site['docs_url']) ?>">Read Documentation</a>
+          <a class="button secondary" href="<?= e($site['docs_url'] . '/architecture.html') ?>">View Architecture</a>
+          <a class="button secondary" href="<?= e($site['status_url']) ?>">Open Status</a>
         </div>
       </div>
     </section>
@@ -581,7 +436,7 @@ Docker networks
 
   <footer class="site-footer">
     <div class="site-footer-row">
-      <p>Marlin Scheler &middot; Junior DevOps / System Engineer &middot; Linux, containers, platform operations, observability</p>
+      <p>Marlin Scheler &middot; Junior DevOps / System Engineer &middot; Linux, containers, monitoring, recovery</p>
       <nav class="site-footer-nav" aria-label="Legal">
         <a href="/imprint.php">Imprint</a>
         <a href="/privacy.php">Privacy Policy</a>
