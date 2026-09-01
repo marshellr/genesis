@@ -14,9 +14,9 @@ TIMESTAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 BACKUP_DIR="$BACKUP_ROOT/${TIMESTAMP}-${RELEASE_SHA:0:12}"
 LOCK_DIR="$RUNTIME_DIR/deploy.lock"
 
-SYNC_DIRS=(app docs scripts .github infra/nginx/conf.d infra/nginx/snippets)
+SYNC_DIRS=(app dma docs scripts .github infra/nginx/conf.d infra/nginx/snippets)
 SYNC_FILES=(infra/nginx/nginx.conf infra/compose/docker-compose.yml infra/compose/.env.example)
-BACKUP_ITEMS=(app docs scripts .github infra/nginx/nginx.conf infra/nginx/conf.d infra/nginx/snippets infra/compose/docker-compose.yml infra/compose/.env infra/compose/.env.example)
+BACKUP_ITEMS=(app dma docs scripts .github infra/nginx/nginx.conf infra/nginx/conf.d infra/nginx/snippets infra/compose/docker-compose.yml infra/compose/.env infra/compose/.env.example)
 
 log() {
   printf '[deploy] %s\n' "$*"
@@ -122,7 +122,7 @@ rollback() {
   done
 
   docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" config >/dev/null
-  docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d --no-build db app nginx
+  docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d --no-build db app dma nginx
 
   if healthcheck; then
     log "Rollback completed successfully."
@@ -182,10 +182,10 @@ log "Validating Compose configuration"
 docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" config >/dev/null
 
 log "Building app image tag ${RELEASE_SHA}"
-docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" build app
+docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" build app dma
 
 log "Starting updated services"
-docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d --no-build db app nginx
+docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d --no-build db app dma nginx
 
 if ! healthcheck; then
   log "Healthcheck failed after deployment."

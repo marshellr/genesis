@@ -55,15 +55,6 @@ Web-based inventory application used as a practical CRUD workload inside the wid
 - structured display and management of stock data
 - useful proving ground for deployment, monitoring, and backup behavior
 
-## Private web projects and hosting
-
-Several self-hosted websites operated on privately managed Linux infrastructure before and alongside the current platform shape.
-
-### Focus
-
-- setup and maintenance of multiple web applications
-- Apache and HTTPS configuration
-- deployment and operational upkeep on Linux systems
 
 ## Planned final project: automated vulnerability management
 

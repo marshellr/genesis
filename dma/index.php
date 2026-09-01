@@ -221,7 +221,7 @@ if (!$hasRiotSyncConfig) {
     $messages[] = "<span class='warn'>Riot sync is disabled until valid DMA environment variables are configured.</span>";
 }
 
-if (isset($_GET['prime'])) {
+if (false && isset($_GET['prime'])) {// Public sync disabled; operator-only workflow pending.
     if (!$hasPrimeSyncConfig) {
         $messages[] = "<span class='warn'>Prime sync is not configured right now.</span>";
     } else {
@@ -238,7 +238,7 @@ if (isset($_GET['prime'])) {
     }
 }
 
-if (isset($_GET['riot'])) {
+if (false && isset($_GET['riot'])) {// Public sync disabled; operator-only workflow pending.
     if (!$hasRiotSyncConfig) {
         $messages[] = "<span class='warn'>Riot sync is not configured right now.</span>";
     } else {
@@ -314,7 +314,7 @@ require_once __DIR__ . '/inc/header.php';
       </article>
       <article>
         <p class="context-card-title">Update model</p>
-        <p>Live syncs remain manual by design, while champion-pool stat caches are refreshed on a schedule for faster reads.</p>
+        <p>Published statistics are read-only; data synchronization is kept out of the public interface.</p>
       </article>
       <article>
         <p class="context-card-title">Operational limit</p>
@@ -322,15 +322,6 @@ require_once __DIR__ . '/inc/header.php';
       </article>
     </div>
   </section>
-
-  <div class="sync-area">
-    <form method="get" style="display:inline;">
-      <button name="prime" value="1" class="action-btn" <?= $hasPrimeSyncConfig ? '' : 'disabled title="Prime sync is not configured"' ?>>Sync Prime data</button>
-    </form>
-    <form method="get" style="display:inline;">
-      <button name="riot" value="1" class="action-btn" <?= $hasRiotSyncConfig ? '' : 'disabled title="Riot sync is not configured"' ?>>Sync Riot data</button>
-    </form>
-  </div>
 
   <?php if (!empty($primeMatches)): ?>
   <section class="collapsible-section">

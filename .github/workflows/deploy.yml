@@ -38,7 +38,7 @@ jobs:
           rm -rf .release
           mkdir -p .release/payload
 
-          for path in app infra scripts docs .github README.md .gitignore .env.example; do
+          for path in app dma infra scripts docs .github README.md .gitignore .env.example; do
             if [ -e "$path" ]; then
               cp -a --parents "$path" .release/payload/
             fi

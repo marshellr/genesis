@@ -5,6 +5,7 @@ umask 027
 OUTPUT_FILE="/projects/genesis/infra/nginx/static/status/snapshot.html"
 COMPOSE_ENV="/projects/genesis/infra/compose/.env"
 BACKUP_DIR="/projects/genesis/infra/backup/db"
+BACKUP_HEALTH_FILE="/projects/genesis/infra/backup/last-successful-backup"
 GENERATED_AT="$(date -u '+%Y-%m-%d %H:%M UTC')"
 
 service_status() {
@@ -24,21 +25,22 @@ service_status() {
 
 backup_snapshot() {
   local latest latest_epoch age_minutes status detail
-  latest="$(find "$BACKUP_DIR" -maxdepth 1 -type f -name '*.sql.gz' -printf '%T@ %p\n' | sort -nr | head -n1 | cut -d' ' -f2- || true)"
-  if [[ -z "$latest" ]]; then
-    printf 'degraded|No database backup found yet.'
+  if [[ ! -f "$BACKUP_HEALTH_FILE" ]]; then
+    printf 'degraded|Backup verification has not completed yet.'
     return
   fi
+
+  latest="$BACKUP_HEALTH_FILE"
 
   latest_epoch="$(stat -c %Y "$latest")"
   age_minutes="$(( ( $(date +%s) - latest_epoch ) / 60 ))"
 
   if (( age_minutes <= 1500 )); then
     status="ok"
-    detail="Last successful DB backup: $(basename "$latest") (${age_minutes} minutes old)."
+    detail="Daily backup verification is current."
   else
     status="degraded"
-    detail="Backup is older than expected: $(basename "$latest") (${age_minutes} minutes old)."
+    detail="Backup verification requires operator attention."
   fi
 
   printf '%s|%s' "$status" "$detail"

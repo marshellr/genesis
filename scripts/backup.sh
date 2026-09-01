@@ -17,6 +17,7 @@ LOG_FILE="$LOG_DIR/backup.log"
 RUNTIME_STATE_DIR="$TMP_DIR/runtime-state"
 RESTIC_ENV_FILE="$PROJECT_ROOT/infra/backup/restic.env"
 RESTIC_CACHE_DIR="$PROJECT_ROOT/restic-cache"
+BACKUP_HEALTH_FILE="$BACKUP_ROOT/last-successful-backup"
 
 mkdir -p "$DB_BACKUP_DIR" "$FILES_BACKUP_DIR" "$LOG_DIR" "$TMP_DIR" "$RESTORE_ROOT"
 
@@ -187,6 +188,10 @@ find "$DB_BACKUP_DIR" -type f -mtime +"$RETENTION_DAYS" -delete
 find "$FILES_BACKUP_DIR" -type f -mtime +"$RETENTION_DAYS" -delete
 find "$RESTORE_ROOT" -mindepth 1 -maxdepth 1 -type d -mtime +"$RETENTION_DAYS" -exec rm -rf {} +
 sudo rm -rf "$RUNTIME_STATE_DIR"
+
+mkdir -p "$(dirname "$BACKUP_HEALTH_FILE")"
+printf "%s\n" "$(date +%s)" > "$BACKUP_HEALTH_FILE.tmp"
+mv "$BACKUP_HEALTH_FILE.tmp" "$BACKUP_HEALTH_FILE"
 
 log "Backup abgeschlossen"
 log "DB-Dump Groesse: $(du -h "$DB_DUMP_FILE" | awk '{print $1}')"
