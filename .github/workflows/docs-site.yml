@@ -31,4 +31,3 @@ jobs:
           test -f docs/site/index.html
           test -f docs/site/CNAME
           ! rg -n -i "schowo|sinna" docs/site
-
