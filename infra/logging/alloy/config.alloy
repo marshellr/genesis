@@ -42,6 +42,7 @@ loki.process "docker_logs" {
 loki.source.file "docker_logs" {
   targets    = local.file_match.docker_logs.targets
   forward_to = [loki.process.docker_logs.receiver]
+  tail_from_end = true
 }
 
 loki.write "default" {
