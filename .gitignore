@@ -37,6 +37,7 @@ infra/backup/files/
 infra/backup/logs/
 infra/backup/restore/
 infra/backup/tmp/
+infra/backup/last-successful-backup
 
 # Docker and local runtime artifacts
 docker-data/
