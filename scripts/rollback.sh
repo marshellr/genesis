@@ -51,11 +51,16 @@ restore_item() {
 }
 
 restore_platform_services() {
-  local cron_file target
+  local cron_file target name
 
   for cron_file in "$ROOT_DIR"/infra/backup/cron/*.cron; do
     [[ -f "$cron_file" ]] || continue
-    target="/etc/cron.d/genesis-$(basename "${cron_file%.cron}")"
+    name="$(basename "${cron_file%.cron}")"
+    if [[ "$name" == genesis-* ]]; then
+      target="/etc/cron.d/$name"
+    else
+      target="/etc/cron.d/genesis-$name"
+    fi
     sudo install -m 0644 "$cron_file" "$target"
   done
 
@@ -63,7 +68,7 @@ restore_platform_services() {
   docker compose --env-file "$ROOT_DIR/infra/monitoring/.env" -f "$ROOT_DIR/infra/monitoring/docker-compose.monitoring.yml" restart prometheus alertmanager grafana
 
   docker compose --env-file "$ROOT_DIR/infra/logging/.env" -f "$ROOT_DIR/infra/logging/docker-compose.logging.yml" config >/dev/null
-  docker compose --env-file "$ROOT_DIR/infra/logging/.env" -f "$ROOT_DIR/infra/logging/docker-compose.logging.yml" restart loki promtail
+  docker compose --env-file "$ROOT_DIR/infra/logging/.env" -f "$ROOT_DIR/infra/logging/docker-compose.logging.yml" up -d --no-build --remove-orphans --wait
 }
 
 [[ -f "$STATE_FILE" ]] || fail "Deployment state file not found: $STATE_FILE"

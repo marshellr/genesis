@@ -23,7 +23,7 @@ $liveComponents = [
     ],
     [
         'title' => 'dma.shellr.net',
-        'body' => 'Application runtime',
+        'body' => 'Read-only architecture showcase',
         'href' => $site['dma_url'],
     ],
     [
@@ -65,7 +65,7 @@ $securityModel = [
         'points' => [
             'TLS termination via Nginx (HTTPS only)',
             'Redirect enforcement and hostname routing',
-            'Basic request filtering and rate limiting',
+            'Request filtering and layered security headers',
         ],
     ],
     [
@@ -86,7 +86,7 @@ $securityModel = [
         'title' => 'Recovery',
         'points' => [
             'Regular backups with defined retention',
-            'Restore scripts tested against real workloads',
+            'Restore scripts and documented recovery procedures',
         ],
     ],
 ];
@@ -278,7 +278,7 @@ function e(string $value): string
 
         <div class="hero-actions">
           <a class="button primary" href="<?= e($site['docs_url'] . '/architecture.html') ?>">View Architecture</a>
-          <a class="button secondary" href="<?= e($site['dma_url']) ?>">Open Live System</a>
+          <a class="button secondary" href="<?= e($site['dma_url']) ?>">View DMA Showcase</a>
           <a class="button secondary" href="<?= e($site['docs_url']) ?>">Read Documentation</a>
         </div>
       </div>

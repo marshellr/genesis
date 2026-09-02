@@ -4,6 +4,7 @@ set -euo pipefail
 KUMA_URL="${KUMA_URL:-http://genesis-monitoring-uptime-kuma:3001}"
 KUMA_USERNAME="${KUMA_USERNAME:-shellr-admin}"
 KUMA_PASSWORD="${KUMA_PASSWORD:?KUMA_PASSWORD is required}"
+AUTOKUMA_IMAGE="ghcr.io/bigboot/autokuma@sha256:43fe8cbfb4138ef9f1deba30499cfb6c27c124d13d1e989dba4046e8051dece5"
 
 cleanup() {
   docker rm -f genesis-monitor-targets >/dev/null 2>&1 || true
@@ -47,7 +48,7 @@ timeout 30s docker run --rm \
   -e AUTOKUMA__DOCKER__HOSTS=unix:///var/run/docker.sock \
   -e AUTOKUMA__DOCKER__LABEL_PREFIX=kuma \
   -e AUTOKUMA__ON_DELETE=delete \
-  ghcr.io/bigboot/autokuma:uptime-kuma-v1-latest
+  "$AUTOKUMA_IMAGE"
 status=$?
 set -e
 

@@ -10,7 +10,7 @@ ENV_FILE="$ROOT_DIR/infra/compose/.env"
 docker run --rm \
   -v "$CERTBOT_WWW:/var/www/certbot" \
   -v "$CERTBOT_CONF:/etc/letsencrypt" \
-  certbot/certbot:latest renew \
+  certbot/certbot@sha256:f70ad0adbb7e117f0fe42a63c553f28ea451edabc0148757b6efcd9735acaa20 renew \
   --webroot \
   -w /var/www/certbot \
   --non-interactive

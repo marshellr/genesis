@@ -1,6 +1,6 @@
 services:
   nginx:
-    image: nginx:1.28-alpine
+    image: nginx:1.30.4-alpine@sha256:97d490c12ba55b4946b01546d1c3ed324e8d41ab1c9fcb2a616aa470620e5b46
     container_name: ${COMPOSE_PROJECT_NAME:-genesis}-nginx
     restart: unless-stopped
     depends_on:

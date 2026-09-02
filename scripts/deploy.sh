@@ -13,6 +13,7 @@ HOST_HEADER="${DEPLOY_HOST_HEADER:-shellr.net}"
 TIMESTAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 BACKUP_DIR="$BACKUP_ROOT/${TIMESTAMP}-${RELEASE_SHA:0:12}"
 LOCK_DIR="$RUNTIME_DIR/deploy.lock"
+RELEASE_BACKUP_RETENTION="${RELEASE_BACKUP_RETENTION:-10}"
 
 SYNC_DIRS=(app dma docs scripts .github infra/nginx/conf.d infra/nginx/snippets infra/nginx/static)
 SYNC_FILES=(infra/nginx/nginx.conf infra/compose/docker-compose.yml infra/compose/.env.example)
@@ -29,7 +30,7 @@ PLATFORM_CONFIG_FILES=(
   infra/logging/docker-compose.logging.yml
   infra/logging/.env.example
   infra/logging/loki/config.yml
-  infra/logging/promtail/config.yml
+  infra/logging/alloy/config.alloy
 )
 BACKUP_ITEMS=(app dma docs scripts .github infra/nginx/nginx.conf infra/nginx/conf.d infra/nginx/snippets infra/nginx/static infra/compose/docker-compose.yml infra/compose/.env infra/compose/.env.example infra/monitoring infra/logging infra/backup/cron)
 PLATFORM_CONFIG_CHANGED=0
@@ -115,11 +116,28 @@ sync_platform_file() {
 }
 
 install_cron_jobs() {
-  local cron_file target
+  local cron_file target name existing keep
+  local -a expected_targets=()
+
   for cron_file in "$ROOT_DIR"/infra/backup/cron/*.cron; do
     [[ -f "$cron_file" ]] || continue
-    target="/etc/cron.d/genesis-$(basename "${cron_file%.cron}")"
+    name="$(basename "${cron_file%.cron}")"
+    if [[ "$name" == genesis-* ]]; then
+      target="/etc/cron.d/$name"
+    else
+      target="/etc/cron.d/genesis-$name"
+    fi
     sudo install -m 0644 "$cron_file" "$target"
+    expected_targets+=("$target")
+  done
+
+  for existing in /etc/cron.d/genesis-*; do
+    [[ -f "$existing" ]] || continue
+    keep=0
+    for target in "${expected_targets[@]}"; do
+      [[ "$existing" == "$target" ]] && keep=1 && break
+    done
+    (( keep == 1 )) || sudo rm -f -- "$existing"
   done
 }
 
@@ -132,7 +150,7 @@ restart_platform_services() {
   docker compose --env-file "$ROOT_DIR/infra/monitoring/.env" -f "$ROOT_DIR/infra/monitoring/docker-compose.monitoring.yml" up -d --no-build --wait prometheus alertmanager grafana
 
   docker compose --env-file "$ROOT_DIR/infra/logging/.env" -f "$ROOT_DIR/infra/logging/docker-compose.logging.yml" config >/dev/null
-  docker compose --env-file "$ROOT_DIR/infra/logging/.env" -f "$ROOT_DIR/infra/logging/docker-compose.logging.yml" restart loki promtail
+  docker compose --env-file "$ROOT_DIR/infra/logging/.env" -f "$ROOT_DIR/infra/logging/docker-compose.logging.yml" up -d --no-build --remove-orphans --wait loki alloy
 }
 
 upsert_env_value() {
@@ -172,8 +190,24 @@ smoke_check() {
   local expected="$3"
   local response
 
-  response="$(curl -fsS --max-time 10 "$url")" || fail "Public smoke check failed for $name"
-  printf '%s' "$response" | grep -Fq "$expected" || fail "Public smoke check returned an unexpected response for $name"
+  response="$(curl -fsS --max-time 10 "$url")" || {
+    log "Public smoke check failed for $name"
+    return 1
+  }
+  printf '%s' "$response" | grep -Fq "$expected" || {
+    log "Public smoke check returned an unexpected response for $name"
+    return 1
+  }
+}
+
+prune_release_backups() {
+  local -a backups=()
+  local index
+
+  mapfile -t backups < <(find "$BACKUP_ROOT" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort -r)
+  for ((index=RELEASE_BACKUP_RETENTION; index<${#backups[@]}; index++)); do
+    rm -rf -- "$BACKUP_ROOT/${backups[$index]}"
+  done
 }
 
 rollback() {
@@ -185,7 +219,7 @@ rollback() {
   done
 
   docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" config >/dev/null
-  docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d --no-build db app dma nginx
+  docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d --no-build --wait db app dma nginx
 
   if healthcheck; then
     log "Rollback completed successfully."
@@ -222,8 +256,12 @@ fi
 
 PREVIOUS_IMAGE_TAG="$(awk -F= '/^APP_IMAGE_TAG=/{print $2}' "$ENV_FILE" | tail -n1)"
 PREVIOUS_IMAGE_REPOSITORY="$(awk -F= '/^APP_IMAGE_REPOSITORY=/{print $2}' "$ENV_FILE" | tail -n1)"
+PREVIOUS_DMA_IMAGE_TAG="$(awk -F= '/^DMA_IMAGE_TAG=/{print $2}' "$ENV_FILE" | tail -n1)"
+PREVIOUS_DMA_IMAGE_REPOSITORY="$(awk -F= '/^DMA_IMAGE_REPOSITORY=/{print $2}' "$ENV_FILE" | tail -n1)"
 PREVIOUS_IMAGE_TAG="${PREVIOUS_IMAGE_TAG:-manual}"
 PREVIOUS_IMAGE_REPOSITORY="${PREVIOUS_IMAGE_REPOSITORY:-genesis-app}"
+PREVIOUS_DMA_IMAGE_TAG="${PREVIOUS_DMA_IMAGE_TAG:-manual}"
+PREVIOUS_DMA_IMAGE_REPOSITORY="${PREVIOUS_DMA_IMAGE_REPOSITORY:-genesis-dma}"
 
 log "Creating backup in $BACKUP_DIR"
 for item in "${BACKUP_ITEMS[@]}"; do
@@ -248,6 +286,8 @@ find "$ROOT_DIR/scripts" -maxdepth 1 -type f -name '*.sh' -exec chmod 750 {} \; 
 
 upsert_env_value APP_IMAGE_REPOSITORY "${PREVIOUS_IMAGE_REPOSITORY}"
 upsert_env_value APP_IMAGE_TAG "$RELEASE_SHA"
+upsert_env_value DMA_IMAGE_REPOSITORY "${PREVIOUS_DMA_IMAGE_REPOSITORY}"
+upsert_env_value DMA_IMAGE_TAG "$RELEASE_SHA"
 
 log "Validating Compose configuration"
 docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" config >/dev/null
@@ -261,8 +301,11 @@ docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T nginx nginx -t
 docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T nginx nginx -s reload
 restart_platform_services
 
-if ! healthcheck; then
-  log "Healthcheck failed after deployment."
+if ! healthcheck \
+  || ! smoke_check "shellr health" "https://shellr.net/health" '"status":"ok"' \
+  || ! smoke_check "DMA showcase" "https://dma.shellr.net/" 'DMA Statistics Module' \
+  || ! smoke_check "status snapshot" "https://status.shellr.net/" 'shellr platform status'; then
+  log "Post-deployment verification failed."
   if rollback; then
     fail "Deployment failed and rollback succeeded."
   else
@@ -270,9 +313,7 @@ if ! healthcheck; then
   fi
 fi
 
-smoke_check "shellr health" "https://shellr.net/health" '"status":"ok"'
-smoke_check "DMA showcase" "https://dma.shellr.net/" 'DMA Statistics Module'
-smoke_check "status snapshot" "https://status.shellr.net/" 'shellr platform status'
+prune_release_backups
 
 cat > "$STATE_FILE" <<EOF
 LAST_DEPLOYED_SHA=$RELEASE_SHA
@@ -282,6 +323,10 @@ PREVIOUS_APP_IMAGE_REPOSITORY=$PREVIOUS_IMAGE_REPOSITORY
 PREVIOUS_APP_IMAGE_TAG=$PREVIOUS_IMAGE_TAG
 CURRENT_APP_IMAGE_REPOSITORY=$PREVIOUS_IMAGE_REPOSITORY
 CURRENT_APP_IMAGE_TAG=$RELEASE_SHA
+PREVIOUS_DMA_IMAGE_REPOSITORY=$PREVIOUS_DMA_IMAGE_REPOSITORY
+PREVIOUS_DMA_IMAGE_TAG=$PREVIOUS_DMA_IMAGE_TAG
+CURRENT_DMA_IMAGE_REPOSITORY=$PREVIOUS_DMA_IMAGE_REPOSITORY
+CURRENT_DMA_IMAGE_TAG=$RELEASE_SHA
 EOF
 
 log "Deployment completed successfully."

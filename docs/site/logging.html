@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Logging | shellr docs</title>
-  <meta name="description" content="Logging design for the shellr platform, covering Loki, Promtail, retention decisions, and short-lived log visibility.">
+  <meta name="description" content="Logging design for the shellr platform, covering Loki, Grafana Alloy, retention decisions, and short-lived log visibility.">
   <link rel="canonical" href="https://docs.shellr.net/logging.html">
   <link rel="icon" type="image/png" href="./favi.png">
   <link rel="apple-touch-icon" href="./favi.png">
@@ -39,10 +39,10 @@
         <p class="eyebrow">Logging</p>
         <h1>Short-lived aggregation, not log warehousing.</h1>
         <p>
-          Loki and Promtail are used for centralized log visibility on the VM. The design goal is incident support
+          Loki and Grafana Alloy are used for centralized log visibility on the VM. The design goal is incident support
           and recent history, not long-term archival or analytics at ELK scale.
         </p>
-        <pre>Docker containers -> Promtail -> Loki -> Grafana
+        <pre>Docker containers -> Grafana Alloy -> Loki -> Grafana
 
 Retention stays intentionally short.
 Container logs are rotated before they become disk pressure.

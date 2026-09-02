@@ -60,7 +60,7 @@
         <h2>What happens during a release.</h2>
         <ul class="plain-list">
           <li>Changes are pushed to GitHub and picked up by the deployment workflow.</li>
-          <li>Artifacts and images are prepared and transferred to the VM.</li>
+          <li>A versioned source bundle is transferred to the VM, where the production images are built from that exact release.</li>
           <li>Compose configuration is validated before the live stack is updated.</li>
           <li>Services are recreated and health endpoints are checked before the run is considered successful.</li>
         </ul>
@@ -83,7 +83,7 @@
           <li>Confirm container health with <code>docker compose ps</code>.</li>
           <li>Check the public surfaces: <code>shellr.net</code>, <code>dma.shellr.net</code>, and <code>status.shellr.net</code>.</li>
           <li>Verify Prometheus targets and Grafana health if observability changed.</li>
-          <li>Rollback immediately if the health-gated checks fail instead of waiting for user reports.</li>
+          <li>Public health and smoke checks run after the service update; a failed check triggers rollback instead of waiting for user reports.</li>
         </ul>
       </article>
 

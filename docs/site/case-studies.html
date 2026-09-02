@@ -83,7 +83,7 @@
           </header>
           <p><strong>Problem:</strong> Legacy PHP workloads become operational blind spots when they are embedded into a wider site without clear boundaries.</p>
           <p><strong>Constraints:</strong> Existing codebase, existing data model, and a need to preserve usefulness while improving runtime clarity.</p>
-          <p><strong>Implementation:</strong> DMA was moved behind its own subdomain, container, cookie scope, database boundary, and health behavior instead of being treated as a path-level add-on.</p>
+          <p><strong>Implementation:</strong> DMA was moved behind its own subdomain, container, cookie scope, database boundary, and health behavior instead of being treated as a path-level add-on. Its public endpoint now presents the architecture as a read-only showcase.</p>
           <p><strong>Outcome:</strong> The application is easier to route, test, monitor, and reason about, while still remaining usable as a live statistics tool.</p>
         </article>
 
@@ -101,7 +101,7 @@
           </header>
           <p><strong>Problem:</strong> Small hosts still need visibility, but full observability stacks quickly become disproportionate in memory, disk, and maintenance effort.</p>
           <p><strong>Constraints:</strong> 8 GB RAM, 40 GB disk, and a goal of staying understandable for one operator path.</p>
-          <p><strong>Implementation:</strong> Prometheus, Grafana, Uptime Kuma, cAdvisor, Loki, and Promtail were kept on intentionally short retention and bounded storage instead of aiming for long-term analytics.</p>
+          <p><strong>Implementation:</strong> Prometheus, Grafana, Uptime Kuma, cAdvisor, Loki, and Grafana Alloy are kept on intentionally short retention and bounded storage instead of aiming for long-term analytics.</p>
           <p><strong>Outcome:</strong> The platform stays observable enough for incidents and review without pretending to be a multi-team observability platform.</p>
         </article>
 
