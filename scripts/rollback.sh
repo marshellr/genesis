@@ -36,6 +36,20 @@ healthcheck() {
   return 1
 }
 
+restore_item() {
+  local relative="$1"
+  local live_path="$ROOT_DIR/$relative"
+  local backup_path="$BACKUP_DIR/$relative"
+
+  if [[ -d "$backup_path" ]]; then
+    mkdir -p "$live_path"
+    rsync -a --delete "$backup_path/" "$live_path/"
+  elif [[ -e "$backup_path" ]]; then
+    mkdir -p "$(dirname "$live_path")"
+    cp -a "$backup_path" "$live_path"
+  fi
+}
+
 restore_platform_services() {
   local cron_file target
 
@@ -60,12 +74,10 @@ BACKUP_DIR="${1:-${LAST_BACKUP_DIR:-}}"
 [[ -n "$BACKUP_DIR" ]] || fail "No backup directory specified and no LAST_BACKUP_DIR in state file."
 [[ -d "$BACKUP_DIR" ]] || fail "Backup directory not found: $BACKUP_DIR"
 
+command -v rsync >/dev/null 2>&1 || fail "Required command missing: rsync"
+
 for item in "${BACKUP_ITEMS[@]}"; do
-  rm -rf "$ROOT_DIR/$item"
-  if [[ -e "$BACKUP_DIR/$item" ]]; then
-    mkdir -p "$(dirname "$ROOT_DIR/$item")"
-    cp -a "$BACKUP_DIR/$item" "$ROOT_DIR/$item"
-  fi
+  restore_item "$item"
 done
 
 docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" config >/dev/null

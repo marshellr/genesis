@@ -67,9 +67,10 @@ restore_item() {
   local live_path="$ROOT_DIR/$relative"
   local backup_path="$BACKUP_DIR/$relative"
 
-  rm -rf "$live_path"
-
-  if [[ -e "$backup_path" ]]; then
+  if [[ -d "$backup_path" ]]; then
+    mkdir -p "$live_path"
+    rsync -a --delete "$backup_path/" "$live_path/"
+  elif [[ -e "$backup_path" ]]; then
     mkdir -p "$(dirname "$live_path")"
     cp -a "$backup_path" "$live_path"
   fi
@@ -82,9 +83,9 @@ sync_directory() {
 
   [[ -d "$source_path" ]] || return 0
 
-  rm -rf "$live_path"
-  mkdir -p "$(dirname "$live_path")"
-  cp -a "$source_path" "$live_path"
+  # Keep the target directory inode so Docker bind mounts remain valid.
+  mkdir -p "$live_path"
+  rsync -a --delete "$source_path/" "$live_path/"
 }
 
 sync_file() {
@@ -203,6 +204,7 @@ require_command grep
 require_command install
 require_command sed
 require_command cmp
+require_command rsync
 require_command sudo
 
 [[ -n "$RELEASE_SHA" ]] || fail "Usage: deploy.sh <release-sha> <release-dir>"
