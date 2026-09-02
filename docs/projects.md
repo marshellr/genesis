@@ -2,7 +2,7 @@
 
 ## Overview
 
-The project set behind `shellr.net` is not just a list of code exercises. It combines live platform work, legacy workload integration, reporting automation, migration and hardening work, and planned security automation.
+The project set behind `shellr.net` is not just a list of code exercises. It combines live platform work, legacy workload integration, reporting automation, migration and hardening work, and current security automation.
 
 ## Genesis / self-hosted platform
 
@@ -56,12 +56,13 @@ Web-based inventory application used as a practical CRUD workload inside the wid
 - useful proving ground for deployment, monitoring, and backup behavior
 
 
-## Planned final project: automated vulnerability management
+## Current security automation work: vulnerability relevance
 
-Planned completion project centered on vulnerability ingestion and relevance matching.
+Current automation work centered on vulnerability ingestion and asset-relevance matching.
 
 ### Focus
 
 - ENISA EUVD API as upstream data source
 - comparison with asset inventory data
-- reduction of manual triage through automation
+- CVSS, KEV, and EPSS enrichment
+- reduction of manual triage through repeatable automation

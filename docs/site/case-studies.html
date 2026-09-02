@@ -8,9 +8,7 @@
   <link rel="canonical" href="https://docs.shellr.net/case-studies.html">
   <link rel="icon" type="image/png" href="./favi.png">
   <link rel="apple-touch-icon" href="./favi.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./fonts.css">
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body data-page="case-studies">
@@ -105,6 +103,24 @@
           <p><strong>Constraints:</strong> 8 GB RAM, 40 GB disk, and a goal of staying understandable for one operator path.</p>
           <p><strong>Implementation:</strong> Prometheus, Grafana, Uptime Kuma, cAdvisor, Loki, and Promtail were kept on intentionally short retention and bounded storage instead of aiming for long-term analytics.</p>
           <p><strong>Outcome:</strong> The platform stays observable enough for incidents and review without pretending to be a multi-team observability platform.</p>
+        </article>
+
+        <article class="case-study">
+          <header>
+            <div>
+              <p class="eyebrow">Case 04</p>
+              <h3>Reducing vulnerability-feed noise through asset relevance</h3>
+            </div>
+            <div class="case-study-meta">
+              <span>ENISA EUVD</span>
+              <span>SQLite</span>
+              <span>Freshservice</span>
+            </div>
+          </header>
+          <p><strong>Problem:</strong> Raw vulnerability feeds create review noise because new records do not directly identify the systems that are actually present in an environment.</p>
+          <p><strong>Constraints:</strong> Upstream API availability, incomplete product naming, repeated records, and the need to avoid duplicate notifications.</p>
+          <p><strong>Implementation:</strong> The current automation work maps ENISA EUVD records to an asset inventory, enriches relevant findings with CVSS, KEV, and EPSS context, and records revisions for repeatable review.</p>
+          <p><strong>Outcome:</strong> The design moves vulnerability review from broad feed scanning toward a focused, asset-relevant daily workflow while keeping incomplete matches visible for manual validation.</p>
         </article>
       </section>
     </main>

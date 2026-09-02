@@ -18,9 +18,7 @@ function e(string $value): string
   <link rel="canonical" href="https://shellr.net/privacy.php">
   <link rel="icon" type="image/png" href="/assets/favi.png">
   <link rel="apple-touch-icon" href="/assets/favi.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/fonts.css">
   <link rel="stylesheet" href="/assets/styles.css">
 </head>
 <body>
@@ -77,6 +75,11 @@ function e(string $value): string
           When visiting this website, server log files may process technically necessary data such as IP address,
           date and time of access, requested resource, referrer, user agent, and response status. This processing is
           required to ensure the stable and secure operation of the website.
+        </p>
+        <p>
+          Access logs are retained only for the operational period defined for the platform. They may be processed by
+          AWStats to create aggregate webserver reports. These reports support operational review and do not use a
+          third-party analytics service. The platform is hosted by Hetzner in Germany.
         </p>
       </section>
 

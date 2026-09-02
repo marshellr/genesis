@@ -14,9 +14,9 @@ TIMESTAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 BACKUP_DIR="$BACKUP_ROOT/${TIMESTAMP}-${RELEASE_SHA:0:12}"
 LOCK_DIR="$RUNTIME_DIR/deploy.lock"
 
-SYNC_DIRS=(app dma docs scripts .github infra/nginx/conf.d infra/nginx/snippets)
+SYNC_DIRS=(app dma docs scripts .github infra/nginx/conf.d infra/nginx/snippets infra/nginx/static)
 SYNC_FILES=(infra/nginx/nginx.conf infra/compose/docker-compose.yml infra/compose/.env.example)
-BACKUP_ITEMS=(app dma docs scripts .github infra/nginx/nginx.conf infra/nginx/conf.d infra/nginx/snippets infra/compose/docker-compose.yml infra/compose/.env infra/compose/.env.example)
+BACKUP_ITEMS=(app dma docs scripts .github infra/nginx/nginx.conf infra/nginx/conf.d infra/nginx/snippets infra/nginx/static infra/compose/docker-compose.yml infra/compose/.env infra/compose/.env.example)
 
 log() {
   printf '[deploy] %s\n' "$*"

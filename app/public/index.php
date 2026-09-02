@@ -53,7 +53,7 @@ $platformSnapshot = [
 ];
 
 $operationalMetrics = [
-    ['title' => 'Public Surfaces', 'body' => '5 public hostnames routed through one ingress layer.'],
+    ['title' => 'External Surfaces', 'body' => '5 external hostnames across two hosting boundaries: 4 through the VM ingress and docs on GitHub Pages.'],
     ['title' => 'Network Segments', 'body' => '3 Docker networks separating frontend, backend, and monitoring traffic.'],
     ['title' => 'Backup Cadence', 'body' => 'Daily database and runtime backup jobs with defined retention.'],
     ['title' => 'Monitoring Coverage', 'body' => 'Host, container, and application checks are included in the stack.'],
@@ -114,16 +114,16 @@ $featuredProjects = [
     ],
     [
         'title' => 'DMA Statistics Module',
-        'tag' => 'live application',
-        'lead' => 'Simulates a stateful application to test deployment, monitoring, and recovery under realistic conditions.',
+        'tag' => 'project showcase',
+        'lead' => 'A contained PHP and MariaDB workload for match-statistics analysis, retained as a read-only architecture showcase.',
         'points' => [
-            'Includes: Database persistence',
-            'Includes: Application runtime isolation',
-            'Includes: Health-based monitoring and alerting',
+            'Separates application routing, database state, and health behavior',
+            'Uses external match data and role-based statistics',
+            'Public access exposes project context, not administrative controls',
         ],
         'stack' => ['PHP', 'MariaDB', 'Health checks', 'Monitoring'],
         'href' => $site['dma_url'],
-        'label' => 'Open live system',
+        'label' => 'Open project showcase',
     ],
     [
         'title' => 'Automated Web Analytics with AWStats',
@@ -154,15 +154,28 @@ $featuredProjects = [
     [
         'title' => 'Inventory Tracking Application',
         'tag' => 'stateful application',
-        'lead' => 'Simulates a stateful application to test deployment, monitoring, and recovery under realistic conditions.',
+        'lead' => 'Database-backed CRUD application for tracking stock and inventory changes under normal operational constraints.',
         'points' => [
-            'Includes: Database persistence',
-            'Includes: Application runtime isolation',
-            'Includes: Health-based monitoring and alerting',
+            'Models relational inventory and stock state',
+            'Supports create, update, and delete workflows',
+            'Validates backup and restore behavior against persistent data',
         ],
         'stack' => ['PHP', 'MariaDB', 'CRUD', 'Health checks'],
         'href' => $site['docs_url'] . '/projects.html',
         'label' => 'Read project notes',
+    ],
+    [
+        'title' => 'Vulnerability Relevance Automation',
+        'tag' => 'security automation',
+        'lead' => 'Current security automation work for turning vulnerability feeds into actionable, asset-relevant review tasks.',
+        'points' => [
+            'Maps ENISA EUVD records against an asset inventory',
+            'Adds CVSS, KEV, and EPSS context before review',
+            'Focuses on repeatable triage instead of manual feed scanning',
+        ],
+        'stack' => ['ENISA EUVD API', 'SQLite', 'Automation', 'Freshservice'],
+        'href' => $site['docs_url'] . '/projects.html',
+        'label' => 'Read project overview',
     ],
 ];
 
@@ -188,12 +201,37 @@ function e(string $value): string
   <title>shellr | DevOps / System Engineer</title>
   <meta name="description" content="Self-hosted platform demonstrating real-world system operation with deployment, monitoring, logging, and recovery built into the operating model.">
   <link rel="canonical" href="https://shellr.net/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="shellr">
+  <meta property="og:title" content="shellr | DevOps / System Engineer">
+  <meta property="og:description" content="Self-hosted platform demonstrating deployment, monitoring, logging, and recovery in a live operating model.">
+  <meta property="og:url" content="https://shellr.net/">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="shellr | DevOps / System Engineer">
+  <meta name="twitter:description" content="Self-hosted platform demonstrating deployment, monitoring, logging, and recovery in a live operating model.">
   <link rel="icon" type="image/png" href="/assets/favi.png">
   <link rel="apple-touch-icon" href="/assets/favi.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/fonts.css">
   <link rel="stylesheet" href="/assets/styles.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Person",
+        "name": "Marlin Scheler",
+        "url": "https://shellr.net/",
+        "jobTitle": "Junior DevOps / System Engineer",
+        "sameAs": ["https://github.com/marshellr"]
+      },
+      {
+        "@type": "WebSite",
+        "name": "shellr",
+        "url": "https://shellr.net/"
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to content</a>

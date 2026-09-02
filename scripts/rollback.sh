@@ -7,7 +7,7 @@ ENV_FILE="$ROOT_DIR/infra/compose/.env"
 STATE_FILE="$ROOT_DIR/infra/runtime/deploy-state.env"
 HOST_HEADER="${DEPLOY_HOST_HEADER:-shellr.net}"
 
-BACKUP_ITEMS=(app docs scripts .github infra/nginx/nginx.conf infra/nginx/conf.d infra/nginx/snippets infra/compose/docker-compose.yml infra/compose/.env infra/compose/.env.example)
+BACKUP_ITEMS=(app docs scripts .github infra/nginx/nginx.conf infra/nginx/conf.d infra/nginx/snippets infra/nginx/static infra/compose/docker-compose.yml infra/compose/.env infra/compose/.env.example)
 
 log() {
   printf '[rollback] %s\n' "$*"
