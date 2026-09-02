@@ -15,11 +15,26 @@ service_status() {
   local fail_text="$4"
   local code
 
-  code="$(curl -ksS -o /dev/null -w '%{http_code}' --max-time 15 "$url" || true)"
-  if [[ "$code" =~ ^2|3 ]]; then
+  code="$(curl -fsS -o /dev/null -w '%{http_code}' --max-time 15 "$url" || true)"
+  if [[ "$code" =~ ^[23][0-9][0-9]$ ]]; then
     printf '%s|ok|%s|%s' "$name" "$ok_text" "$code"
   else
     printf '%s|degraded|%s|%s' "$name" "$fail_text" "${code:-000}"
+  fi
+}
+
+static_health_status() {
+  local name="$1"
+  local url="$2"
+  local ok_text="$3"
+  local fail_text="$4"
+  local response
+
+  response="$(curl -fsS --max-time 15 "$url" 2>/dev/null || true)"
+  if [[ "$response" == "ok" ]]; then
+    printf '%s|ok|%s|200' "$name" "$ok_text"
+  else
+    printf '%s|degraded|%s|000' "$name" "$fail_text"
   fi
 }
 
@@ -52,7 +67,7 @@ read_env_value() {
 }
 
 shellr="$(service_status "shellr.net" "https://shellr.net/health" "Landing page and health endpoint respond." "Landing page health endpoint is not responding as expected.")"
-dma="$(service_status "dma.shellr.net" "https://dma.shellr.net/health.php" "DMA health endpoint responds." "DMA health endpoint is currently failing.")"
+dma="$(static_health_status "dma.shellr.net" "https://dma.shellr.net/health.txt" "DMA showcase health marker responds." "DMA showcase health marker is not responding as expected.")"
 docs="$(service_status "docs.shellr.net" "https://docs.shellr.net/" "Docs site is reachable through GitHub Pages." "Docs site is currently unreachable or returning an error.")"
 status_surface="$(service_status "status.shellr.net" "https://status.shellr.net/status/shellr" "Public status board is reachable." "Public status board is not returning cleanly.")"
 backup_info="$(backup_snapshot)"

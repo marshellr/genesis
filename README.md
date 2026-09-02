@@ -7,7 +7,7 @@ This repository contains the platform behind `shellr.net`: a public landing page
 ## Live Surfaces
 
 - `https://shellr.net` - personal landing page and platform frontdoor
-- `https://dma.shellr.net` - DMA application
+- `https://dma.shellr.net` - read-only DMA project showcase
 - `https://status.shellr.net` - public uptime and service status
 - `https://docs.shellr.net` - technical documentation on GitHub Pages
 - `https://grafana.shellr.net` - protected monitoring surface
@@ -18,12 +18,11 @@ This repository contains the platform behind `shellr.net`: a public landing page
 flowchart TD
     Internet --> Nginx["Nginx reverse proxy"]
     Nginx --> Shellr["shellr.net"]
-    Nginx --> DMA["dma.shellr.net"]
+    Nginx --> DMA["DMA static showcase"]
     Nginx --> Status["status.shellr.net"]
     Nginx --> Grafana["grafana.shellr.net"]
     Shellr --> App["Portfolio app container"]
-    DMA --> DmaApp["DMA app container"]
-    DmaApp --> DB["MariaDB"]
+    DmaApp["DMA legacy runtime"] --> DB["MariaDB"]
     Prom["Prometheus"] --> Grafana
     Kuma["Uptime Kuma"] --> Prom
     Loki["Loki"] --> Grafana
@@ -35,7 +34,7 @@ flowchart TD
 - Docker Compose runtime on a single Hetzner VM
 - Nginx ingress with TLS termination and hostname-based routing
 - PHP application workloads with MariaDB
-- GitHub Actions deployment over SSH with health checks
+- GitHub Actions SSH release workflow with health gates and rollback mechanics
 - Monitoring through Prometheus, Grafana, Node Exporter, cAdvisor, and Uptime Kuma
 - Logging through Loki and Promtail
 - Backup and restore through database dumps, file archives, and explicit restore scripts
@@ -51,6 +50,7 @@ flowchart TD
     nginx/              reverse proxy and TLS config
     monitoring/         Prometheus, Grafana, Kuma, cAdvisor
     logging/            Loki and Promtail
+    analytics/          AWStats reference configuration and report generator
     backup/             backup artifacts and cron definitions
   scripts/              deploy, backup, restore, and helper scripts
   docs/                 technical documentation and GitHub Pages source

@@ -6,8 +6,6 @@ services:
     depends_on:
       app:
         condition: service_started
-      dma:
-        condition: service_started
     ports:
       - "80:80"
       - "443:443"
@@ -132,10 +130,7 @@ services:
       MIN_MATCH_DURATION: ${DMA_MIN_MATCH_DURATION:-15}
       RIOT_SYNC_COOLDOWN: ${DMA_RIOT_SYNC_COOLDOWN:-300}
       RIOT_MATCH_COUNT: ${DMA_RIOT_MATCH_COUNT:-10}
-    expose:
-      - "80"
     networks:
-      - frontend
       - backend
     healthcheck:
       test: ["CMD-SHELL", "php -r 'exit(@file_get_contents(\"http://127.0.0.1/health.php\") === false ? 1 : 0);'"]

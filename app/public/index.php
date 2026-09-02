@@ -47,13 +47,13 @@ $platformSnapshot = [
     ['title' => 'Host', 'body' => 'Single Hetzner VM with 4 vCPU, 8 GB RAM, and bounded disk usage.'],
     ['title' => 'Runtime', 'body' => 'Services run in separate containers instead of sharing one unmanaged host setup.'],
     ['title' => 'Ingress', 'body' => 'Nginx handles HTTPS, redirects, and hostname-based routing for public services.'],
-    ['title' => 'Delivery', 'body' => 'GitHub Actions deploys staged releases over SSH and checks service health before completion.'],
+    ['title' => 'Delivery', 'body' => 'GitHub Actions defines staged SSH releases with health gates, rollback mechanics, and explicit production verification.'],
     ['title' => 'Monitoring', 'body' => 'Prometheus, Grafana, Node Exporter, cAdvisor, and Uptime Kuma cover host and service visibility.'],
     ['title' => 'Recovery', 'body' => 'Database dumps, project archives, and restore scripts are part of normal operations.'],
 ];
 
 $operationalMetrics = [
-    ['title' => 'External Surfaces', 'body' => '5 external hostnames across two hosting boundaries: 4 through the VM ingress and docs on GitHub Pages.'],
+    ['title' => 'Portfolio Surfaces', 'body' => '5 documented portfolio surfaces across two hosting boundaries: 4 through the VM ingress and docs on GitHub Pages.'],
     ['title' => 'Network Segments', 'body' => '3 Docker networks separating frontend, backend, and monitoring traffic.'],
     ['title' => 'Backup Cadence', 'body' => 'Daily database and runtime backup jobs with defined retention.'],
     ['title' => 'Monitoring Coverage', 'body' => 'Host, container, and application checks are included in the stack.'],
@@ -128,10 +128,10 @@ $featuredProjects = [
     [
         'title' => 'Automated Web Analytics with AWStats',
         'tag' => 'reporting',
-        'lead' => 'Generates lightweight reporting from webserver logs without adding a heavy analytics stack.',
+        'lead' => 'Reference reporting workflow for generating lightweight webserver reports without adding a heavy analytics stack.',
         'points' => [
-            'Turns raw access logs into readable reports',
-            'Runs on a scheduled shell-based workflow',
+            'Provides a documented AWStats configuration and cron-ready generator',
+            'Requires an intentional access-log source before activation',
             'Fits the resource limits of a small single-host platform',
         ],
         'stack' => ['AWStats', 'Shell scripts', 'Cron', 'Reporting'],

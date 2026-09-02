@@ -16,7 +16,23 @@ LOCK_DIR="$RUNTIME_DIR/deploy.lock"
 
 SYNC_DIRS=(app dma docs scripts .github infra/nginx/conf.d infra/nginx/snippets infra/nginx/static)
 SYNC_FILES=(infra/nginx/nginx.conf infra/compose/docker-compose.yml infra/compose/.env.example)
-BACKUP_ITEMS=(app dma docs scripts .github infra/nginx/nginx.conf infra/nginx/conf.d infra/nginx/snippets infra/nginx/static infra/compose/docker-compose.yml infra/compose/.env infra/compose/.env.example)
+PLATFORM_CONFIG_FILES=(
+  infra/monitoring/docker-compose.monitoring.yml
+  infra/monitoring/.env.example
+  infra/monitoring/prometheus/prometheus.yml
+  infra/monitoring/prometheus/alerts.yml
+  infra/monitoring/alertmanager/alertmanager.yml
+  infra/monitoring/grafana/provisioning/datasources/prometheus.yml
+  infra/monitoring/grafana/provisioning/datasources/loki.yml
+  infra/monitoring/grafana/provisioning/dashboards/dashboards.yml
+  infra/monitoring/grafana/dashboards/genesis-vm-overview.json
+  infra/logging/docker-compose.logging.yml
+  infra/logging/.env.example
+  infra/logging/loki/config.yml
+  infra/logging/promtail/config.yml
+)
+BACKUP_ITEMS=(app dma docs scripts .github infra/nginx/nginx.conf infra/nginx/conf.d infra/nginx/snippets infra/nginx/static infra/compose/docker-compose.yml infra/compose/.env infra/compose/.env.example infra/monitoring infra/logging infra/backup/cron)
+PLATFORM_CONFIG_CHANGED=0
 
 log() {
   printf '[deploy] %s\n' "$*"
@@ -82,6 +98,42 @@ sync_file() {
   install -m 0644 "$source_path" "$live_path"
 }
 
+sync_platform_file() {
+  local relative="$1"
+  local source_path="$RELEASE_DIR/$relative"
+  local live_path="$ROOT_DIR/$relative"
+
+  [[ -f "$source_path" ]] || return 0
+  if [[ -f "$live_path" ]] && cmp -s "$source_path" "$live_path"; then
+    return 0
+  fi
+
+  mkdir -p "$(dirname "$live_path")"
+  install -m 0644 "$source_path" "$live_path"
+  PLATFORM_CONFIG_CHANGED=1
+}
+
+install_cron_jobs() {
+  local cron_file target
+  for cron_file in "$ROOT_DIR"/infra/backup/cron/*.cron; do
+    [[ -f "$cron_file" ]] || continue
+    target="/etc/cron.d/genesis-$(basename "${cron_file%.cron}")"
+    sudo install -m 0644 "$cron_file" "$target"
+  done
+}
+
+restart_platform_services() {
+  (( PLATFORM_CONFIG_CHANGED == 1 )) || return 0
+
+  log "Applying monitoring and logging configuration changes"
+  docker compose --env-file "$ROOT_DIR/infra/monitoring/.env" -f "$ROOT_DIR/infra/monitoring/docker-compose.monitoring.yml" config >/dev/null
+  docker compose --env-file "$ROOT_DIR/infra/monitoring/.env" -f "$ROOT_DIR/infra/monitoring/docker-compose.monitoring.yml" restart prometheus alertmanager grafana
+  docker compose --env-file "$ROOT_DIR/infra/monitoring/.env" -f "$ROOT_DIR/infra/monitoring/docker-compose.monitoring.yml" up -d --no-build --wait prometheus alertmanager grafana
+
+  docker compose --env-file "$ROOT_DIR/infra/logging/.env" -f "$ROOT_DIR/infra/logging/docker-compose.logging.yml" config >/dev/null
+  docker compose --env-file "$ROOT_DIR/infra/logging/.env" -f "$ROOT_DIR/infra/logging/docker-compose.logging.yml" restart loki promtail
+}
+
 upsert_env_value() {
   local key="$1"
   local value="$2"
@@ -113,6 +165,16 @@ healthcheck() {
   return 1
 }
 
+smoke_check() {
+  local name="$1"
+  local url="$2"
+  local expected="$3"
+  local response
+
+  response="$(curl -fsS --max-time 10 "$url")" || fail "Public smoke check failed for $name"
+  printf '%s' "$response" | grep -Fq "$expected" || fail "Public smoke check returned an unexpected response for $name"
+}
+
 rollback() {
   log "Starting rollback to previous release state."
 
@@ -140,6 +202,8 @@ require_command curl
 require_command grep
 require_command install
 require_command sed
+require_command cmp
+require_command sudo
 
 [[ -n "$RELEASE_SHA" ]] || fail "Usage: deploy.sh <release-sha> <release-dir>"
 [[ -n "$RELEASE_DIR" ]] || fail "Usage: deploy.sh <release-sha> <release-dir>"
@@ -171,6 +235,11 @@ done
 for item in "${SYNC_FILES[@]}"; do
   sync_file "$item"
 done
+for item in "${PLATFORM_CONFIG_FILES[@]}"; do
+  sync_platform_file "$item"
+done
+
+install_cron_jobs
 
 chmod 755 "$ROOT_DIR/scripts" || true
 find "$ROOT_DIR/scripts" -maxdepth 1 -type f -name '*.sh' -exec chmod 750 {} \; || true
@@ -185,7 +254,10 @@ log "Building app image tag ${RELEASE_SHA}"
 docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" build app dma
 
 log "Starting updated services"
-docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d --no-build db app dma nginx
+docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d --no-build --wait db app dma nginx
+docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T nginx nginx -t
+docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T nginx nginx -s reload
+restart_platform_services
 
 if ! healthcheck; then
   log "Healthcheck failed after deployment."
@@ -195,6 +267,10 @@ if ! healthcheck; then
     fail "Deployment failed and rollback also failed. Manual intervention required."
   fi
 fi
+
+smoke_check "shellr health" "https://shellr.net/health" '"status":"ok"'
+smoke_check "DMA showcase" "https://dma.shellr.net/" 'DMA Statistics Module'
+smoke_check "status snapshot" "https://status.shellr.net/" 'shellr platform status'
 
 cat > "$STATE_FILE" <<EOF
 LAST_DEPLOYED_SHA=$RELEASE_SHA

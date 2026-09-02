@@ -7,7 +7,7 @@ ENV_FILE="$ROOT_DIR/infra/compose/.env"
 STATE_FILE="$ROOT_DIR/infra/runtime/deploy-state.env"
 HOST_HEADER="${DEPLOY_HOST_HEADER:-shellr.net}"
 
-BACKUP_ITEMS=(app docs scripts .github infra/nginx/nginx.conf infra/nginx/conf.d infra/nginx/snippets infra/nginx/static infra/compose/docker-compose.yml infra/compose/.env infra/compose/.env.example)
+BACKUP_ITEMS=(app dma docs scripts .github infra/nginx/nginx.conf infra/nginx/conf.d infra/nginx/snippets infra/nginx/static infra/compose/docker-compose.yml infra/compose/.env infra/compose/.env.example infra/monitoring infra/logging infra/backup/cron)
 
 log() {
   printf '[rollback] %s\n' "$*"
@@ -36,6 +36,22 @@ healthcheck() {
   return 1
 }
 
+restore_platform_services() {
+  local cron_file target
+
+  for cron_file in "$ROOT_DIR"/infra/backup/cron/*.cron; do
+    [[ -f "$cron_file" ]] || continue
+    target="/etc/cron.d/genesis-$(basename "${cron_file%.cron}")"
+    sudo install -m 0644 "$cron_file" "$target"
+  done
+
+  docker compose --env-file "$ROOT_DIR/infra/monitoring/.env" -f "$ROOT_DIR/infra/monitoring/docker-compose.monitoring.yml" config >/dev/null
+  docker compose --env-file "$ROOT_DIR/infra/monitoring/.env" -f "$ROOT_DIR/infra/monitoring/docker-compose.monitoring.yml" restart prometheus alertmanager grafana
+
+  docker compose --env-file "$ROOT_DIR/infra/logging/.env" -f "$ROOT_DIR/infra/logging/docker-compose.logging.yml" config >/dev/null
+  docker compose --env-file "$ROOT_DIR/infra/logging/.env" -f "$ROOT_DIR/infra/logging/docker-compose.logging.yml" restart loki promtail
+}
+
 [[ -f "$STATE_FILE" ]] || fail "Deployment state file not found: $STATE_FILE"
 # shellcheck disable=SC1090
 source "$STATE_FILE"
@@ -53,7 +69,10 @@ for item in "${BACKUP_ITEMS[@]}"; do
 done
 
 docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" config >/dev/null
-docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d --no-build db app nginx
+docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d --no-build --wait db app dma nginx
+docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T nginx nginx -t
+docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T nginx nginx -s reload
+restore_platform_services
 
 if healthcheck; then
   log "Rollback completed successfully."

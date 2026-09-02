@@ -16,6 +16,7 @@ concurrency:
 env:
   DEPLOY_USER: shellr
   DEPLOY_ROOT: /projects/genesis
+  DEPLOY_PORT: ${{ secrets.DEPLOY_SSH_PORT || '22' }}
   HEALTHCHECK_URL: https://shellr.net/health
 
 jobs:
@@ -66,13 +67,34 @@ jobs:
           path: .release
 
       - name: Prepare SSH
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
         run: |
           set -euo pipefail
+          test -n "$DEPLOY_HOST"
+          test -n "$DEPLOY_SSH_PRIVATE_KEY"
+          test -n "$DEPLOY_KNOWN_HOSTS"
+          test "$DEPLOY_HOST" != "shellr"
           install -m 700 -d ~/.ssh
-          printf '%s\n' '${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}' > ~/.ssh/id_ed25519
+          printf '%s\n' "$DEPLOY_SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          printf '%s\n' '${{ secrets.DEPLOY_KNOWN_HOSTS }}' > ~/.ssh/known_hosts
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
+          ssh-keygen -F "$DEPLOY_HOST" -f ~/.ssh/known_hosts >/dev/null
+
+      - name: Verify SSH connectivity and release permissions
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+        run: |
+          set -euo pipefail
+          ssh -i ~/.ssh/id_ed25519 -p "$DEPLOY_PORT" \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile=~/.ssh/known_hosts \
+            "$DEPLOY_USER@$DEPLOY_HOST" \
+            "test -d '$DEPLOY_ROOT' && test -w '$DEPLOY_ROOT/releases' && test -x '$DEPLOY_ROOT/scripts/deploy.sh'"
 
       - name: Upload release bundle to server
         env:
@@ -82,8 +104,8 @@ jobs:
           set -euo pipefail
           REMOTE_RELEASE_DIR="$DEPLOY_ROOT/releases/$RELEASE_SHA"
 
-          ssh -i ~/.ssh/id_ed25519 "$DEPLOY_USER@$DEPLOY_HOST" "mkdir -p '$REMOTE_RELEASE_DIR'"
-          scp -i ~/.ssh/id_ed25519 .release/release.tgz "$DEPLOY_USER@$DEPLOY_HOST:$REMOTE_RELEASE_DIR/release.tgz"
+          ssh -i ~/.ssh/id_ed25519 -p "$DEPLOY_PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=~/.ssh/known_hosts "$DEPLOY_USER@$DEPLOY_HOST" "mkdir -p '$REMOTE_RELEASE_DIR'"
+          scp -i ~/.ssh/id_ed25519 -P "$DEPLOY_PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=~/.ssh/known_hosts .release/release.tgz "$DEPLOY_USER@$DEPLOY_HOST:$REMOTE_RELEASE_DIR/release.tgz"
 
       - name: Run remote deployment
         env:
@@ -93,7 +115,7 @@ jobs:
           set -euo pipefail
           REMOTE_RELEASE_DIR="$DEPLOY_ROOT/releases/$RELEASE_SHA"
 
-          ssh -i ~/.ssh/id_ed25519 "$DEPLOY_USER@$DEPLOY_HOST" "set -euo pipefail; tar -xzf '$REMOTE_RELEASE_DIR/release.tgz' -C '$REMOTE_RELEASE_DIR'; rm -f '$REMOTE_RELEASE_DIR/release.tgz'; chmod 750 '$REMOTE_RELEASE_DIR/scripts/deploy.sh' '$REMOTE_RELEASE_DIR/scripts/rollback.sh'; '$REMOTE_RELEASE_DIR/scripts/deploy.sh' '$RELEASE_SHA' '$REMOTE_RELEASE_DIR'"
+          ssh -i ~/.ssh/id_ed25519 -p "$DEPLOY_PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=~/.ssh/known_hosts "$DEPLOY_USER@$DEPLOY_HOST" "set -euo pipefail; tar -xzf '$REMOTE_RELEASE_DIR/release.tgz' -C '$REMOTE_RELEASE_DIR'; rm -f '$REMOTE_RELEASE_DIR/release.tgz'; chmod 750 '$REMOTE_RELEASE_DIR/scripts/deploy.sh' '$REMOTE_RELEASE_DIR/scripts/rollback.sh'; '$REMOTE_RELEASE_DIR/scripts/deploy.sh' '$RELEASE_SHA' '$REMOTE_RELEASE_DIR'"
 
       - name: Verify public health endpoint
         run: |

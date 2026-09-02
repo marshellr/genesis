@@ -1,0 +1,14 @@
+LogFile="/var/log/nginx/shellr-access.log"
+LogType=W
+LogFormat=1
+SiteDomain="shellr.net"
+HostAliases="shellr.net www.shellr.net"
+DirData="/var/lib/awstats"
+DirCgi="/usr/lib/cgi-bin"
+DirIcons="/usr/share/awstats/icon"
+AllowToUpdateStatsFromBrowser=0
+AllowFullYearView=3
+DNSLookup=0
+ShowLinksOnUrl=0
+ShowLinksToWhoIs=0
+SkipHosts="127.0.0.1 REGEX[^172\\.30\\.]"

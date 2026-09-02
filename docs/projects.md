@@ -27,12 +27,12 @@ API-based dashboard for match and performance data, implemented as a separate PH
 
 ## Automated web analytics with AWStats
 
-Static reporting workflow for access and usage patterns derived from webserver logs.
+Reference reporting workflow for access and usage patterns derived from webserver logs.
 
 ### Focus
 
-- automated generation of reports instead of manual export
-- structured analysis of log data over time
+- sanitised AWStats configuration and cron-ready generator
+- explicit access-log source required before production activation
 - lightweight reporting model that fits a single-VM environment
 
 ## Web platform migration and hardening
