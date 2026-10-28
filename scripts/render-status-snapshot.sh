@@ -66,7 +66,11 @@ read_env_value() {
   grep -E "^${key}=" "$COMPOSE_ENV" | tail -n1 | cut -d= -f2- || true
 }
 
-shellr="$(service_status "shellr.net" "https://shellr.net/health" "Landing page and health endpoint respond." "Landing page health endpoint is not responding as expected.")"
+if python3 /projects/genesis/scripts/check-public-routing.py --rounds 3 >/dev/null 2>&1; then
+  shellr='shellr.net|ok|Landing page, application identity and required assets respond correctly.|200'
+else
+  shellr='shellr.net|degraded|Landing page, application identity or required assets failed verification.|ERROR'
+fi
 dma="$(static_health_status "dma.shellr.net" "https://dma.shellr.net/health.txt" "DMA showcase health marker responds." "DMA showcase health marker is not responding as expected.")"
 docs="$(service_status "docs.shellr.net" "https://docs.shellr.net/" "Docs site is reachable through GitHub Pages." "Docs site is currently unreachable or returning an error.")"
 status_surface="$(service_status "status.shellr.net" "https://status.shellr.net/status/shellr" "Public status board is reachable." "Public status board is not returning cleanly.")"

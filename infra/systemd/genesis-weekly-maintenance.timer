@@ -1,0 +1,12 @@
+[Unit]
+Description=Run Genesis weekly maintenance on Sunday night
+
+[Timer]
+OnCalendar=Sun *-*-* 05:15:00 Europe/Berlin
+RandomizedDelaySec=10m
+AccuracySec=1m
+Persistent=false
+Unit=genesis-weekly-maintenance.service
+
+[Install]
+WantedBy=timers.target

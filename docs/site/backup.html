@@ -39,17 +39,17 @@
         <p class="eyebrow">Backup</p>
         <h1>Simple enough to understand under pressure.</h1>
         <div class="meta-strip">
-          <span>Last reviewed: September 2026</span>
-          <span>Retention: day-based</span>
+          <span>Last reviewed: October 2026</span>
+          <span>Retention: 7 complete local sets</span>
           <span>Restore model: procedural</span>
         </div>
         <ul>
-          <li>Logical MariaDB dump for database recovery</li>
+          <li>Logical MariaDB dump covering both the Genesis Inventory and DMA application databases</li>
           <li>Project archive for configuration and application files</li>
-          <li>Runtime-state snapshots for Grafana and Uptime Kuma databases</li>
-          <li>Optional restic offsite sync when repository credentials are configured</li>
-          <li>Day-based retention to protect disk on a 40 GB host</li>
-          <li>Cron-based execution with local log files</li>
+          <li>Integrity-checked SQLite snapshots for Grafana and Uptime Kuma, excluding application logs</li>
+          <li>Optional host-local project backups; offsite sync deliberately disabled</li>
+          <li>Count-based retention of the 7 newest complete backup sets</li>
+          <li>Atomic output, single-run locking, free-space checks, and automatic temporary-data cleanup</li>
         </ul>
         <div class="callout">
           <strong>Why this choice</strong>
@@ -67,9 +67,21 @@
         <h2>What recovery is expected to achieve.</h2>
         <ul class="plain-list">
           <li><strong>Goal:</strong> restore application state, platform files, and key operational data without guessing where critical files live.</li>
-          <li><strong>Included:</strong> database dumps, project tree archives, and selected runtime data used by monitoring and status tooling.</li>
+          <li><strong>Included:</strong> a combined dump of both application databases, project tree archives, and selected runtime data used by monitoring and status tooling.</li>
           <li><strong>Operational limit:</strong> this is a single-host strategy, not multi-site disaster recovery.</li>
-          <li><strong>Practice:</strong> restore scripts exist because backup quality only matters if restore remains understandable.</li>
+          <li><strong>Practice:</strong> file restores first extract into a private staging directory; direct overwrites of live databases are blocked.</li>
+        </ul>
+      </article>
+
+      <article class="doc-panel">
+        <p class="eyebrow">Storage Safety</p>
+        <h2>Backups must not become an outage source.</h2>
+        <ul class="plain-list">
+          <li>Each run requires enough space for the estimated archive and runtime snapshot while preserving a 2 GiB filesystem reserve.</li>
+          <li>Files are written with a <code>.partial</code> suffix and only promoted after the local backup is complete.</li>
+          <li>A run-specific directory under <code>infra/backup/tmp</code> is removed on success, error, interruption, or the next run after a hard crash.</li>
+          <li>Uptime Kuma and Grafana <code>*.log</code> files are excluded before runtime data is copied.</li>
+          <li>Uptime Kuma's internal <code>error.log</code> is checked every 5 minutes and rotated at 10 MiB with 3 compressed archives.</li>
         </ul>
       </article>
 

@@ -113,6 +113,7 @@ docker compose \
 - [Logging](/docs/logging.md)
 - [Routing and DNS](/docs/routing-dns.md)
 - [Backup and Restore](/docs/backup-restore.md)
+- [Weekly System Maintenance](/docs/maintenance.md)
 - [Lessons Learned](/docs/lessons-learned.md)
 - [GitHub Pages](/docs/github-pages.md)
 

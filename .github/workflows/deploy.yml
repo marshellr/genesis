@@ -132,8 +132,10 @@ jobs:
 
           ssh -i ~/.ssh/id_ed25519 -p "$DEPLOY_PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=~/.ssh/known_hosts "$DEPLOY_USER@$DEPLOY_HOST" "set -euo pipefail; tar -xzf '$REMOTE_RELEASE_DIR/release.tgz' -C '$REMOTE_RELEASE_DIR'; rm -f '$REMOTE_RELEASE_DIR/release.tgz'; chmod 750 '$REMOTE_RELEASE_DIR/scripts/deploy.sh' '$REMOTE_RELEASE_DIR/scripts/rollback.sh'; '$REMOTE_RELEASE_DIR/scripts/deploy.sh' '$RELEASE_SHA' '$REMOTE_RELEASE_DIR'"
 
-      - name: Verify public health endpoint
+      - name: Checkout routing verification
+        uses: actions/checkout@v4
+
+      - name: Verify public routing
         run: |
           set -euo pipefail
-          response="$(curl --fail --silent --show-error "$HEALTHCHECK_URL")"
-          printf '%s' "$response" | grep -Eq '"status"[[:space:]]*:[[:space:]]*"ok"'
+          python3 scripts/check-public-routing.py --rounds 5

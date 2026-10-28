@@ -1,0 +1,19 @@
+[Unit]
+Description=Reconcile and verify Genesis services after boot
+Documentation=file:/projects/genesis/docs/maintenance.md
+Requires=docker.service
+Wants=network-online.target
+After=docker.service network-online.target
+ConditionPathExists=/projects/genesis/infra/compose/.env
+StartLimitIntervalSec=20min
+StartLimitBurst=3
+
+[Service]
+Type=oneshot
+ExecStart=/projects/genesis/scripts/post-reboot-health.sh --reconcile
+TimeoutStartSec=20min
+Restart=on-failure
+RestartSec=30s
+
+[Install]
+WantedBy=multi-user.target

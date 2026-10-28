@@ -57,6 +57,14 @@ docker compose \
 - `https://grafana.shellr.net/login`
 - `https://status.shellr.net/`
 
+## Log size protection
+
+- Docker stdout/stderr uses `json-file` rotation with 10 MiB per file and 3 files per container.
+- Uptime Kuma 1.x also appends unexpected application errors to `/app/data/error.log`; Docker's log driver does not manage that file.
+- Deployment installs `infra/monitoring/logrotate/uptime-kuma.conf` as root-owned `/etc/logrotate.d/genesis-uptime-kuma`; it rotates the bind-mounted file at 10 MiB, keeps 3 compressed archives, and uses `copytruncate`.
+- `infra/backup/cron/uptime-kuma-logrotate.cron` evaluates the size every 5 minutes.
+- Backup runtime snapshots exclude `*.log` and `*.log.*`, so application logs never become part of the file archive.
+
 ## Prometheus notes
 
 - Prometheus scrapes:

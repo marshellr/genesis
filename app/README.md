@@ -18,7 +18,7 @@ A small plain-PHP inventory application for the DevOps portfolio project. It use
 - `src/env.php` - Minimal `.env` loader
 - `src/db.php` - PDO factory
 - `src/InventoryRepository.php` - Database access layer
-- `schema.sql` - Database schema and sample data
+- `schema.sql` - Idempotent database schema for new MariaDB volumes
 - `.env.example` - Environment template
 - `router.php` - Router for PHP's built-in server
 

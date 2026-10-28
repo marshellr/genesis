@@ -1,5 +1,9 @@
 SHELL=/bin/bash
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 MAILTO=""
+BACKUP_RETENTION_COUNT=7
+BACKUP_RESTORE_RETENTION_DAYS=7
+BACKUP_MIN_FREE_MIB=2048
+BACKUP_ESTIMATED_ARCHIVE_MIB=1024
 
 17 3 * * * shellr /projects/genesis/scripts/backup.sh >> /projects/genesis/infra/backup/logs/cron.log 2>&1

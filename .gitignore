@@ -28,6 +28,7 @@ tmp/
 *.backup
 *.dump
 *.sql
+!app/schema.sql
 *.sql.gz
 restic-cache/
 docs/publish/
@@ -38,6 +39,7 @@ infra/backup/logs/
 infra/backup/restore/
 infra/backup/tmp/
 infra/backup/last-successful-backup
+infra/backup/.backup.lock
 
 # Docker and local runtime artifacts
 docker-data/
@@ -68,3 +70,10 @@ __pycache__/
 .terraform/
 *.tfstate
 *.tfstate.*
+
+# Host-local project configuration (never publish)
+infra/local/
+infra/nginx/conf.d/local/
+
+# Local audit exports and snapshots
+.audit/

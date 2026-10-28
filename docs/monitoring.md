@@ -21,3 +21,4 @@
 - cAdvisor for container-level runtime visibility
 - no additional exporters unless they solve a concrete problem
 - retention sized for a small single-VM host
+- Uptime Kuma's internal error log is host-rotated at 10 MiB and excluded from backups

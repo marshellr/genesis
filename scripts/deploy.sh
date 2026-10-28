@@ -13,10 +13,19 @@ HOST_HEADER="${DEPLOY_HOST_HEADER:-shellr.net}"
 TIMESTAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 BACKUP_DIR="$BACKUP_ROOT/${TIMESTAMP}-${RELEASE_SHA:0:12}"
 LOCK_DIR="$RUNTIME_DIR/deploy.lock"
+LOGROTATE_SOURCE="$ROOT_DIR/infra/monitoring/logrotate/uptime-kuma.conf"
+LOGROTATE_TARGET="/etc/logrotate.d/genesis-uptime-kuma"
+SYSTEMD_SOURCE_DIR="$ROOT_DIR/infra/systemd"
+SYSTEMD_TARGET_DIR="/etc/systemd/system"
+SYSTEMD_UNITS=(
+  genesis-post-reboot-health.service
+  genesis-weekly-maintenance.service
+  genesis-weekly-maintenance.timer
+)
 RELEASE_BACKUP_RETENTION="${RELEASE_BACKUP_RETENTION:-10}"
 
-SYNC_DIRS=(app dma docs scripts .github infra/nginx/conf.d infra/nginx/snippets infra/nginx/static)
-SYNC_FILES=(infra/nginx/nginx.conf infra/compose/docker-compose.yml infra/compose/.env.example)
+SYNC_DIRS=(app dma docs scripts .github infra/nginx/conf.d infra/nginx/snippets infra/nginx/static infra/backup/cron infra/systemd)
+SYNC_FILES=(infra/nginx/nginx.conf infra/compose/docker-compose.yml infra/compose/.env.example infra/monitoring/logrotate/uptime-kuma.conf)
 PLATFORM_CONFIG_FILES=(
   infra/monitoring/docker-compose.monitoring.yml
   infra/monitoring/.env.example
@@ -32,7 +41,7 @@ PLATFORM_CONFIG_FILES=(
   infra/logging/loki/config.yml
   infra/logging/alloy/config.alloy
 )
-BACKUP_ITEMS=(app dma docs scripts .github infra/nginx/nginx.conf infra/nginx/conf.d infra/nginx/snippets infra/nginx/static infra/compose/docker-compose.yml infra/compose/.env infra/compose/.env.example infra/monitoring infra/logging infra/backup/cron)
+BACKUP_ITEMS=(app dma docs scripts .github infra/nginx/nginx.conf infra/nginx/conf.d infra/nginx/snippets infra/nginx/static infra/compose/docker-compose.yml infra/compose/.env infra/compose/.env.example infra/monitoring infra/logging infra/backup/cron infra/systemd)
 PLATFORM_CONFIG_CHANGED=0
 
 log() {
@@ -70,7 +79,7 @@ restore_item() {
 
   if [[ -d "$backup_path" ]]; then
     mkdir -p "$live_path"
-    rsync -a --delete "$backup_path/" "$live_path/"
+    rsync -a --delete --exclude=/local/ "$backup_path/" "$live_path/"
   elif [[ -e "$backup_path" ]]; then
     mkdir -p "$(dirname "$live_path")"
     cp -a "$backup_path" "$live_path"
@@ -86,7 +95,7 @@ sync_directory() {
 
   # Keep the target directory inode so Docker bind mounts remain valid.
   mkdir -p "$live_path"
-  rsync -a --delete "$source_path/" "$live_path/"
+  rsync -a --delete --exclude=/local/ "$source_path/" "$live_path/"
 }
 
 sync_file() {
@@ -141,6 +150,28 @@ install_cron_jobs() {
   done
 }
 
+install_logrotate_config() {
+  if [[ -f "$LOGROTATE_SOURCE" ]]; then
+    sudo install -o root -g root -m 0644 "$LOGROTATE_SOURCE" "$LOGROTATE_TARGET"
+  else
+    # Keep rollbacks to releases without this policy consistent.
+    sudo rm -f -- "$LOGROTATE_TARGET"
+  fi
+}
+
+install_systemd_units() {
+  local unit
+
+  for unit in "${SYSTEMD_UNITS[@]}"; do
+    [[ -f "$SYSTEMD_SOURCE_DIR/$unit" ]] || fail "Missing systemd unit: $unit"
+    sudo install -o root -g root -m 0644 "$SYSTEMD_SOURCE_DIR/$unit" "$SYSTEMD_TARGET_DIR/$unit"
+  done
+
+  sudo systemctl daemon-reload
+  sudo systemctl enable genesis-post-reboot-health.service >/dev/null
+  sudo systemctl enable --now genesis-weekly-maintenance.timer >/dev/null
+}
+
 restart_platform_services() {
   (( PLATFORM_CONFIG_CHANGED == 1 )) || return 0
 
@@ -171,7 +202,7 @@ healthcheck() {
   local response
 
   for attempt in $(seq 1 24); do
-    if response="$(curl -kfsS --max-time 5 -H "Host: $HOST_HEADER" https://127.0.0.1/health 2>/dev/null)"; then
+    if response="$(curl -fsS --max-time 5 --resolve "$HOST_HEADER:443:127.0.0.1" "https://$HOST_HEADER/health" 2>/dev/null)"; then
       if printf '%s' "$response" | grep -Eq '"status"[[:space:]]*:[[:space:]]*"ok"'; then
         log "Healthcheck passed on attempt ${attempt}."
         return 0
@@ -217,6 +248,9 @@ rollback() {
   for item in "${BACKUP_ITEMS[@]}"; do
     restore_item "$item"
   done
+  install_cron_jobs
+  install_logrotate_config
+  install_systemd_units
 
   docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" config >/dev/null
   docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d --no-build --wait db app dma nginx
@@ -240,12 +274,19 @@ require_command sed
 require_command cmp
 require_command rsync
 require_command sudo
+require_command systemctl
 
 [[ -n "$RELEASE_SHA" ]] || fail "Usage: deploy.sh <release-sha> <release-dir>"
 [[ -n "$RELEASE_DIR" ]] || fail "Usage: deploy.sh <release-sha> <release-dir>"
 [[ -d "$RELEASE_DIR" ]] || fail "Release directory not found: $RELEASE_DIR"
 [[ -f "$RELEASE_DIR/app/Dockerfile" ]] || fail "Release is missing app/Dockerfile"
+[[ -f "$RELEASE_DIR/app/schema.sql" ]] || fail "Release is missing app/schema.sql"
+[[ -f "$RELEASE_DIR/dma/Dockerfile" ]] || fail "Release is missing dma/Dockerfile"
 [[ -f "$RELEASE_DIR/infra/compose/docker-compose.yml" ]] || fail "Release is missing infra/compose/docker-compose.yml"
+for unit in "${SYSTEMD_UNITS[@]}"; do
+  [[ -f "$RELEASE_DIR/infra/systemd/$unit" ]] || fail "Release is missing infra/systemd/$unit"
+done
+[[ -f "$RELEASE_DIR/scripts/check-public-routing.py" ]] || fail "Release is missing routing verification"
 [[ -f "$ENV_FILE" ]] || fail "Compose env file missing: $ENV_FILE"
 
 mkdir -p "$RUNTIME_DIR" "$BACKUP_ROOT"
@@ -280,6 +321,8 @@ for item in "${PLATFORM_CONFIG_FILES[@]}"; do
 done
 
 install_cron_jobs
+install_logrotate_config
+install_systemd_units
 
 chmod 755 "$ROOT_DIR/scripts" || true
 find "$ROOT_DIR/scripts" -maxdepth 1 -type f -name '*.sh' -exec chmod 750 {} \; || true
@@ -302,6 +345,7 @@ docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T nginx nginx -s 
 restart_platform_services
 
 if ! healthcheck \
+  || ! python3 "$ROOT_DIR/scripts/check-public-routing.py" --local --rounds 3 \
   || ! smoke_check "shellr health" "https://shellr.net/health" '"status":"ok"' \
   || ! smoke_check "DMA showcase" "https://dma.shellr.net/" 'DMA Statistics Module' \
   || ! smoke_check "status snapshot" "https://status.shellr.net/" 'shellr platform status'; then

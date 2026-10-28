@@ -1,0 +1,5 @@
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+MAILTO=""
+
+*/5 * * * * root /usr/sbin/logrotate --state /var/lib/logrotate/genesis-uptime-kuma.status /etc/logrotate.d/genesis-uptime-kuma

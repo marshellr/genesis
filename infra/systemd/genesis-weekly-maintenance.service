@@ -1,0 +1,14 @@
+[Unit]
+Description=Genesis weekly package maintenance and controlled reboot
+Documentation=file:/projects/genesis/docs/maintenance.md
+Wants=network-online.target
+After=network-online.target docker.service
+ConditionPathExists=/projects/genesis/infra/compose/.env
+
+[Service]
+Type=oneshot
+ExecStart=/projects/genesis/scripts/weekly-maintenance.sh
+TimeoutStartSec=2h
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
