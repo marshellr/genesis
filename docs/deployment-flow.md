@@ -1,6 +1,7 @@
 # Deployment Flow
 
 <!-- The deployment bundle records its source commit in app/public/deploy-version.txt. -->
+<!-- The public marker can be checked at /deploy-version.txt after deployment. -->
 
 ## Goal
 
