@@ -10,6 +10,7 @@ LOGROTATE_SOURCE="$ROOT_DIR/infra/monitoring/logrotate/uptime-kuma.conf"
 LOGROTATE_TARGET="/etc/logrotate.d/genesis-uptime-kuma"
 SYSTEMD_SOURCE_DIR="$ROOT_DIR/infra/systemd"
 SYSTEMD_TARGET_DIR="/etc/systemd/system"
+readonly INSTALL_HOST_INTEGRATION="${GENESIS_INSTALL_HOST_INTEGRATION:-0}"
 SYSTEMD_UNITS=(
   genesis-post-reboot-health.service
   genesis-weekly-maintenance.service
@@ -26,6 +27,10 @@ fail() {
   printf '[rollback] ERROR: %s\n' "$*" >&2
   exit 1
 }
+
+if [[ "$INSTALL_HOST_INTEGRATION" == 1 && "$(hostname -s)" == docker01 ]]; then
+  fail "Host integration is managed separately on docker01."
+fi
 
 healthcheck() {
   local attempt
@@ -59,7 +64,7 @@ restore_item() {
   fi
 }
 
-restore_platform_services() {
+restore_host_integration() {
   local cron_file target name existing keep
   local unit
   local -a expected_targets=()
@@ -101,7 +106,9 @@ restore_platform_services() {
     sudo systemctl enable genesis-post-reboot-health.service >/dev/null
     sudo systemctl enable --now genesis-weekly-maintenance.timer >/dev/null
   fi
+}
 
+restore_platform_services() {
   docker compose --env-file "$ROOT_DIR/infra/monitoring/.env" -f "$ROOT_DIR/infra/monitoring/docker-compose.monitoring.yml" config >/dev/null
   docker compose --env-file "$ROOT_DIR/infra/monitoring/.env" -f "$ROOT_DIR/infra/monitoring/docker-compose.monitoring.yml" restart prometheus alertmanager grafana
 
@@ -118,16 +125,29 @@ BACKUP_DIR="${1:-${LAST_BACKUP_DIR:-}}"
 [[ -d "$BACKUP_DIR" ]] || fail "Backup directory not found: $BACKUP_DIR"
 
 command -v rsync >/dev/null 2>&1 || fail "Required command missing: rsync"
-command -v systemctl >/dev/null 2>&1 || fail "Required command missing: systemctl"
+if [[ "$INSTALL_HOST_INTEGRATION" == 1 ]]; then
+  command -v sudo >/dev/null 2>&1 || fail "Required command missing: sudo"
+  command -v systemctl >/dev/null 2>&1 || fail "Required command missing: systemctl"
+fi
+
+nginx_recreate=()
+if [[ -f "$BACKUP_DIR/infra/nginx/nginx.conf" ]] &&
+   ! cmp -s "$BACKUP_DIR/infra/nginx/nginx.conf" "$ROOT_DIR/infra/nginx/nginx.conf"; then
+  nginx_recreate=(--force-recreate)
+fi
 
 for item in "${BACKUP_ITEMS[@]}"; do
   restore_item "$item"
 done
 
 docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" config >/dev/null
-docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d --no-build --wait db app dma nginx
+docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d --no-build --wait db app dma
+docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d --no-deps --no-build --wait "${nginx_recreate[@]}" nginx
 docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T nginx nginx -t
 docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T nginx nginx -s reload
+if [[ "$INSTALL_HOST_INTEGRATION" == 1 ]]; then
+  restore_host_integration
+fi
 restore_platform_services
 
 if healthcheck; then

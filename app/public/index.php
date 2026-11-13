@@ -28,8 +28,8 @@ $liveComponents = [
     ],
     [
         'title' => 'status.shellr.net',
-        'body' => 'Public uptime monitoring',
-        'href' => $site['status_url'],
+        'body' => 'Uptime monitoring on the local network',
+        'href' => '',
     ],
     [
         'title' => 'grafana.shellr.net',
@@ -44,7 +44,7 @@ $liveComponents = [
 ];
 
 $platformSnapshot = [
-    ['title' => 'Host', 'body' => 'Single Hetzner VM with 4 vCPU, 8 GB RAM, and bounded disk usage.'],
+    ['title' => 'Host', 'body' => 'Docker runs in a virtual machine on my own Proxmox server. Cloudflare Tunnel serves the public sites without inbound port forwarding.'],
     ['title' => 'Runtime', 'body' => 'Services run in separate containers instead of sharing one unmanaged host setup.'],
     ['title' => 'Ingress', 'body' => 'Nginx handles HTTPS, redirects, and hostname-based routing for public services.'],
     ['title' => 'Delivery', 'body' => 'GitHub Actions defines staged SSH releases with health gates, rollback mechanics, and explicit production verification.'],
@@ -468,7 +468,6 @@ Backup System</pre>
         <div class="hero-actions">
           <a class="button primary" href="<?= e($site['docs_url']) ?>">Read Documentation</a>
           <a class="button secondary" href="<?= e($site['docs_url'] . '/architecture.html') ?>">View Architecture</a>
-          <a class="button secondary" href="<?= e($site['status_url']) ?>">Open Status</a>
           <a class="button secondary" href="<?= e($githubUrl) ?>">Open Repository</a>
         </div>
       </div>

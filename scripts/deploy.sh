@@ -17,6 +17,7 @@ LOGROTATE_SOURCE="$ROOT_DIR/infra/monitoring/logrotate/uptime-kuma.conf"
 LOGROTATE_TARGET="/etc/logrotate.d/genesis-uptime-kuma"
 SYSTEMD_SOURCE_DIR="$ROOT_DIR/infra/systemd"
 SYSTEMD_TARGET_DIR="/etc/systemd/system"
+readonly INSTALL_HOST_INTEGRATION="${GENESIS_INSTALL_HOST_INTEGRATION:-0}"
 SYSTEMD_UNITS=(
   genesis-post-reboot-health.service
   genesis-weekly-maintenance.service
@@ -43,6 +44,7 @@ PLATFORM_CONFIG_FILES=(
 )
 BACKUP_ITEMS=(app dma docs scripts .github infra/nginx/nginx.conf infra/nginx/conf.d infra/nginx/snippets infra/nginx/static infra/compose/docker-compose.yml infra/compose/.env infra/compose/.env.example infra/monitoring infra/logging infra/backup/cron infra/systemd)
 PLATFORM_CONFIG_CHANGED=0
+NGINX_CONFIG_CHANGED=0
 
 log() {
   printf '[deploy] %s\n' "$*"
@@ -52,6 +54,10 @@ fail() {
   printf '[deploy] ERROR: %s\n' "$*" >&2
   exit 1
 }
+
+if [[ "$INSTALL_HOST_INTEGRATION" == 1 && "$(hostname -s)" == docker01 ]]; then
+  fail "Host integration is managed separately on docker01."
+fi
 
 require_command() {
   command -v "$1" >/dev/null 2>&1 || fail "Required command missing: $1"
@@ -105,6 +111,12 @@ sync_file() {
 
   [[ -f "$source_path" ]] || return 0
 
+  if [[ "$relative" == infra/nginx/nginx.conf ]]; then
+    if [[ -f "$live_path" ]] && cmp -s "$source_path" "$live_path"; then
+      return 0
+    fi
+    NGINX_CONFIG_CHANGED=1
+  fi
   mkdir -p "$(dirname "$live_path")"
   install -m 0644 "$source_path" "$live_path"
 }
@@ -176,12 +188,12 @@ restart_platform_services() {
   (( PLATFORM_CONFIG_CHANGED == 1 )) || return 0
 
   log "Applying monitoring and logging configuration changes"
-  docker compose --env-file "$ROOT_DIR/infra/monitoring/.env" -f "$ROOT_DIR/infra/monitoring/docker-compose.monitoring.yml" config >/dev/null
-  docker compose --env-file "$ROOT_DIR/infra/monitoring/.env" -f "$ROOT_DIR/infra/monitoring/docker-compose.monitoring.yml" restart prometheus alertmanager grafana
-  docker compose --env-file "$ROOT_DIR/infra/monitoring/.env" -f "$ROOT_DIR/infra/monitoring/docker-compose.monitoring.yml" up -d --no-build --wait prometheus alertmanager grafana
+  docker compose --env-file "$ROOT_DIR/infra/monitoring/.env" -f "$ROOT_DIR/infra/monitoring/docker-compose.monitoring.yml" config >/dev/null || return 1
+  docker compose --env-file "$ROOT_DIR/infra/monitoring/.env" -f "$ROOT_DIR/infra/monitoring/docker-compose.monitoring.yml" restart prometheus alertmanager grafana || return 1
+  docker compose --env-file "$ROOT_DIR/infra/monitoring/.env" -f "$ROOT_DIR/infra/monitoring/docker-compose.monitoring.yml" up -d --no-build --wait prometheus alertmanager grafana || return 1
 
-  docker compose --env-file "$ROOT_DIR/infra/logging/.env" -f "$ROOT_DIR/infra/logging/docker-compose.logging.yml" config >/dev/null
-  docker compose --env-file "$ROOT_DIR/infra/logging/.env" -f "$ROOT_DIR/infra/logging/docker-compose.logging.yml" up -d --no-build --remove-orphans --wait loki alloy
+  docker compose --env-file "$ROOT_DIR/infra/logging/.env" -f "$ROOT_DIR/infra/logging/docker-compose.logging.yml" config >/dev/null || return 1
+  docker compose --env-file "$ROOT_DIR/infra/logging/.env" -f "$ROOT_DIR/infra/logging/docker-compose.logging.yml" up -d --no-build --remove-orphans --wait loki alloy || return 1
 }
 
 upsert_env_value() {
@@ -246,14 +258,23 @@ rollback() {
 
   local item
   for item in "${BACKUP_ITEMS[@]}"; do
-    restore_item "$item"
+    restore_item "$item" || return 1
   done
-  install_cron_jobs
-  install_logrotate_config
-  install_systemd_units
+  if [[ "$INSTALL_HOST_INTEGRATION" == 1 ]]; then
+    install_cron_jobs || return 1
+    install_logrotate_config || return 1
+    install_systemd_units || return 1
+  fi
 
-  docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" config >/dev/null
-  docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d --no-build --wait db app dma nginx
+  docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" config >/dev/null || return 1
+  docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d --no-build --wait db app dma || return 1
+  local -a nginx_recreate=()
+  if (( NGINX_CONFIG_CHANGED == 1 )); then
+    nginx_recreate=(--force-recreate)
+  fi
+  docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d --no-deps --no-build --wait "${nginx_recreate[@]}" nginx || return 1
+  docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T nginx nginx -t || return 1
+  docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T nginx nginx -s reload || return 1
 
   if healthcheck; then
     log "Rollback completed successfully."
@@ -273,8 +294,10 @@ require_command install
 require_command sed
 require_command cmp
 require_command rsync
-require_command sudo
-require_command systemctl
+if [[ "$INSTALL_HOST_INTEGRATION" == 1 ]]; then
+  require_command sudo
+  require_command systemctl
+fi
 
 [[ -n "$RELEASE_SHA" ]] || fail "Usage: deploy.sh <release-sha> <release-dir>"
 [[ -n "$RELEASE_DIR" ]] || fail "Usage: deploy.sh <release-sha> <release-dir>"
@@ -320,9 +343,11 @@ for item in "${PLATFORM_CONFIG_FILES[@]}"; do
   sync_platform_file "$item"
 done
 
-install_cron_jobs
-install_logrotate_config
-install_systemd_units
+if [[ "$INSTALL_HOST_INTEGRATION" == 1 ]]; then
+  install_cron_jobs
+  install_logrotate_config
+  install_systemd_units
+fi
 
 chmod 755 "$ROOT_DIR/scripts" || true
 find "$ROOT_DIR/scripts" -maxdepth 1 -type f -name '*.sh' -exec chmod 750 {} \; || true
@@ -339,16 +364,20 @@ log "Building app image tag ${RELEASE_SHA}"
 docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" build app dma
 
 log "Starting updated services"
-docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d --no-build --wait db app dma nginx
-docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T nginx nginx -t
-docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T nginx nginx -s reload
-restart_platform_services
-
-if ! healthcheck \
+docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d --no-build --wait db app dma
+nginx_recreate=()
+if (( NGINX_CONFIG_CHANGED == 1 )); then
+  # nginx.conf is a file bind mount. Recreate nginx to pick up the new inode.
+  nginx_recreate=(--force-recreate)
+fi
+if ! docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d --no-deps --no-build --wait "${nginx_recreate[@]}" nginx \
+  || ! docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T nginx nginx -t \
+  || ! docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T nginx nginx -s reload \
+  || ! restart_platform_services \
+  || ! healthcheck \
   || ! python3 "$ROOT_DIR/scripts/check-public-routing.py" --local --rounds 3 \
   || ! smoke_check "shellr health" "https://shellr.net/health" '"status":"ok"' \
-  || ! smoke_check "DMA showcase" "https://dma.shellr.net/" 'DMA Statistics Module' \
-  || ! smoke_check "status snapshot" "https://status.shellr.net/" 'shellr platform status'; then
+  || ! smoke_check "DMA showcase" "https://dma.shellr.net/" 'DMA Statistics Module'; then
   log "Post-deployment verification failed."
   if rollback; then
     fail "Deployment failed and rollback succeeded."
