@@ -37,7 +37,7 @@ healthcheck() {
   local response
 
   for attempt in $(seq 1 24); do
-    if response="$(curl -kfsS --max-time 5 -H "Host: $HOST_HEADER" https://127.0.0.1/health 2>/dev/null)"; then
+    if response="$(curl -fsS --max-time 5 --resolve "$HOST_HEADER:443:127.0.0.1" "https://$HOST_HEADER/health" 2>/dev/null)"; then
       if printf '%s' "$response" | grep -Eq '"status"[[:space:]]*:[[:space:]]*"ok"'; then
         log "Healthcheck passed on attempt ${attempt}."
         return 0

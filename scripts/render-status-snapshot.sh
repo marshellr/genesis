@@ -3,8 +3,6 @@ set -Eeuo pipefail
 umask 027
 
 OUTPUT_FILE="/projects/genesis/infra/nginx/static/status/snapshot.html"
-COMPOSE_ENV="/projects/genesis/infra/compose/.env"
-BACKUP_DIR="/projects/genesis/infra/backup/db"
 BACKUP_HEALTH_FILE="/projects/genesis/infra/backup/last-successful-backup"
 GENERATED_AT="$(date -u '+%Y-%m-%d %H:%M UTC')"
 
@@ -15,7 +13,8 @@ service_status() {
   local fail_text="$4"
   local code
 
-  code="$(curl -fsS -o /dev/null -w '%{http_code}' --max-time 15 "$url" || true)"
+  shift 4
+  code="$(curl -fsS -o /dev/null -w '%{http_code}' --max-time 15 "$@" "$url" || true)"
   if [[ "$code" =~ ^[23][0-9][0-9]$ ]]; then
     printf '%s|ok|%s|%s' "$name" "$ok_text" "$code"
   else
@@ -39,18 +38,20 @@ static_health_status() {
 }
 
 backup_snapshot() {
-  local latest latest_epoch age_minutes status detail
+  local latest_epoch last_success age_seconds status detail
   if [[ ! -f "$BACKUP_HEALTH_FILE" ]]; then
     printf 'degraded|Backup verification has not completed yet.'
     return
   fi
 
-  latest="$BACKUP_HEALTH_FILE"
+  read -r latest_epoch < "$BACKUP_HEALTH_FILE" || latest_epoch=""
+  if [[ ! "$latest_epoch" =~ ^[0-9]{1,12}$ ]] || ! last_success="$(date -u -d "@$latest_epoch" '+%Y-%m-%d %H:%M UTC')"; then
+    printf 'degraded|Backup verification marker is invalid.'
+    return
+  fi
+  age_seconds=$(( $(date +%s) - 10#$latest_epoch ))
 
-  latest_epoch="$(stat -c %Y "$latest")"
-  age_minutes="$(( ( $(date +%s) - latest_epoch ) / 60 ))"
-
-  if (( age_minutes <= 1500 )); then
+  if (( age_seconds >= 0 && age_seconds <= 1500 * 60 )); then
     status="ok"
     detail="Daily backup verification is current."
   else
@@ -58,12 +59,7 @@ backup_snapshot() {
     detail="Backup verification requires operator attention."
   fi
 
-  printf '%s|%s' "$status" "$detail"
-}
-
-read_env_value() {
-  local key="$1"
-  grep -E "^${key}=" "$COMPOSE_ENV" | tail -n1 | cut -d= -f2- || true
+  printf '%s|%s Last successful local backup: %s.' "$status" "$detail" "$last_success"
 }
 
 if python3 /projects/genesis/scripts/check-public-routing.py --rounds 3 >/dev/null 2>&1; then
@@ -73,7 +69,7 @@ else
 fi
 dma="$(static_health_status "dma.shellr.net" "https://dma.shellr.net/health.txt" "DMA showcase health marker responds." "DMA showcase health marker is not responding as expected.")"
 docs="$(service_status "docs.shellr.net" "https://docs.shellr.net/" "Docs site is reachable through GitHub Pages." "Docs site is currently unreachable or returning an error.")"
-status_surface="$(service_status "status.shellr.net" "https://status.shellr.net/status/shellr" "Public status board is reachable." "Public status board is not returning cleanly.")"
+status_surface="$(service_status "status.shellr.net" "https://status.shellr.net/status/shellr" "Internal status board is reachable." "Internal status board is not returning cleanly." --resolve status.shellr.net:443:127.0.0.1)"
 backup_info="$(backup_snapshot)"
 
 IFS='|' read -r shellr_name shellr_state shellr_text shellr_code <<< "$shellr"
@@ -89,7 +85,7 @@ cat > "$OUTPUT_FILE" <<HTML
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>shellr status</title>
-  <meta name="description" content="Public platform snapshot for shellr.net.">
+  <meta name="description" content="Internal platform snapshot for shellr.net.">
   <style>
     :root {
       color-scheme: dark;
@@ -128,7 +124,7 @@ cat > "$OUTPUT_FILE" <<HTML
 <body>
   <main>
     <section class="panel">
-      <p class="eyebrow">Public Status Snapshot</p>
+      <p class="eyebrow">Internal Status Snapshot</p>
       <h1>shellr platform status</h1>
       <p>This snapshot is rendered on the VM and refreshed on a schedule. It gives visitors a readable platform overview even when the full Uptime Kuma UI is not the best first entrypoint.</p>
       <div class="meta">
@@ -166,12 +162,12 @@ cat > "$OUTPUT_FILE" <<HTML
         <article class="card">
           <div class="state ok">operator note</div>
           <h2>Protected surfaces</h2>
-          <p><code>grafana.shellr.net</code> stays protected behind access control and is not part of the public status board.</p>
+          <p><code>grafana.shellr.net</code> is protected by access control.</p>
         </article>
       </div>
 
       <div class="links">
-        <a class="button primary" href="/status/shellr">Open full public status</a>
+        <a class="button primary" href="/status/shellr">Open full status</a>
         <a class="button" href="https://shellr.net">Open shellr.net</a>
         <a class="button" href="https://docs.shellr.net">Open docs</a>
       </div>

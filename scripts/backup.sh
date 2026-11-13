@@ -33,6 +33,7 @@ FILES_ARCHIVE_FILE_PARTIAL=""
 MANIFEST_FILE_PARTIAL=""
 
 mkdir -p "$DB_BACKUP_DIR" "$FILES_BACKUP_DIR" "$LOG_DIR" "$TMP_DIR" "$RESTORE_ROOT"
+BACKUP_OWNER="${BACKUP_OWNER:-$(stat -c '%u:%g' "$BACKUP_ROOT")}"
 
 log() {
   printf '[%s] %s\n' "$(date '+%F %T')" "$*" | tee -a "$LOG_FILE"
@@ -285,6 +286,11 @@ fi
 
 require_file "$COMPOSE_ENV"
 
+DOCKER=(docker)
+if (( EUID != 0 )) && ! docker info >/dev/null 2>&1; then
+  DOCKER=(sudo -n docker)
+fi
+
 for required_command in docker flock sqlite3 sudo tar; do
   if ! command -v "$required_command" >/dev/null 2>&1; then
     log "Fehlendes Kommando: $required_command"
@@ -332,18 +338,18 @@ log "DB-Container: $DB_CONTAINER"
 
 check_free_space
 
-if ! docker inspect "$DB_CONTAINER" >/dev/null 2>&1; then
+if ! "${DOCKER[@]}" inspect "$DB_CONTAINER" >/dev/null 2>&1; then
   log "DB-Container nicht gefunden: $DB_CONTAINER"
   exit 1
 fi
 
-if [[ "$(docker inspect -f '{{.State.Running}}' "$DB_CONTAINER")" != "true" ]]; then
+if [[ "$("${DOCKER[@]}" inspect -f '{{.State.Running}}' "$DB_CONTAINER")" != "true" ]]; then
   log "DB-Container laeuft nicht: $DB_CONTAINER"
   exit 1
 fi
 
 log "Erstelle MariaDB-Dump fuer $DB_DATABASE und $DMA_DB_NAME: $DB_DUMP_FILE"
-docker exec \
+"${DOCKER[@]}" exec \
   -e MYSQL_PWD="$DB_ROOT_PASSWORD" \
   "$DB_CONTAINER" \
   mariadb-dump \
@@ -396,10 +402,10 @@ if [[ -d "$ARCHIVE_OVERLAY_DIR/external" ]]; then
   tar_args+=(./_runtime-overlay/external)
 fi
 sudo tar "${tar_args[@]}"
-sudo chown shellr:shellr "$FILES_ARCHIVE_FILE_PARTIAL"
+sudo -n chown "$BACKUP_OWNER" "$FILES_ARCHIVE_FILE_PARTIAL"
 chmod 600 "$FILES_ARCHIVE_FILE_PARTIAL"
 
-sudo chown shellr:shellr "$DB_DUMP_FILE_PARTIAL"
+sudo -n chown "$BACKUP_OWNER" "$DB_DUMP_FILE_PARTIAL"
 mv "$DB_DUMP_FILE_PARTIAL" "$DB_DUMP_FILE"
 mv "$FILES_ARCHIVE_FILE_PARTIAL" "$FILES_ARCHIVE_FILE"
 
@@ -413,7 +419,7 @@ mv "$FILES_ARCHIVE_FILE_PARTIAL" "$FILES_ARCHIVE_FILE"
   backup_extra_manifest
   sha256sum "$DB_DUMP_FILE" "$FILES_ARCHIVE_FILE"
 } > "$MANIFEST_FILE_PARTIAL"
-sudo chown shellr:shellr "$MANIFEST_FILE_PARTIAL"
+sudo -n chown "$BACKUP_OWNER" "$MANIFEST_FILE_PARTIAL"
 mv "$MANIFEST_FILE_PARTIAL" "$MANIFEST_FILE"
 LOCAL_BACKUP_COMPLETE=1
 
@@ -458,7 +464,7 @@ find "$RESTORE_ROOT" -mindepth 1 -maxdepth 1 -type d -mtime +"$RESTORE_RETENTION
 
 mkdir -p "$(dirname "$BACKUP_HEALTH_FILE")"
 printf "%s\n" "$(date +%s)" > "$BACKUP_HEALTH_FILE.tmp"
-sudo chown shellr:shellr "$BACKUP_HEALTH_FILE.tmp"
+sudo -n chown "$BACKUP_OWNER" "$BACKUP_HEALTH_FILE.tmp"
 mv "$BACKUP_HEALTH_FILE.tmp" "$BACKUP_HEALTH_FILE"
 
 log "Backup abgeschlossen"

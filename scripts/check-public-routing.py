@@ -8,10 +8,14 @@ import sys
 
 def fetch(path, local=False):
     args=['curl','--silent','--show-error','--fail','--connect-timeout','3','--max-time','8']
-    if local:args+=['--resolve','shellr.net:443:127.0.0.1']
-    result=subprocess.run([*args,'https://shellr.net'+path],capture_output=True)
+    if local:
+        args+=['--resolve','shellr.net:443:127.0.0.1']
+    result=subprocess.run([*args,'--write-out','\n%header{cf-ray}','https://shellr.net'+path],capture_output=True)
     if result.returncode:raise RuntimeError(f'{path}: request failed ({result.returncode})')
-    return result.stdout.decode('utf-8')
+    body, separator, cf_ray = result.stdout.rpartition(b'\n')
+    if not separator or (not local and not cf_ray.strip()):
+        raise RuntimeError(f'{path}: missing Cloudflare response header')
+    return body.decode('utf-8')
 
 
 def check(local=False,rounds=3):

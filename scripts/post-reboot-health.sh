@@ -119,7 +119,8 @@ wait_for_containers() {
 http_code() {
   local host="$1"
   local path="$2"
-  curl -LsS --connect-timeout 3 --max-time 10 --resolve "$host:443:127.0.0.1" -o /dev/null -w '%{http_code}' "https://$host$path" || true
+  shift 2
+  curl -LsS --connect-timeout 3 --max-time 10 -o /dev/null -w '%{http_code}' "$@" "https://$host$path" || true
 }
 
 wait_for_endpoints() {
@@ -132,11 +133,11 @@ wait_for_endpoints() {
   for attempt in $(seq 1 60); do
     shellr_code="$(http_code shellr.net /health)"
     dma_code="$(http_code dma.shellr.net /)"
-    status_code="$(http_code status.shellr.net /)"
-    grafana_code="$(http_code grafana.shellr.net /login)"
+    status_code="$(http_code status.shellr.net / --resolve status.shellr.net:443:127.0.0.1)"
+    grafana_code="$(http_code grafana.shellr.net /login --resolve grafana.shellr.net:443:127.0.0.1)"
 
 
-    if [[ "$shellr_code" == "200" && "$dma_code" == "200" && "$status_code" == "200" && "$grafana_code" == "401" ]] && check_extra_endpoints && python3 "$PROJECT_ROOT/scripts/check-public-routing.py" --local --rounds 3; then
+    if [[ "$shellr_code" == "200" && "$dma_code" == "200" && "$status_code" == "200" && "$grafana_code" == "401" ]] && check_extra_endpoints && python3 "$PROJECT_ROOT/scripts/check-public-routing.py" --rounds 3; then
       log "Endpunkte gesund: shellr=$shellr_code dma=$dma_code status=$status_code grafana=$grafana_code"
       return 0
     fi

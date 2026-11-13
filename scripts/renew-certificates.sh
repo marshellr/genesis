@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Legacy HTTP-01 renewal. On docker01, cert-renew.timer handles DNS-01.
+
 ROOT_DIR="/projects/genesis"
 CERTBOT_WWW="$ROOT_DIR/infra/nginx/certbot/www"
 CERTBOT_CONF="$ROOT_DIR/infra/nginx/certbot/conf"
