@@ -1,4 +1,4 @@
-name: Build and Deploy
+name: Build and Publish Release
 
 on:
   push:
@@ -13,14 +13,9 @@ concurrency:
   group: production-deploy
   cancel-in-progress: false
 
-env:
-  DEPLOY_USER: shellr
-  DEPLOY_ROOT: /projects/genesis
-  DEPLOY_PORT: ${{ secrets.DEPLOY_SSH_PORT || '22' }}
-  HEALTHCHECK_URL: https://shellr.net/health
-
 jobs:
   build:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     steps:
@@ -51,28 +46,33 @@ jobs:
       - name: Create release bundle
         run: |
           set -euo pipefail
-          rm -rf .release
           mkdir -p .release/payload
-
+          paths=()
           for path in app dma infra scripts docs .github README.md .gitignore .env.example; do
-            if [ -e "$path" ]; then
-              cp -a --parents "$path" .release/payload/
+            if git cat-file -e "HEAD:$path" 2>/dev/null; then
+              paths+=("$path")
             fi
           done
-
+          git archive --format=tar HEAD -- "${paths[@]}" | tar -xf - -C .release/payload
+          printf '%s\n' "$GITHUB_SHA" > .release/payload/app/public/deploy-version.txt
           tar -C .release/payload -czf .release/release.tgz .
+          (cd .release && sha256sum release.tgz > SHA256SUMS)
 
       - name: Upload release bundle
         uses: actions/upload-artifact@v4
         with:
           name: release-bundle
-          path: .release/release.tgz
+          path: |
+            .release/release.tgz
+            .release/SHA256SUMS
           if-no-files-found: error
+          include-hidden-files: true
 
-  deploy:
+  publish:
     runs-on: ubuntu-latest
     needs: build
-    environment: production
+    permissions:
+      contents: write
 
     steps:
       - name: Download release bundle
@@ -81,61 +81,39 @@ jobs:
           name: release-bundle
           path: .release
 
-      - name: Prepare SSH
+      - name: Publish deployment release
         env:
-          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
-          DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
-          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          test -n "$DEPLOY_HOST"
-          test -n "$DEPLOY_SSH_PRIVATE_KEY"
-          test -n "$DEPLOY_KNOWN_HOSTS"
-          test "$DEPLOY_HOST" != "shellr"
-          install -m 700 -d ~/.ssh
-          printf '%s\n' "$DEPLOY_SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
-          chmod 644 ~/.ssh/known_hosts
-          ssh-keygen -F "$DEPLOY_HOST" -f ~/.ssh/known_hosts >/dev/null
+          (cd .release && sha256sum --check --strict SHA256SUMS)
+          tag="deploy-$(date -u +%Y%m%d-%H%M)-${GITHUB_SHA:0:12}"
+          gh release create "$tag" .release/release.tgz .release/SHA256SUMS \
+            --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --latest --title "$tag" --notes "Deployment commit $GITHUB_SHA"
 
-      - name: Verify SSH connectivity and release permissions
-        env:
-          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+  verify:
+    runs-on: ubuntu-latest
+    needs: publish
+    permissions: {}
+
+    steps:
+      - name: Wait for the published version
         run: |
           set -euo pipefail
-          ssh -i ~/.ssh/id_ed25519 -p "$DEPLOY_PORT" \
-            -o BatchMode=yes \
-            -o StrictHostKeyChecking=yes \
-            -o UserKnownHostsFile=~/.ssh/known_hosts \
-            "$DEPLOY_USER@$DEPLOY_HOST" \
-            "test -d '$DEPLOY_ROOT' && test -w '$DEPLOY_ROOT/releases' && test -x '$DEPLOY_ROOT/scripts/deploy.sh'"
-
-      - name: Upload release bundle to server
-        env:
-          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
-          RELEASE_SHA: ${{ github.sha }}
-        run: |
-          set -euo pipefail
-          REMOTE_RELEASE_DIR="$DEPLOY_ROOT/releases/$RELEASE_SHA"
-
-          ssh -i ~/.ssh/id_ed25519 -p "$DEPLOY_PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=~/.ssh/known_hosts "$DEPLOY_USER@$DEPLOY_HOST" "mkdir -p '$REMOTE_RELEASE_DIR'"
-          scp -i ~/.ssh/id_ed25519 -P "$DEPLOY_PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=~/.ssh/known_hosts .release/release.tgz "$DEPLOY_USER@$DEPLOY_HOST:$REMOTE_RELEASE_DIR/release.tgz"
-
-      - name: Run remote deployment
-        env:
-          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
-          RELEASE_SHA: ${{ github.sha }}
-        run: |
-          set -euo pipefail
-          REMOTE_RELEASE_DIR="$DEPLOY_ROOT/releases/$RELEASE_SHA"
-
-          ssh -i ~/.ssh/id_ed25519 -p "$DEPLOY_PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=~/.ssh/known_hosts "$DEPLOY_USER@$DEPLOY_HOST" "set -euo pipefail; tar -xzf '$REMOTE_RELEASE_DIR/release.tgz' -C '$REMOTE_RELEASE_DIR'; rm -f '$REMOTE_RELEASE_DIR/release.tgz'; chmod 750 '$REMOTE_RELEASE_DIR/scripts/deploy.sh' '$REMOTE_RELEASE_DIR/scripts/rollback.sh'; '$REMOTE_RELEASE_DIR/scripts/deploy.sh' '$RELEASE_SHA' '$REMOTE_RELEASE_DIR'"
-
-      - name: Checkout routing verification
-        uses: actions/checkout@v4
-
-      - name: Verify public routing
-        run: |
-          set -euo pipefail
-          python3 scripts/check-public-routing.py --rounds 5
+          deadline=$((SECONDS + 600))
+          while (( SECONDS < deadline )); do
+            remaining=$((deadline - SECONDS))
+            if version=$(curl --fail --silent --connect-timeout 4 --max-time "$((remaining < 8 ? remaining : 8))" \
+              --header 'Cache-Control: no-cache' "https://shellr.net/deploy-version.txt?sha=$GITHUB_SHA"); then
+              if [[ "$version" == "$GITHUB_SHA" ]]; then
+                echo "Deployment verified at $GITHUB_SHA"
+                exit 0
+              fi
+            fi
+            remaining=$((deadline - SECONDS))
+            if (( remaining > 0 )); then
+              sleep "$((remaining < 10 ? remaining : 10))"
+            fi
+          done
+          echo "The published commit did not become live within ten minutes." >&2
+          exit 1
