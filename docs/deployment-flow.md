@@ -1,5 +1,7 @@
 # Deployment Flow
 
+<!-- The deployment bundle records its source commit in app/public/deploy-version.txt. -->
+
 ## Goal
 
 Keep deployment reviewable and recoverable while avoiding unnecessary CI infrastructure on the VM itself.
