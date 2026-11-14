@@ -237,15 +237,16 @@ smoke_check() {
     curl_exit=0
     response="$(curl -fsS --max-time 10 --write-out $'\n%{http_code}' "$url")" || curl_exit=$?
     status="${response##*$'\n'}"
-    if (( curl_exit == 0 )); then
+    if (( curl_exit == 0 )) && [[ "$status" == 200 ]]; then
       if grep -Fq -- "$expected" <<< "${response%$'\n'*}"; then
         return 0
       fi
       log "Public smoke check returned an unexpected response for $name"
       return 1
     fi
-    case "$status" in
-      502|503|504)
+    case "$status:$curl_exit" in
+      502:*|503:*|504:*|000:6|000:7|000:28|000:35|000:52|000:55|000:56|\
+      200:6|200:7|200:28|200:35|200:52|200:55|200:56)
         if (( attempt < 12 )); then
           sleep 5
           continue
@@ -397,8 +398,8 @@ fi
 if ! check_step "nginx startup" docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d --no-deps --no-build --wait "${nginx_recreate[@]}" nginx \
   || ! check_step "nginx config test" docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T nginx nginx -t \
   || ! check_step "nginx reload" docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T nginx nginx -s reload \
+  || ! check_step "origin readiness" python3 "$ROOT_DIR/scripts/check-public-routing.py" --wait-for-origin \
   || ! check_step "monitoring and logging" restart_platform_services \
-  || ! check_step "origin health" healthcheck \
   || ! check_step "origin routing" python3 "$ROOT_DIR/scripts/check-public-routing.py" --local --rounds 3 --gateway-retries 12 \
   || ! smoke_check "shellr health" "https://shellr.net/health" '"status":"ok"' \
   || ! smoke_check "DMA showcase" "https://dma.shellr.net/" 'DMA Statistics Module'; then

@@ -97,15 +97,15 @@ jobs:
     permissions: {}
 
     steps:
-      - name: Wait for the published version
+      - name: Wait for host deployment confirmation
         run: |
           set -euo pipefail
           deadline=$((SECONDS + 900))
           while (( SECONDS < deadline )); do
             remaining=$((deadline - SECONDS))
-            if version=$(curl --fail --silent --connect-timeout 4 --max-time "$((remaining < 8 ? remaining : 8))" \
-              --header 'Cache-Control: no-cache' "https://shellr.net/deploy-version.txt?sha=$GITHUB_SHA"); then
-              if [[ "$version" == "$GITHUB_SHA" ]]; then
+            if receipt=$(curl --fail --silent --connect-timeout 4 --max-time "$((remaining < 8 ? remaining : 8))" \
+              --header 'Cache-Control: no-cache' "https://shellr.net/deployed.json?sha=$GITHUB_SHA"); then
+              if jq -e --arg sha "$GITHUB_SHA" '.commit == $sha and (.verified_at | fromdateiso8601 > 0)' <<< "$receipt" >/dev/null 2>&1; then
                 echo "Deployment verified at $GITHUB_SHA"
                 exit 0
               fi
@@ -115,5 +115,5 @@ jobs:
               sleep "$((remaining < 10 ? remaining : 10))"
             fi
           done
-          echo "The published commit did not become live within fifteen minutes." >&2
+          echo "The host did not confirm the deployment within fifteen minutes." >&2
           exit 1

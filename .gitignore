@@ -74,6 +74,7 @@ __pycache__/
 # Host-local project configuration (never publish)
 infra/local/
 infra/nginx/conf.d/local/
+infra/nginx/static/local/
 
 # Local audit exports and snapshots
 .audit/
