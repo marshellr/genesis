@@ -14,7 +14,7 @@ function e(string $value): string
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Privacy Policy | shellr</title>
-  <meta name="description" content="Privacy policy for shellr.net.">
+  <meta name="description" content="Privacy policy for websites operated under shellr.net.">
   <link rel="canonical" href="https://shellr.net/privacy.php">
   <link rel="icon" type="image/png" href="/assets/favi.png">
   <link rel="apple-touch-icon" href="/assets/favi.png">
@@ -45,12 +45,12 @@ function e(string $value): string
       <p class="eyebrow">Privacy Policy</p>
       <h1>Information about the processing of personal data.</h1>
       <p class="legal-summary">
-        This policy explains how personal data is processed when you visit the public website.
+        This policy explains how I process personal data when you visit the websites covered by this policy.
       </p>
       <div class="legal-meta">
         <span>Controller: Marlin Scheler</span>
         <span>Contact: <?= e($site['contact_email']) ?></span>
-        <span>Applies to: shellr.net, www.shellr.net and dma.shellr.net</span>
+        <span>Applies to: the websites I operate under shellr.net, except docs.shellr.net (hosted on GitHub Pages)</span>
         <span>Last updated: 13 November 2026</span>
       </div>
     </section>
@@ -73,9 +73,9 @@ function e(string $value): string
         <p class="eyebrow">Hosting</p>
         <h2>Self-hosting and Cloudflare</h2>
         <p>
-          I run this website on my own hardware in Germany. Requests to <code>shellr.net</code>,
-          <code>www.shellr.net</code> and <code>dma.shellr.net</code> pass through Cloudflare, Inc.
-          Cloudflare provides DNS, TLS, protection against attacks and delivery of the website.
+          I run the websites covered by this policy on my own hardware in Germany. Requests to these
+          websites pass through Cloudflare, Inc. Cloudflare provides DNS, TLS, protection against
+          attacks and delivery of the websites.
           It processes your IP address and request data, such as the requested URL, request time
           and browser information. The legal basis is Article 6(1)(f) GDPR. My legitimate interest
           is to deliver the website securely and reliably. Cloudflare acts as a data processor under its
@@ -114,8 +114,7 @@ function e(string $value): string
         <p class="eyebrow">Website use</p>
         <h2>Cookies and analytics</h2>
         <p>
-          The public website at <code>shellr.net</code>, <code>www.shellr.net</code> and
-          <code>dma.shellr.net</code> sets no cookies and uses no visitor analytics service.
+          The websites covered by this policy set no cookies and use no visitor analytics service.
         </p>
       </section>
 
