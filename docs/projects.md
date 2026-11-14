@@ -6,7 +6,7 @@ The project set behind `shellr.net` is not just a list of code exercises. It com
 
 ## Genesis / self-hosted platform
 
-Current platform layer built on one Hetzner VM with explicit runtime boundaries, documented deployment, monitoring, logging, and recovery.
+Docker Compose on a Proxmox VE homelab with Cloudflare Tunnel, internal monitoring, and verified recovery.
 
 ### Focus
 

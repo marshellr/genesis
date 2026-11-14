@@ -27,13 +27,13 @@ $liveComponents = [
         'href' => $site['dma_url'],
     ],
     [
-        'title' => 'status.shellr.net',
+        'title' => 'Internal status',
         'body' => 'Uptime monitoring on the local network',
         'href' => '',
     ],
     [
-        'title' => 'grafana.shellr.net',
-        'body' => 'Metrics and logs (restricted)',
+        'title' => 'Grafana',
+        'body' => 'Metrics and logs on the local network',
         'href' => '',
     ],
     [
@@ -44,16 +44,16 @@ $liveComponents = [
 ];
 
 $platformSnapshot = [
-    ['title' => 'Host', 'body' => 'Docker runs in a virtual machine on my own Proxmox server. Cloudflare Tunnel serves the public sites without inbound port forwarding.'],
-    ['title' => 'Runtime', 'body' => 'Services run in separate containers instead of sharing one unmanaged host setup.'],
-    ['title' => 'Ingress', 'body' => 'Nginx handles HTTPS, redirects, and hostname-based routing for public services.'],
-    ['title' => 'Delivery', 'body' => 'GitHub Actions defines staged SSH releases with health gates, rollback mechanics, and explicit production verification.'],
-    ['title' => 'Monitoring', 'body' => 'Prometheus, Grafana, Node Exporter, cAdvisor, and Uptime Kuma cover host and service visibility.'],
-    ['title' => 'Recovery', 'body' => 'Database dumps, project archives, and restore scripts are part of normal operations.'],
+    ['title' => 'Host', 'body' => 'Docker Compose runs in a VM on my own Proxmox VE hardware in Germany.'],
+    ['title' => 'Runtime', 'body' => 'Docker networks separate frontend, backend, and monitoring traffic. Pi-hole resolves internal names.'],
+    ['title' => 'Ingress', 'body' => 'Cloudflare Tunnel carries public traffic without inbound ports. TLS protects the edge and origin. Nginx uses a Let’s Encrypt wildcard renewed with DNS-01.'],
+    ['title' => 'Delivery', 'body' => 'GitHub Actions builds and publishes a release. The server pulls it, checks service health, and rolls back if verification fails.'],
+    ['title' => 'Monitoring', 'body' => 'Prometheus, Grafana, Loki, and Uptime Kuma are available only on the internal network.'],
+    ['title' => 'Recovery', 'body' => 'MariaDB dumps and consistent SQLite copies are backed up daily. Restic encrypts the offsite backup. Restores have been tested.'],
 ];
 
 $operationalMetrics = [
-    ['title' => 'Portfolio Surfaces', 'body' => '5 documented portfolio surfaces across two hosting boundaries: 4 through the VM ingress and docs on GitHub Pages.'],
+    ['title' => 'Portfolio Surfaces', 'body' => 'The portfolio and DMA showcase use Cloudflare Tunnel. The documentation is hosted on GitHub Pages.'],
     ['title' => 'Network Segments', 'body' => '3 Docker networks separating frontend, backend, and monitoring traffic.'],
     ['title' => 'Backup Cadence', 'body' => 'Daily database and runtime backup jobs with defined retention.'],
     ['title' => 'Monitoring Coverage', 'body' => 'Host, container, and application checks are included in the stack.'],
@@ -63,7 +63,7 @@ $securityModel = [
     [
         'title' => 'Ingress Control',
         'points' => [
-            'TLS termination via Nginx (HTTPS only)',
+            'TLS at the Cloudflare edge and at the Nginx origin',
             'Redirect enforcement and hostname routing',
             'Request filtering and layered security headers',
         ],
@@ -72,7 +72,7 @@ $securityModel = [
         'title' => 'Access Control',
         'points' => [
             'Grafana and internal tools behind authentication',
-            'No direct public exposure of internal services',
+            'Internal service interfaces are reachable on the local network',
         ],
     ],
     [
@@ -141,15 +141,15 @@ $featuredProjects = [
     [
         'title' => 'Web Platform Migration and Hardening',
         'tag' => 'operations',
-        'lead' => 'Moves existing web workloads into a safer operating model with cleaner routing and tighter access control.',
+        'lead' => 'Moves containerized web services from a cloud VM to a Proxmox homelab.',
         'points' => [
-            'Improves SSH, TLS, firewalling, and reverse proxy structure',
-            'Reduces cross-impact between services',
-            'Turns inherited setups into supportable systems',
+            'Moves public ingress to Cloudflare Tunnel',
+            'Transfers databases and files with a planned cutover',
+            'Verifies restores and internal DNS',
         ],
-        'stack' => ['Ubuntu', 'SSH', 'UFW', 'Nginx'],
-        'href' => $site['docs_url'] . '/architecture.html',
-        'label' => 'View architecture',
+        'stack' => ['Proxmox VE', 'Docker Compose', 'Cloudflare Tunnel', 'Restic'],
+        'href' => $site['docs_url'] . '/case-studies.html#cloud-vm-to-homelab',
+        'label' => 'Read migration case study',
     ],
     [
         'title' => 'Inventory Tracking Application',
@@ -293,7 +293,7 @@ function e(string $value): string
           <article>
             <span>runtime</span>
             <strong>Single-VM platform</strong>
-            <p>One host, containerized services, documented recovery, and bounded infrastructure choices.</p>
+            <p>Proxmox VE hosts the Docker VM. The documentation is hosted separately on GitHub Pages.</p>
           </article>
           <article>
             <span>operations</span>
@@ -369,7 +369,7 @@ function e(string $value): string
     <section class="section" id="security-model">
       <div class="section-heading" data-reveal>
         <p class="eyebrow">Security Model</p>
-        <h2>Security is treated as part of system design, not a side note.</h2>
+        <h2>TLS, access control, and service isolation.</h2>
       </div>
 
       <div class="work-grid">
@@ -408,13 +408,15 @@ function e(string $value): string
           </div>
           <pre>Internet
    |
-Nginx (Ingress)
+Cloudflare edge and Tunnel
    |
-Docker Services (App / Monitoring)
+Nginx in the Docker VM
    |
-Metrics + Logs (Prometheus / Grafana)
-   |
-Backup System</pre>
+Public web services
+
+Local DNS: Pi-hole
+LAN access: internal services
+Docker VM → Encrypted offsite backups</pre>
         </div>
       </div>
     </section>

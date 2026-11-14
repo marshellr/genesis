@@ -38,63 +38,24 @@
 
       <article class="doc-panel">
         <p class="eyebrow">Deployment Flow</p>
-        <h1>Build, stage, switch, verify.</h1>
-        <p>
-          The deployment path is intentionally simple: build on GitHub Actions, transfer a release to the VM,
-          validate configuration, update containers, and verify health before a release is treated as complete.
-        </p>
-        <div class="meta-strip">
-          <span>Last reviewed: September 2026</span>
-          <span>Trigger: GitHub Actions</span>
-          <span>Gate: health checks</span>
-        </div>
-        <div class="callout">
-          <strong>Why this choice</strong>
-          For a single VM, a readable SSH-based delivery path is easier to review and recover than introducing
-          more moving parts than the platform actually needs.
-        </div>
+        <h1>Build, publish, pull, verify.</h1>
+        <p>A push to <code>main</code> triggers GitHub Actions. It validates the configuration, builds the application, and publishes a versioned release bundle with SHA-256 checksums.</p>
       </article>
 
       <article class="doc-panel">
-        <p class="eyebrow">Sequence</p>
-        <h2>What happens during a release.</h2>
-        <ul class="plain-list">
-          <li>Changes are pushed to GitHub and picked up by the deployment workflow.</li>
-          <li>A versioned source bundle is transferred to the VM, where the production images are built from that exact release.</li>
-          <li>Compose configuration is validated before the live stack is updated.</li>
-          <li>Services are recreated and health endpoints are checked before the run is considered successful.</li>
-        </ul>
+        <h2>From release to production</h2>
+        <ol>
+          <li>A timer on the VM polls GitHub for a new release using a read-only credential and conditional requests.</li>
+          <li>The VM checks the release identity and checksums, stages the bundle, and takes a local database backup before applying it.</li>
+          <li>Docker Compose builds and updates the services. Nginx validates and reloads its configuration. Origin readiness, public routing, and container health are checked.</li>
+          <li>After the host checks pass, the VM publishes a confirmation with the deployed commit and verification time. GitHub Actions reads <code>/deployed.json</code> over HTTPS and waits up to 15 minutes.</li>
+        </ol>
       </article>
 
       <article class="doc-panel">
-        <p class="eyebrow">Failure Modes</p>
-        <h2>What the process is designed to avoid.</h2>
-        <ul class="plain-list">
-          <li><strong>Blind overwrite:</strong> the deployment path validates and checks health instead of treating container recreation as success.</li>
-          <li><strong>Unclear rollback:</strong> releases are staged and rollback-aware, so a bad change does not require improvisation.</li>
-          <li><strong>Operational drift:</strong> the same repo structure used for local review maps to the VM layout under <code>/projects/genesis</code>.</li>
-        </ul>
-      </article>
-
-      <article class="doc-panel">
-        <p class="eyebrow">Runbook</p>
-        <h2>The first checks after a release.</h2>
-        <ul class="plain-list">
-          <li>Confirm container health with <code>docker compose ps</code>.</li>
-          <li>Check the public surfaces: <code>shellr.net</code>, <code>dma.shellr.net</code>, and <code>status.shellr.net</code>.</li>
-          <li>Verify Prometheus targets and Grafana health if observability changed.</li>
-          <li>Public health and smoke checks run after the service update; a failed check triggers rollback instead of waiting for user reports.</li>
-        </ul>
-      </article>
-
-      <article class="doc-panel">
-        <p class="eyebrow">Operational Limits</p>
-        <h2>What this deployment model does not try to be.</h2>
-        <ul class="plain-list">
-          <li>It is not blue-green or multi-node orchestration.</li>
-          <li>It does not hide the production layout behind a control plane.</li>
-          <li>It is intentionally optimized for maintainability on one VM and one operator path.</li>
-        </ul>
+        <h2>Rollback and operator checks</h2>
+        <p>A failed verification restores the previous release and retains its deployment confirmation. The VM records the failed release and waits for a newer one. To diagnose a deploy, compare the GitHub jobs, the host journal, the deployed commit, and the container health checks.</p>
+        <p>The VM initiates every release download. GitHub can verify the public endpoint without SSH access to the host.</p>
       </article>
     </main>
   </div>

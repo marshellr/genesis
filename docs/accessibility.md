@@ -7,7 +7,7 @@ Accessibility on `shellr.net`, `dma.shellr.net`, and `docs.shellr.net` is treate
 - skip links exist on the main public surfaces
 - keyboard focus states are intentionally visible
 - mobile table handling on DMA avoids clipped statistics
-- public status has a server-rendered snapshot instead of relying purely on a JavaScript app
+- the internal status page has a server-rendered snapshot that works without JavaScript
 
 ## What Gets Checked
 

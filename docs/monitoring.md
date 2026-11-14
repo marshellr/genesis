@@ -1,24 +1,10 @@
 # Monitoring
 
-## Components
+The monitoring and logging interfaces are available on the internal network.
 
-- Prometheus
-- Grafana
-- Node Exporter
-- cAdvisor
-- Uptime Kuma
+- Prometheus collects service and host metrics from Node Exporter, cAdvisor, and application endpoints. Alertmanager handles Prometheus alerts.
+- Grafana provides authenticated access to metrics and logs.
+- Grafana Alloy forwards logs to Loki, which retains them for 72 hours.
+- Uptime Kuma checks service availability, including public routing through Cloudflare. The internal status snapshot shows the last successful local backup.
 
-## Goals
-
-- host visibility
-- container and service visibility
-- deployment verification
-- basic uptime checks
-
-## Design choices
-
-- one Grafana instance for metrics and logs
-- cAdvisor for container-level runtime visibility
-- no additional exporters unless they solve a concrete problem
-- retention sized for a small single-VM host
-- Uptime Kuma's internal error log is host-rotated at 10 MiB and excluded from backups
+During an incident, compare the public request with an origin probe, inspect Prometheus targets and container health, and use Loki to correlate relevant logs.

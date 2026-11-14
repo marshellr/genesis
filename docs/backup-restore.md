@@ -25,7 +25,7 @@ The MariaDB data is restored from SQL dumps, not raw volume snapshots. That keep
 
 ## Explicit Exclusions
 
-To keep disk usage predictable on a 40 GB VM, the file archive intentionally excludes:
+The local file archive excludes:
 
 - `/projects/genesis/infra/backup`
 - `/projects/genesis/infra/docker/volumes` as a live tree
@@ -38,7 +38,6 @@ To keep disk usage predictable on a 40 GB VM, the file archive intentionally exc
 - the newest 7 complete local backup sets are retained
 - incomplete and unreferenced artifacts are removed automatically
 - restore work directories older than 7 days are removed
-- the policy is intentionally small to protect disk on a 40 GB VM
 
 Every run reserves at least 2 GiB of free space in addition to the estimated archive and staged runtime-state size. Outputs remain `*.partial` until the dump and file archive are complete.
 
@@ -49,9 +48,11 @@ Every run reserves at least 2 GiB of free space in addition to the estimated arc
 - file restore uses a dedicated extraction script and does not overwrite `/projects/genesis` by default
 - recovery remains procedural and transparent, not hidden in backup tooling
 
-## Local policy (2026-10-28)
+## Local and offsite schedules
 
-Offsite storage is deliberately disabled at the operator's request. Daily execution is at 03:17 (host timezone), retaining seven complete sets. Archives and dumps are mode 0600. SQLite is snapshotted through the online backup API; every staged SQLite database must pass `PRAGMA integrity_check` before publication. Rebuildable `.venv`, `node_modules`, Python caches and build outputs are excluded. The Genesis transient runtime and restic cache directories are excluded too.
+The local job runs daily at 03:17 in the host timezone. Archives and dumps are mode 0600. SQLite is snapshotted through the online backup API. Each staged database must pass PRAGMA integrity_check before publication.
+
+A separate nightly Restic job writes encrypted offsite snapshots. Its hook supplies a logical MariaDB dump and consistent SQLite copies. Restic excludes the raw MariaDB backing directory and duplicate local dump and archive sets, as well as the short-lived Prometheus, Loki, and Alloy stores. An offsite restore test imported MariaDB into an isolated instance and verified the restored SQLite copies.
 
 ## Staged recovery
 

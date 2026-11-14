@@ -37,62 +37,24 @@
       </nav>
       <article class="doc-panel">
         <p class="eyebrow">Backup</p>
-        <h1>Simple enough to understand under pressure.</h1>
-        <div class="meta-strip">
-          <span>Last reviewed: October 2026</span>
-          <span>Retention: 7 complete local sets</span>
-          <span>Restore model: procedural</span>
-        </div>
-        <ul>
-          <li>Logical MariaDB dump covering both the Genesis Inventory and DMA application databases</li>
-          <li>Project archive for configuration and application files</li>
-          <li>Integrity-checked SQLite snapshots for Grafana and Uptime Kuma, excluding application logs</li>
-          <li>Optional host-local project backups; offsite sync deliberately disabled</li>
-          <li>Count-based retention of the 7 newest complete backup sets</li>
-          <li>Atomic output, single-run locking, free-space checks, and automatic temporary-data cleanup</li>
-        </ul>
-        <div class="callout">
-          <strong>Why this choice</strong>
-          For a single VM, readable restore steps are more valuable than another backup product. The aim is to recover
-          calmly and predictably, not to hide the process behind more tooling.
-        </div>
-        <p>
-          The restore model stays procedural on purpose. A small environment benefits more from readable restore steps
-          than from another management layer.
-        </p>
+        <h1>Local backup sets and encrypted offsite snapshots.</h1>
+        <p>Daily local backups contain a MariaDB dump, project files, and consistent SQLite copies. Each set has a timestamped manifest and SHA-256 checksums. The newest seven complete sets are retained.</p>
       </article>
 
       <article class="doc-panel">
-        <p class="eyebrow">Restore Focus</p>
-        <h2>What recovery is expected to achieve.</h2>
+        <h2>What goes offsite</h2>
+        <p>A separate nightly Restic job encrypts and uploads snapshots to offsite storage. Its pre-backup hook creates the logical MariaDB dump and consistent SQLite copies. The raw MariaDB backing directory and the duplicate local dump and archive sets are excluded.</p>
         <ul class="plain-list">
-          <li><strong>Goal:</strong> restore application state, platform files, and key operational data without guessing where critical files live.</li>
-          <li><strong>Included:</strong> a combined dump of both application databases, project tree archives, and selected runtime data used by monitoring and status tooling.</li>
-          <li><strong>Operational limit:</strong> this is a single-host strategy, not multi-site disaster recovery.</li>
-          <li><strong>Practice:</strong> file restores first extract into a private staging directory; direct overwrites of live databases are blocked.</li>
+          <li>The local job reserves at least 2 GiB of free space in addition to the estimated archive and staged runtime data.</li>
+          <li>Local files use a partial suffix until promotion. Interrupted runs are cleaned up.</li>
+          <li>Short-lived metrics and log stores are excluded from the offsite snapshot.</li>
         </ul>
       </article>
 
       <article class="doc-panel">
-        <p class="eyebrow">Storage Safety</p>
-        <h2>Backups must not become an outage source.</h2>
-        <ul class="plain-list">
-          <li>Each run requires enough space for the estimated archive and runtime snapshot while preserving a 2 GiB filesystem reserve.</li>
-          <li>Files are written with a <code>.partial</code> suffix and only promoted after the local backup is complete.</li>
-          <li>A run-specific directory under <code>infra/backup/tmp</code> is removed on success, error, interruption, or the next run after a hard crash.</li>
-          <li>Uptime Kuma and Grafana <code>*.log</code> files are excluded before runtime data is copied.</li>
-          <li>Uptime Kuma's internal <code>error.log</code> is checked every 5 minutes and rotated at 10 MiB with 3 compressed archives.</li>
-        </ul>
-      </article>
-
-      <article class="doc-panel">
-        <p class="eyebrow">Failure Modes</p>
-        <h2>What this strategy still does not solve on its own.</h2>
-        <ul class="plain-list">
-          <li>A single-host backup strategy is still vulnerable if the VM and its local backup storage disappear together.</li>
-          <li>Offsite sync is prepared, but it still depends on external repository credentials being configured.</li>
-          <li>Short-retention observability data is intentionally not treated as long-term archival data.</li>
-        </ul>
+        <h2>Restore verification</h2>
+        <p>The restore test recovered an offsite snapshot into private staging. The MariaDB dump was imported into an isolated instance and checked against the source. The restored SQLite copies passed integrity checks.</p>
+        <p>Verify checksums before extracting a local set. Stage files away from the live tree and test database imports before applying a recovery to production.</p>
       </article>
     </main>
   </div>

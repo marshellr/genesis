@@ -15,5 +15,5 @@ Publish technical documentation and project overviews for `docs.shellr.net` with
 
 - plain static site under `/docs/site`
 - `/docs/site` is the only source of truth for site content
-- deployment is done from the VM through a dedicated publish script into the Pages repo checkout under `/projects/genesis/docs/publish/marshellr.github.io`
+- the Genesis docs workflow validates the sources. The publish script syncs them to the separate Pages repository, whose workflow publishes the site
 - custom domain handled through `CNAME`

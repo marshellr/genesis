@@ -3,7 +3,7 @@
 ## Components
 
 - Loki
-- Promtail
+- Grafana Alloy
 - Grafana
 
 ## Goals

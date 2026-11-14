@@ -2,28 +2,25 @@
 
 Single-VM DevOps portfolio platform for [shellr.net](https://shellr.net).
 
-This repository contains the platform behind `shellr.net`: a public landing page, a legacy DMA workload, reverse proxying, TLS, CI/CD, monitoring, logging, backup, and technical documentation. The goal is not to imitate enterprise scale, but to show production-like engineering decisions on a small Hetzner VM with explicit runtime boundaries.
+Genesis runs in a Docker VM on operator-owned Proxmox VE hardware in Germany. It includes the public portfolio, a DMA workload, internal monitoring and logging, and backup and recovery tooling.
 
 ## Live Surfaces
 
 - `https://shellr.net` - personal landing page and platform frontdoor
 - `https://dma.shellr.net` - read-only DMA project showcase
-- `https://status.shellr.net` - public uptime and service status
 - `https://docs.shellr.net` - technical documentation on GitHub Pages
-- `https://grafana.shellr.net` - protected monitoring surface
 
 ## Architecture Overview
 
 ```mermaid
 flowchart TD
-    Internet --> Nginx["Nginx reverse proxy"]
+    Internet --> Edge["Cloudflare edge and Tunnel"]
+    Edge --> Nginx["Nginx in the Docker VM"]
     Nginx --> Shellr["shellr.net"]
     Nginx --> DMA["DMA static showcase"]
-    Nginx --> Status["status.shellr.net"]
-    Nginx --> Grafana["grafana.shellr.net"]
     Shellr --> App["Portfolio app container"]
     DmaApp["DMA legacy runtime"] --> DB["MariaDB"]
-    Prom["Prometheus"] --> Grafana
+    Prom["Prometheus"] --> Grafana["Internal Grafana"]
     Kuma["Uptime Kuma"] --> Prom
     Loki["Loki"] --> Grafana
     Docs["docs.shellr.net"] --> Pages["GitHub Pages"]
@@ -31,13 +28,13 @@ flowchart TD
 
 ## Technical Focus
 
-- Docker Compose runtime on a single Hetzner VM
-- Nginx ingress with TLS termination and hostname-based routing
+- Docker Compose runtime on a Proxmox VE VM
+- Cloudflare Tunnel and HTTPS to the Nginx origin
 - PHP application workloads with MariaDB
-- GitHub Actions SSH release workflow with health gates and rollback mechanics
+- GitHub Actions release publishing with host-initiated pull, health checks, and rollback
 - Monitoring through Prometheus, Grafana, Node Exporter, cAdvisor, and Uptime Kuma
-- Logging through Loki and Promtail
-- Backup and restore through database dumps, file archives, and explicit restore scripts
+- Logging through Loki and Grafana Alloy
+- Daily database and SQLite backups with encrypted offsite Restic snapshots
 
 ## Repository Layout
 
@@ -49,7 +46,7 @@ flowchart TD
     compose/            main runtime stack
     nginx/              reverse proxy and TLS config
     monitoring/         Prometheus, Grafana, Kuma, cAdvisor
-    logging/            Loki and Promtail
+    logging/            Loki and Grafana Alloy
     analytics/          AWStats reference configuration and report generator
     backup/             backup artifacts and cron definitions
   scripts/              deploy, backup, restore, and helper scripts
@@ -120,6 +117,4 @@ docker compose \
 ## Operational Notes
 
 - `docs.shellr.net` is intentionally hosted on GitHub Pages, not on the VM
-- `grafana.shellr.net` is intentionally protected and not meant to be publicly browsable
-- retention is deliberately short to protect disk on a 40 GB host
 - the platform is designed for maintainability and explainability over tool sprawl

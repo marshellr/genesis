@@ -45,7 +45,7 @@
           implementation choice that was made, and the operational outcome.
         </p>
         <div class="meta-strip">
-          <span>Last reviewed: September 2026</span>
+          <span>Last reviewed: November 2026</span>
           <span>Format: problem, constraints, implementation, outcome</span>
         </div>
       </article>
@@ -65,8 +65,8 @@
           </header>
           <p><strong>Problem:</strong> A portfolio landing page can look polished and still say very little about whether the operator understands delivery, failure handling, or runtime separation.</p>
           <p><strong>Constraints:</strong> One VM, limited disk, no orchestration layer, and no room for decorative infrastructure.</p>
-          <p><strong>Implementation:</strong> The main site became the public frontdoor of a live platform with links to architecture, status, source, and running services instead of staying a static self-description.</p>
-          <p><strong>Outcome:</strong> Reviewers can move from positioning to proof: architecture, deployment flow, live status, and repository structure are all visible from the first layer.</p>
+          <p><strong>Implementation:</strong> The main site became the public frontdoor of a live platform with links to architecture, source, and public services.</p>
+          <p><strong>Outcome:</strong> Reviewers can move from positioning to proof: architecture, deployment flow, and repository structure are accessible from the landing page.</p>
         </article>
 
         <article class="case-study">
@@ -121,6 +121,28 @@
           <p><strong>Constraints:</strong> Upstream API availability, incomplete product naming, repeated records, and the need to avoid duplicate notifications.</p>
           <p><strong>Implementation:</strong> The current automation work maps ENISA EUVD records to an asset inventory, enriches relevant findings with CVSS, KEV, and EPSS context, and records revisions for repeatable review.</p>
           <p><strong>Outcome:</strong> The design moves vulnerability review from broad feed scanning toward a focused, asset-relevant daily workflow while keeping incomplete matches visible for manual validation.</p>
+        </article>
+        <article class="case-study" id="cloud-vm-to-homelab">
+          <header>
+            <div>
+              <p class="eyebrow">Migration</p>
+              <h3>Migration from a cloud VM to a homelab</h3>
+            </div>
+          </header>
+          <p><strong>Starting point.</strong> A cloud VM hosted the Compose stacks, MariaDB, reverse proxy, and observability. The goal was to move the services to a Docker VM on operator-owned Proxmox VE hardware while keeping their public URLs.</p>
+          <ol>
+            <li>Provision the destination, inventory the source, and test the offsite backup and restore path.</li>
+            <li>Stage application files and required images. Transfer the files as a direct SSH tar stream with numeric ownership. Import MariaDB from a logical dump and verify the staged services locally.</li>
+            <li>During the maintenance window, freeze source writes, take a final dump and file copy, and start the destination. Switch public ingress to Cloudflare Tunnel and verify DNS, HTTPS, and service responses.</li>
+            <li>Keep the source and its previous routing configuration available for rollback until the destination is accepted. Confirm an encrypted offsite restore before retiring the source.</li>
+          </ol>
+          <p><strong>Cutover.</strong> The cutover interrupted public access for roughly 15–20 minutes. Direct edge checks confirmed both sites about 18 minutes after the old ingress stopped. Cached DNS on the operator’s client took longer to converge.</p>
+          <ul class="plain-list">
+            <li><strong>Bind-backed volumes:</strong> verify the actual backing paths, numeric ownership, and modes before starting containers. Restore MariaDB from a logical dump.</li>
+            <li><strong>Loki permissions:</strong> a root-owned backing directory prevented Loki from writing. Matching the directory ownership to the container UID restored write access.</li>
+            <li><strong>Transfer path:</strong> the PC relay was slow. A direct stream between the hosts removed that bottleneck.</li>
+            <li><strong>IPv6 DNS:</strong> FRITZ!Box still advertised its own IPv6 resolvers after IPv4 DNS moved to Pi-hole. Verify both resolver lists on a client before removing temporary DNS entries.</li>
+          </ul>
         </article>
       </section>
     </main>

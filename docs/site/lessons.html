@@ -73,10 +73,10 @@
             <p><strong>Why it matters:</strong> the public surface should degrade gracefully instead of treating presentation logic as a hard dependency.</p>
           </article>
           <article class="incident-card">
-            <h3>Operational tools need a public-friendly entrypoint</h3>
-            <p><strong>Trigger:</strong> a raw tool surface is fine for an operator, but weak for visitors, previews, and no-JS scenarios.</p>
-            <p><strong>What changed:</strong> <code>status.shellr.net</code> now has a static public entry page before the deeper Kuma interface.</p>
-            <p><strong>Why it matters:</strong> operational proof is stronger when the public layer stays readable under reduced client capability.</p>
+            <h3>An internal status page needs a readable fallback</h3>
+            <p><strong>Trigger:</strong> an operator needs a quick status and backup overview even when browser scripts are unavailable.</p>
+            <p><strong>What changed:</strong> the internal status entry serves a static snapshot alongside Uptime Kuma.</p>
+            <p><strong>Why it matters:</strong> the basic service and backup state remains readable without JavaScript.</p>
           </article>
           <article class="incident-card">
             <h3>Production proof has to be translated, not just implemented</h3>

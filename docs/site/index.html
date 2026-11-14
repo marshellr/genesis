@@ -35,17 +35,16 @@
       <h1>Operational documentation for the live platform behind shellr.net.</h1>
       <p class="hero-summary">
         This site documents the live platform behind <code>shellr.net</code> from an operations perspective:
-        service boundaries, routing, deployment, monitoring, logging, backup, and recovery on a single
-        Hetzner VM. The goal is not tool hype. The goal is a system that stays understandable when it changes,
-        fails, or has to be handed over.
+        service boundaries, routing, deployment, monitoring, logging, backup, and recovery for a Docker VM on operator-owned Proxmox VE hardware.
       </p>
       <div class="meta-strip">
-        <span>Last reviewed: September 2026</span>
+        <span>Last reviewed: November 2026</span>
         <span>Audience: reviewer, recruiter, operator</span>
         <span>Focus: deployable, observable, recoverable</span>
       </div>
       <div class="hero-meta">
-        <span>Hetzner VM</span>
+        <span>Proxmox VE</span>
+        <span>Cloudflare Tunnel</span>
         <span>Docker Compose</span>
         <span>Nginx</span>
         <span>GitHub Pages</span>
@@ -101,14 +100,9 @@
                 <td>Read-only public surface</td>
               </tr>
               <tr>
-                <td><code>grafana.shellr.net</code></td>
-                <td>Metrics and logs UI</td>
-                <td>Grafana behind Nginx auth</td>
-              </tr>
-              <tr>
-                <td><code>status.shellr.net</code></td>
-                <td>Uptime surface</td>
-                <td>Uptime Kuma</td>
+                <td><code>www.shellr.net</code></td>
+                <td>Canonical redirect</td>
+                <td><code>shellr.net</code></td>
               </tr>
               <tr>
                 <td><code>docs.shellr.net</code></td>
@@ -147,7 +141,7 @@
           </article>
           <article>
             <h3>Backup</h3>
-            <p>What is backed up, what is excluded on purpose, how offsite sync is prepared, and how restore remains procedural under pressure.</p>
+            <p>What the local backups and encrypted offsite snapshots cover, and how to verify a restore.</p>
             <a href="./backup.html">Review backup strategy</a>
           </article>
           <article>
@@ -167,8 +161,9 @@
           </article>
           <article>
             <h3>Live surfaces</h3>
-            <p>Jump directly from the documentation to the public platform, DMA workload, or the uptime surface.</p>
-            <a href="https://status.shellr.net">Open status.shellr.net</a>
+            <p>Open the live portfolio or the read-only DMA showcase.</p>
+            <a href="https://shellr.net">Open the portfolio</a>
+            <a href="https://dma.shellr.net">Open the DMA showcase</a>
           </article>
         </section>
       </section>

@@ -37,65 +37,23 @@
       </nav>
       <article class="doc-panel">
         <p class="eyebrow">Monitoring</p>
-        <h1>Host and service visibility with a small footprint.</h1>
-        <div class="meta-strip">
-          <span>Last reviewed: September 2026</span>
-          <span>Primary source: Prometheus</span>
-          <span>Public surface: status.shellr.net</span>
-        </div>
-        <div class="callout">
-          <strong>Why this matters</strong>
-          Monitoring is not there to look impressive. It exists so someone reviewing or operating the platform can answer
-          three questions quickly: Is the host healthy? Are the services reachable? Where should I look first?
-        </div>
+        <h1>Internal monitoring for host, containers, and services.</h1>
+        <p>Prometheus, Grafana, Loki, and Uptime Kuma are available only on the internal network. Uptime checks also exercise the public Cloudflare path.</p>
         <div class="doc-grid">
-          <article>
-            <h3>Prometheus</h3>
-            <p>Collects host and service metrics with intentionally short retention and size limits.</p>
-          </article>
-          <article>
-            <h3>Grafana</h3>
-            <p>Shared UI for metrics and logs, protected behind Nginx rather than exposed directly.</p>
-          </article>
-          <article>
-            <h3>Node Exporter</h3>
-            <p>Provides host-level metrics for CPU, memory, disk, and filesystem behavior.</p>
-          </article>
-          <article>
-            <h3>Uptime Kuma</h3>
-            <p>Used for availability checks and a dedicated status surface; its internal error log is size-limited and excluded from backups.</p>
-          </article>
-          <article>
-            <h3>cAdvisor</h3>
-            <p>Supplies container-level CPU and memory metrics so Grafana can show workload behavior instead of host metrics alone.</p>
-          </article>
-          <article>
-            <h3>Alertmanager</h3>
-            <p>Evaluates Prometheus alerts locally. Notification receivers are deliberately not configured yet, so alert state remains visible in the monitoring stack without claiming external paging.</p>
-          </article>
+          <article><h3>Prometheus</h3><p>Collects metrics from Node Exporter, cAdvisor, and service endpoints. Alertmanager handles Prometheus alerts.</p></article>
+          <article><h3>Grafana</h3><p>Displays host, container, and service metrics alongside logs. The internal interface requires authentication.</p></article>
+          <article><h3>Loki</h3><p>Receives logs through Grafana Alloy. Logs have a 72-hour retention period.</p></article>
+          <article><h3>Uptime Kuma</h3><p>Checks service availability. The internal status snapshot also shows the timestamp of the latest successful local backup.</p></article>
         </div>
       </article>
 
       <article class="doc-panel">
-        <p class="eyebrow">Responder Path</p>
-        <h2>What gets checked first.</h2>
-        <ul class="checklist">
-          <li>Open <code>status.shellr.net</code> to confirm whether the issue is public and service-wide.</li>
-          <li>Open Grafana for host saturation, container CPU and memory, and public response-time trends.</li>
-          <li>Use Prometheus targets to verify whether exporters and health endpoints are still up.</li>
-          <li>Use Loki for short-term logs when a metric spike needs immediate context.</li>
-        </ul>
-      </article>
-
-      <article class="doc-panel">
-        <p class="eyebrow">Alert Coverage</p>
-        <h2>What the platform watches automatically.</h2>
-        <ul class="plain-list">
-          <li>Host availability through Node Exporter reachability.</li>
-          <li>High CPU, low memory, and low disk thresholds on the VM.</li>
-          <li>Public-service availability from the Uptime Kuma metrics stream.</li>
-          <li>Recent container restart activity through cAdvisor metrics.</li>
-        </ul>
+        <h2>First checks during an incident</h2>
+        <ol>
+          <li>Compare the availability check with a direct request through Cloudflare and an origin probe.</li>
+          <li>Check Grafana and Prometheus for resource pressure, failed targets, and container restarts.</li>
+          <li>Use Loki to correlate the event with short-retention logs, then confirm the affected service has recovered.</li>
+        </ol>
       </article>
     </main>
   </div>

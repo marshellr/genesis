@@ -26,8 +26,6 @@ The same documentation is published as a static GitHub Pages site for:
 
 - `https://shellr.net`
 - `https://dma.shellr.net`
-- `https://status.shellr.net`
-- `https://grafana.shellr.net` (restricted)
 
 The site sources live under:
 

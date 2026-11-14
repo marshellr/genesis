@@ -1,62 +1,14 @@
 # Architecture
 
-## Goal
+Proxmox VE runs on operator-owned hardware in Germany. A Docker VM hosts the web, database, monitoring, and logging services.
 
-Build a technically credible single-VM platform with explicit runtime boundaries, clean hostnames, and operational decisions that still make sense on a small host.
+## Routing and isolation
 
-## Principles
+- Cloudflare terminates visitor TLS and sends public traffic through an outbound tunnel to Nginx over HTTPS. The origin uses a Let’s Encrypt wildcard renewed with DNS-01.
+- Pi-hole resolves internal names. Grafana and the Uptime Kuma status interface are reachable on the internal network.
+- Docker networks separate frontend, database, and monitoring traffic. MariaDB stays on the backend network.
+- GitHub Pages serves the documentation independently at [docs.shellr.net](https://docs.shellr.net).
 
-- one VM, not a pseudo-cluster
-- clear hostname separation
-- Docker Compose for runtime orchestration
-- bounded retention for metrics and logs
-- documentation as part of the platform
+## Operating boundaries
 
-## Topology
-
-```mermaid
-flowchart TD
-    User["Client"] --> DNS["Public DNS"]
-    DNS --> Nginx["Nginx reverse proxy"]
-
-    Nginx --> Shellr["shellr.net"]
-    Nginx --> DMA["dma.shellr.net"]
-    Nginx --> Grafana["grafana.shellr.net"]
-    Nginx --> Status["status.shellr.net"]
-
-    Shellr --> App["Portfolio app container"]
-    DMA --> DMAApp["DMA app container"]
-    DMAApp --> DB["MariaDB"]
-
-    Node["Node Exporter"] --> Prom["Prometheus"]
-    Kuma["Uptime Kuma"] --> Prom
-    Prom --> GrafanaCore["Grafana"]
-
-    Promtail["Promtail"] --> Loki["Loki"]
-    Loki --> GrafanaCore
-
-    Docs["docs.shellr.net"] --> Pages["GitHub Pages"]
-```
-
-## Hostname Model
-
-- `shellr.net` serves the personal portfolio landing page
-- `www.shellr.net` redirects to `shellr.net`
-- `dma.shellr.net` serves the DMA application
-- `grafana.shellr.net` serves Grafana through Nginx and additional access control
-- `status.shellr.net` serves Uptime Kuma
-- `docs.shellr.net` is hosted on GitHub Pages and not on the VM
-
-## Why Hostnames Instead of Subpaths
-
-- cleaner separation between unrelated applications
-- simpler cookie and session handling
-- less path-rewriting complexity
-- easier future migration of individual services
-
-## Why This Fits the VM
-
-- one reverse proxy entrypoint
-- one MariaDB service
-- one monitoring stack reused for metrics and logs
-- no Kubernetes, no service mesh, no ELK overhead
+The web and observability stacks share one VM. The VM pulls and verifies [versioned releases](deployment-flow.md), and [encrypted offsite backups](backup-restore.md) provide a recovery path if local storage is lost.

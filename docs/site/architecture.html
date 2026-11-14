@@ -37,87 +37,37 @@
       </nav>
       <article class="doc-panel">
         <p class="eyebrow">Architecture</p>
-        <h1>How the single-host platform is organized.</h1>
-        <p>
-          The platform stays intentionally small enough to review without hiding behind tooling the host size does not need.
-          Containers provide isolation and deployability, while routing and service boundaries stay easy to inspect.
-        </p>
-        <div class="meta-strip">
-          <span>Last reviewed: September 2026</span>
-          <span>Public surfaces: 5</span>
-          <span>Primary ingress: Nginx + TLS</span>
-        </div>
-        <div class="callout">
-          <strong>Why this choice</strong>
-          The platform is intentionally small enough to stay reviewable. Container boundaries, hostnames, and reverse-proxy rules
-          are easier to reason about here than a larger orchestration layer would be on one VM.
-        </div>
+        <h1>How the homelab is organized.</h1>
+        <p>Proxmox VE runs on operator-owned hardware in Germany. A Docker VM runs the web, database, monitoring, and logging services with Docker Compose. GitHub Pages serves the documentation independently.</p>
         <div class="mermaid">
 flowchart TD
-    User["Client"] --> DNS["Public DNS"]
-    DNS --> Nginx["Nginx reverse proxy"]
-    Nginx --> Shellr["shellr.net"]
-    Nginx --> DMA["dma.shellr.net"]
-    Nginx --> Grafana["grafana.shellr.net"]
-    Nginx --> Status["status.shellr.net"]
-    Shellr --> App["Portfolio app container"]
-    DMA --> DMAApp["DMA app container"]
-    DMAApp --> DB["MariaDB"]
-    Grafana --> Metrics["Prometheus metrics"]
-    Grafana --> Logs["Loki logs"]
-    Status --> Kuma["Uptime Kuma"]
-    Docs["docs.shellr.net"] --> Pages["GitHub Pages"]
-        </div>
-      </article>
-
-      <article class="doc-panel">
-        <p class="eyebrow">Operational Boundaries</p>
-        <h2>Public, private, and failure-sensitive paths.</h2>
-        <ul class="plain-list">
-          <li><strong>Public surfaces:</strong> <code>shellr.net</code>, <code>dma.shellr.net</code>, <code>status.shellr.net</code>, and protected <code>grafana.shellr.net</code> terminate at Nginx.</li>
-          <li><strong>Private paths:</strong> MariaDB, Prometheus, and internal service traffic stay on Docker networks and are not exposed on the host.</li>
-          <li><strong>Failure model:</strong> a broken app container should not collapse the rest of the platform, and docs remain outside the production VM on GitHub Pages.</li>
-          <li><strong>Review model:</strong> each hostname maps to a clear runtime responsibility, which keeps routing and incident analysis simpler.</li>
-        </ul>
-      </article>
-
-      <article class="doc-panel">
-        <p class="eyebrow">Trust and Failure Boundaries</p>
-        <h2>What is public, what is internal, and what fails together.</h2>
-        <ul class="plain-list">
-          <li><strong>Public ingress:</strong> only Nginx binds to host ports 80 and 443.</li>
-          <li><strong>Loopback-only services:</strong> Grafana, Prometheus, Alertmanager, and Uptime Kuma stay on loopback or internal Docker networks.</li>
-          <li><strong>Cross-host separation:</strong> <code>docs.shellr.net</code> is intentionally outside the VM so documentation does not disappear with an app incident.</li>
-          <li><strong>Shared-risk boundary:</strong> app, DMA, monitoring, and logging still share one VM, so retention and recovery paths are designed with that limit in mind.</li>
-        </ul>
-      </article>
-
-      <article class="doc-panel">
-        <p class="eyebrow">Deployment Flow</p>
-        <h2>Build, stage, switch, verify.</h2>
-        <div class="mermaid">
-sequenceDiagram
-    participant Dev as Developer
-    participant GH as GitHub
-    participant Actions as Actions
-    participant VM as VM
-    Dev->>GH: push
-    GH->>Actions: workflow
-    Actions->>VM: transfer release
-    VM->>VM: validate config
-    VM->>VM: update containers
-    VM->>VM: run healthchecks
-    alt ok
-      VM->>Actions: success
-    else failed
-      VM->>VM: rollback
+    Visitor["Internet client"] --> Edge["Cloudflare edge"]
+    Edge --> Tunnel["Cloudflare Tunnel"]
+    subgraph VM["Docker VM on Proxmox VE"]
+      Tunnel --> Nginx["Nginx"]
+      Nginx --> Apps["Public web services"]
+      Apps --> DB["MariaDB"]
+      Nginx --> Tools["Internal monitoring interfaces"]
     end
+    Client["LAN client"] --> DNS["Pi-hole internal DNS"]
+    DNS --> Nginx
+    Visitor --> Pages["Documentation on GitHub Pages"]
         </div>
+      </article>
+
+      <article class="doc-panel">
+        <h2>Ingress and network boundaries</h2>
         <ul class="plain-list">
-          <li><strong>Failure mode:</strong> deployments are not considered complete until health checks pass.</li>
-          <li><strong>Rollback path:</strong> staged releases and backup copies exist so a bad change can be reverted without improvisation.</li>
-          <li><strong>Operational limit:</strong> this stays intentionally SSH- and Compose-based instead of adding a local runner or control plane.</li>
+          <li>Cloudflare terminates visitor TLS. An outbound tunnel carries public requests to Nginx over HTTPS without inbound port forwarding.</li>
+          <li>The Nginx origin uses a Let’s Encrypt wildcard renewed with DNS-01.</li>
+          <li>Pi-hole resolves internal names for LAN clients. Grafana and the Uptime Kuma status interface are available only on the internal network.</li>
+          <li>Docker networks separate frontend, database, and monitoring traffic. MariaDB stays on the backend network.</li>
         </ul>
+      </article>
+
+      <article class="doc-panel">
+        <h2>Deployment and failure boundaries</h2>
+        <p>The VM <a href="./deployment-flow.html">pulls versioned releases from GitHub</a>. The public sites and monitoring share one VM. The documentation stays available independently, and encrypted offsite backups provide a recovery path if local storage is lost.</p>
       </article>
     </main>
   </div>
