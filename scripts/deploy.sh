@@ -231,16 +231,40 @@ smoke_check() {
   local name="$1"
   local url="$2"
   local expected="$3"
-  local response
+  local attempt response status curl_exit
 
-  response="$(curl -fsS --max-time 10 "$url")" || {
-    log "Public smoke check failed for $name"
+  for ((attempt=0; attempt<=12; attempt++)); do
+    curl_exit=0
+    response="$(curl -fsS --max-time 10 --write-out $'\n%{http_code}' "$url")" || curl_exit=$?
+    status="${response##*$'\n'}"
+    if (( curl_exit == 0 )); then
+      if grep -Fq -- "$expected" <<< "${response%$'\n'*}"; then
+        return 0
+      fi
+      log "Public smoke check returned an unexpected response for $name"
+      return 1
+    fi
+    case "$status" in
+      502|503|504)
+        if (( attempt < 12 )); then
+          sleep 5
+          continue
+        fi
+        ;;
+    esac
+    log "Public smoke check failed for $name (HTTP $status, curl exit $curl_exit)"
     return 1
-  }
-  printf '%s' "$response" | grep -Fq "$expected" || {
-    log "Public smoke check returned an unexpected response for $name"
-    return 1
-  }
+  done
+}
+
+check_step() {
+  local name="$1"
+  shift
+  if "$@"; then
+    return 0
+  fi
+  log "Post-deployment check failed: $name"
+  return 1
 }
 
 prune_release_backups() {
@@ -370,12 +394,12 @@ if (( NGINX_CONFIG_CHANGED == 1 )); then
   # nginx.conf is a file bind mount. Recreate nginx to pick up the new inode.
   nginx_recreate=(--force-recreate)
 fi
-if ! docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d --no-deps --no-build --wait "${nginx_recreate[@]}" nginx \
-  || ! docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T nginx nginx -t \
-  || ! docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T nginx nginx -s reload \
-  || ! restart_platform_services \
-  || ! healthcheck \
-  || ! python3 "$ROOT_DIR/scripts/check-public-routing.py" --local --rounds 3 \
+if ! check_step "nginx startup" docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d --no-deps --no-build --wait "${nginx_recreate[@]}" nginx \
+  || ! check_step "nginx config test" docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T nginx nginx -t \
+  || ! check_step "nginx reload" docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T nginx nginx -s reload \
+  || ! check_step "monitoring and logging" restart_platform_services \
+  || ! check_step "origin health" healthcheck \
+  || ! check_step "origin routing" python3 "$ROOT_DIR/scripts/check-public-routing.py" --local --rounds 3 --gateway-retries 12 \
   || ! smoke_check "shellr health" "https://shellr.net/health" '"status":"ok"' \
   || ! smoke_check "DMA showcase" "https://dma.shellr.net/" 'DMA Statistics Module'; then
   log "Post-deployment verification failed."
