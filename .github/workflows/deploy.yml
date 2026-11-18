@@ -83,6 +83,7 @@ jobs:
         with:
           name: vulnerability-reports
           path: .scan/*.json
+          include-hidden-files: true
           retention-days: 7
           if-no-files-found: error
 

@@ -40,6 +40,7 @@ infra/backup/logs/
 infra/backup/restore/
 infra/backup/tmp/
 infra/backup/last-successful-backup
+infra/backup/last-successful-offsite-backup
 infra/backup/.backup.lock
 
 # Docker and local runtime artifacts

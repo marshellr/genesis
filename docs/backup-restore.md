@@ -54,6 +54,10 @@ The local job runs daily at 03:17 in the host timezone. Archives and dumps are m
 
 A separate nightly Restic job writes encrypted offsite snapshots. Its hook supplies a logical MariaDB dump and consistent SQLite copies. Restic excludes the raw MariaDB backing directory and duplicate local dump and archive sets, as well as the short-lived Prometheus, Loki, and Alloy stores. An offsite restore test imported MariaDB into an isolated instance and verified the restored SQLite copies.
 
+The internal status snapshot displays the last completed successful offsite run and its age. It reads the existing backup unit's completion state and preserves the previous success when a later run is active or fails. An age above 25 hours requires operator attention. This check adds no backup schedule.
+
+The online SQLite snapshot helper copies a complete consistent snapshot in one backup step. Invoke it with an external time limit so a busy source or failed storage cannot hold the shared backup lock indefinitely. The host hook must be explicitly connected to this helper before relying on it for scheduled backups.
+
 ## Staged recovery
 
 ```bash

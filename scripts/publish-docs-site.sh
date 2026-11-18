@@ -5,8 +5,8 @@ umask 027
 PROJECT_ROOT="${PROJECT_ROOT:-/projects/genesis}"
 SOURCE_DIR="$PROJECT_ROOT/docs/site"
 PUBLISH_ROOT="$PROJECT_ROOT/docs/publish"
-TARGET_REPO_DIR="${TARGET_REPO_DIR:-$PUBLISH_ROOT/marshellr.github.io}"
-TARGET_REPO_SSH="${TARGET_REPO_SSH:-git@github.com:marshellr/marshellr.github.io.git}"
+TARGET_REPO_DIR="${TARGET_REPO_DIR:-$PUBLISH_ROOT/docs.shellr.net}"
+TARGET_REPO_SSH="${TARGET_REPO_SSH:-git@github.com:marshellr/docs.shellr.net.git}"
 TARGET_BRANCH="${TARGET_BRANCH:-main}"
 
 require_cmd() {

@@ -4,6 +4,7 @@ umask 027
 
 OUTPUT_FILE="/projects/genesis/infra/nginx/static/status/snapshot.html"
 BACKUP_HEALTH_FILE="/projects/genesis/infra/backup/last-successful-backup"
+OFFSITE_HEALTH_FILE="/projects/genesis/infra/backup/last-successful-offsite-backup"
 GENERATED_AT="$(date -u '+%Y-%m-%d %H:%M UTC')"
 
 service_status() {
@@ -37,14 +38,30 @@ static_health_status() {
   fi
 }
 
+record_offsite_success() {
+  local result finished epoch temporary
+  result="$(systemctl show backup-extern.service --property=Result --value 2>/dev/null)" || return 0
+  finished="$(systemctl show backup-extern.service --property=ExecMainExitTimestamp --value 2>/dev/null)" || return 0
+  [[ "$result" == success && -n "$finished" ]] || return 0
+  epoch="$(date -d "$finished" +%s 2>/dev/null)" || return 0
+  [[ "$epoch" =~ ^[0-9]{1,12}$ ]] || return 0
+  temporary="$(mktemp "$OFFSITE_HEALTH_FILE.tmp.XXXXXX")" || return 0
+  if printf '%s\n' "$epoch" > "$temporary" && chmod 600 "$temporary"; then
+    mv -fT "$temporary" "$OFFSITE_HEALTH_FILE"
+  else
+    rm -f -- "$temporary"
+  fi
+}
+
 backup_snapshot() {
+  local marker="$1" label="$2"
   local latest_epoch last_success age_seconds status detail
-  if [[ ! -f "$BACKUP_HEALTH_FILE" ]]; then
+  if [[ ! -f "$marker" ]]; then
     printf 'degraded|Backup verification has not completed yet.'
     return
   fi
 
-  read -r latest_epoch < "$BACKUP_HEALTH_FILE" || latest_epoch=""
+  read -r latest_epoch < "$marker" || latest_epoch=""
   if [[ ! "$latest_epoch" =~ ^[0-9]{1,12}$ ]] || ! last_success="$(date -u -d "@$latest_epoch" '+%Y-%m-%d %H:%M UTC')"; then
     printf 'degraded|Backup verification marker is invalid.'
     return
@@ -59,7 +76,7 @@ backup_snapshot() {
     detail="Backup verification requires operator attention."
   fi
 
-  printf '%s|%s Last successful local backup: %s.' "$status" "$detail" "$last_success"
+  printf '%s|%s Last successful %s backup: %s. Age: %s hours.' "$status" "$detail" "$label" "$last_success" "$(( age_seconds / 3600 ))"
 }
 
 if python3 /projects/genesis/scripts/check-public-routing.py --rounds 3 >/dev/null 2>&1; then
@@ -70,13 +87,16 @@ fi
 dma="$(static_health_status "dma.shellr.net" "https://dma.shellr.net/health.txt" "DMA showcase health marker responds." "DMA showcase health marker is not responding as expected.")"
 docs="$(service_status "docs.shellr.net" "https://docs.shellr.net/" "Docs site is reachable through GitHub Pages." "Docs site is currently unreachable or returning an error.")"
 status_surface="$(service_status "status.shellr.net" "https://status.shellr.net/status/shellr" "Internal status board is reachable." "Internal status board is not returning cleanly." --resolve status.shellr.net:443:127.0.0.1)"
-backup_info="$(backup_snapshot)"
+record_offsite_success
+backup_info="$(backup_snapshot "$BACKUP_HEALTH_FILE" local)"
+offsite_info="$(backup_snapshot "$OFFSITE_HEALTH_FILE" offsite)"
 
 IFS='|' read -r shellr_name shellr_state shellr_text shellr_code <<< "$shellr"
 IFS='|' read -r dma_name dma_state dma_text dma_code <<< "$dma"
 IFS='|' read -r docs_name docs_state docs_text docs_code <<< "$docs"
 IFS='|' read -r status_name status_state status_text status_code <<< "$status_surface"
 IFS='|' read -r backup_state backup_text <<< "$backup_info"
+IFS='|' read -r offsite_state offsite_text <<< "$offsite_info"
 
 cat > "$OUTPUT_FILE" <<HTML
 <!DOCTYPE html>
@@ -158,6 +178,11 @@ cat > "$OUTPUT_FILE" <<HTML
           <div class="state ${backup_state}">backup freshness</div>
           <h2>Daily backup path</h2>
           <p>${backup_text}</p>
+        </article>
+        <article class="card">
+          <div class="state ${offsite_state}">offsite backup freshness</div>
+          <h2>Verified offsite backup</h2>
+          <p>${offsite_text}</p>
         </article>
         <article class="card">
           <div class="state ok">operator note</div>
