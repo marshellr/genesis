@@ -19,6 +19,8 @@ if (is_readable($localOverride)) {
 }
 
 return [
+    'DMA_WRITE_USERNAME' => getenv('DMA_WRITE_USERNAME') ?: ($localConfig['DMA_WRITE_USERNAME'] ?? ''),
+    'DMA_WRITE_PASSWORD_HASH_FILE' => getenv('DMA_WRITE_PASSWORD_HASH_FILE') ?: ($localConfig['DMA_WRITE_PASSWORD_HASH_FILE'] ?? ''),
     // Riot API
     'RIOT_API_KEY'      => getenv('RIOT_API_KEY')      ?: ($localConfig['RIOT_API_KEY']      ?? ''),
     'GAME_NAME'         => getenv('GAME_NAME')         ?: ($localConfig['GAME_NAME']         ?? ''),

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/inc/error-handler.php';
 require_once __DIR__ . '/inc/functions.php';
+require_once __DIR__ . '/inc/write-auth.php';
 
 $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
     || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
@@ -26,6 +27,18 @@ if (empty($_SESSION['csrf_token'])) {
 }
 $csrfToken = $_SESSION['csrf_token'];
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    dma_require_writer();
+    $suppliedToken = $_POST['csrf_token'] ?? null;
+    if (!is_string($suppliedToken) || !hash_equals($csrfToken, $suppliedToken)) {
+        http_response_code(403);
+        header('Content-Type: application/json; charset=UTF-8');
+        header('Cache-Control: no-store');
+        echo json_encode(['success' => false, 'error' => 'Invalid CSRF token.']);
+        exit;
+    }
+}
+
 $selectedElo = $_GET['elo'] ?? 'emerald_plus';
 $validElos = ['emerald_plus', 'diamond_plus', 'master_plus'];
 if (!in_array($selectedElo, $validElos, true)) {
@@ -33,7 +46,7 @@ if (!in_array($selectedElo, $validElos, true)) {
 }
 
 $championsInDb = db_get_all_champions();
-if (empty($championsInDb)) {
+if (empty($championsInDb) && dma_write_authorized($_SERVER, app_config())) {
     $riotChampions = riot_get_all_champions();
     if (!empty($riotChampions)) {
         db_sync_champions($riotChampions);
@@ -43,12 +56,6 @@ if (empty($championsInDb)) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header('Content-Type: application/json');
-
-    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-        http_response_code(403);
-        echo json_encode(['success' => false, 'error' => 'Invalid CSRF token.'], JSON_UNESCAPED_UNICODE);
-        exit;
-    }
 
     $action = $_POST['action'] ?? '';
 

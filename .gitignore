@@ -9,6 +9,7 @@ infra/monitoring/.env
 infra/backup/restic.env
 
 # Secrets and credentials
+/dma/inc/env.local.php
 *.pem
 *.key
 *.crt

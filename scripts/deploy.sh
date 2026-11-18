@@ -101,7 +101,11 @@ sync_directory() {
 
   # Keep the target directory inode so Docker bind mounts remain valid.
   mkdir -p "$live_path"
-  rsync -a --delete --exclude=/local/ "$source_path/" "$live_path/"
+  if [[ "$relative" == dma ]]; then
+    rsync -a --delete --exclude=/inc/env.local.php --exclude=/local/ "$source_path/" "$live_path/"
+  else
+    rsync -a --delete --exclude=/local/ "$source_path/" "$live_path/"
+  fi
 }
 
 sync_file() {

@@ -40,6 +40,13 @@ jobs:
           docker run --rm -v "$PWD/app:/app:ro" php:8.3-cli-alpine \
             sh -c "find /app -type f -name '*.php' -print0 | xargs -0 -r -n1 php -l"
 
+      - name: Validate DMA authorization and PHP syntax
+        run: |
+          set -euo pipefail
+          docker run --rm --network none -v "$PWD:/repo:ro" \
+            php:8.3-cli-alpine@sha256:e7699f91d3b46283a49bde02379266dd98d87844e08aed1ff7ea6a7d1f031268 \
+            sh -ec 'find /repo/dma -type f -name "*.php" -print0 | xargs -0 -r -n1 php -l; php /repo/scripts/tests/dma-write-auth.php'
+
       - name: Build application image
         run: docker build -t genesis-app:${{ github.sha }} app
 
