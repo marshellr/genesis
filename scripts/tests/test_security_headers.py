@@ -12,6 +12,12 @@ spec.loader.exec_module(policy)
 
 
 class SecurityHeaderTests(unittest.TestCase):
+    def test_checks_the_asset_version_served_to_browsers(self):
+        page = '<script src="/assets/app.js?v=0123456789abcdef"></script>'
+        self.assertEqual(policy.published_asset(page), "https://shellr.net/assets/app.js?v=0123456789abcdef")
+        with self.assertRaises(ValueError):
+            policy.published_asset('<script src="https://example.invalid/app.js"></script>')
+
     def headers(self):
         values = {**policy.REQUIRED, "content-security-policy":
                   "default-src 'self'; object-src 'none'; frame-ancestors 'none'"}

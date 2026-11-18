@@ -17,13 +17,15 @@ try {
         [['PHP_AUTH_USER' => 'test-operator', 'PHP_AUTH_PW' => 'incorrect'], false],
         [['PHP_AUTH_USER' => 'other-user', 'PHP_AUTH_PW' => 'synthetic-test-password'], false],
         [['PHP_AUTH_USER' => 'test-operator', 'PHP_AUTH_PW' => 'synthetic-test-password'], true],
+        [['REQUEST_METHOD' => 'GET', 'PHP_AUTH_USER' => 'test-operator', 'PHP_AUTH_PW' => 'synthetic-test-password'], false],
+        [['REQUEST_METHOD' => 'HEAD', 'PHP_AUTH_USER' => 'test-operator', 'PHP_AUTH_PW' => 'synthetic-test-password'], false],
     ];
     foreach ($cases as [$server, $expected]) {
-        if (dma_write_authorized($server, $settings) !== $expected) {
+        if (dma_write_authorized(array_replace(['REQUEST_METHOD' => 'POST'], $server), $settings) !== $expected) {
             throw new RuntimeException('Authorization regression');
         }
     }
-    if (dma_write_authorized($cases[4][0], []) !== false) {
+    if (dma_write_authorized(array_replace(['REQUEST_METHOD' => 'POST'], $cases[4][0]), []) !== false) {
         throw new RuntimeException('Writes must stay disabled without operator credentials');
     }
     echo "DMA authorization tests passed\n";

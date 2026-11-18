@@ -2,6 +2,7 @@
 """Verify the security policy on public HTML, assets and the deployment receipt."""
 import argparse
 import ipaddress
+import re
 import subprocess
 from email.parser import Parser
 from urllib.parse import urlsplit
@@ -9,7 +10,6 @@ from urllib.parse import urlsplit
 
 TARGETS = (
     "https://shellr.net/",
-    "https://shellr.net/assets/app.js",
     "https://shellr.net/deployed.json",
     "https://dma.shellr.net/",
 )
@@ -40,7 +40,7 @@ def check(url, origin_ip=None):
     command = [
         "curl", "--noproxy", "*", "--silent", "--show-error", "--fail",
         "--connect-timeout", "4", "--max-time", "12",
-        "--header", "Cache-Control: no-cache", "--dump-header", "-", "--output", "/dev/null",
+        "--header", "Cache-Control: no-cache", "--include",
     ]
     if origin_ip:
         command += ["--resolve", f"{parsed.hostname}:443:{origin_ip}"]
@@ -55,6 +55,14 @@ def check(url, origin_ip=None):
         raise ValueError("Expected HTTP 200")
     headers = Parser().parsestr(blocks[-1].split("\r\n", 1)[1])
     validate(headers)
+    return result.stdout.split((blocks[-1] + "\r\n\r\n").encode("iso-8859-1"), 1)[1]
+
+
+def published_asset(page):
+    match = re.search(r'''<script\b[^>]*\bsrc=["'](/assets/app\.js\?v=[a-f0-9]{16})["']''', page)
+    if match is None:
+        raise ValueError("The landing page does not reference a versioned application script")
+    return "https://shellr.net" + match[1]
 
 
 if __name__ == "__main__":
@@ -63,7 +71,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
     for target in TARGETS:
         try:
-            check(target, args.origin_ip)
+            body = check(target, args.origin_ip)
+            print(f"Security headers verified for {target}")
+            if target == TARGETS[0]:
+                target = published_asset(body.decode("utf-8"))
+                check(target, args.origin_ip)
+                print(f"Security headers verified for {target}")
         except ValueError as error:
             raise SystemExit(f"{target}: {error}") from None
-        print(f"Security headers verified for {target}")

@@ -7,6 +7,9 @@ declare(strict_types=1);
  */
 function dma_write_authorized(array $server, array $settings): bool
 {
+    if (($server['REQUEST_METHOD'] ?? '') !== 'POST') {
+        return false;
+    }
     $expectedUser = (string) ($settings['DMA_WRITE_USERNAME'] ?? '');
     $hashFile = (string) ($settings['DMA_WRITE_PASSWORD_HASH_FILE'] ?? '');
     $user = $server['PHP_AUTH_USER'] ?? null;
