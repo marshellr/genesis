@@ -148,7 +148,7 @@ function e(string $value): string
         <p>Architecture, deployment and recovery procedures are documented alongside the source. The documentation links to the implementation and records operational limits.</p>
         <div class="hero-actions">
           <a class="button primary" href="<?= e($site['docs_url']) ?>">Read documentation</a>
-          <a class="button secondary" href="<?= e($githubUrl) ?>">Open repository</a>
+          <a class="button secondary" href="https://github.com/marshellr/genesis">Open repository</a>
           <a class="button secondary" href="mailto:<?= e($site['contact_email']) ?>">Contact by email</a>
         </div>
       </div>
