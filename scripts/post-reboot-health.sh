@@ -20,7 +20,6 @@ EXPECTED_CONTAINERS=(
   genesis-nginx
   genesis-monitoring-prometheus
   genesis-monitoring-grafana
-  genesis-monitoring-alertmanager
   genesis-monitoring-node-exporter
   genesis-monitoring-cadvisor
   genesis-monitoring-uptime-kuma

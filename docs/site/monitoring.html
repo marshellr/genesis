@@ -40,7 +40,7 @@
         <h1>Internal monitoring for host, containers, and services.</h1>
         <p>Prometheus, Grafana, Loki, and Uptime Kuma are available only on the internal network. Uptime checks also exercise the public Cloudflare path.</p>
         <div class="doc-grid">
-          <article><h3>Prometheus</h3><p>Collects metrics from Node Exporter, cAdvisor, and service endpoints. Alertmanager handles Prometheus alerts.</p></article>
+          <article><h3>Prometheus</h3><p>Collects metrics from Node Exporter, cAdvisor, and service endpoints.</p></article>
           <article><h3>Grafana</h3><p>Displays host, container, and service metrics alongside logs. The internal interface requires authentication.</p></article>
           <article><h3>Loki</h3><p>Receives logs through Grafana Alloy. Logs have a 72-hour retention period.</p></article>
           <article><h3>Uptime Kuma</h3><p>Checks service availability. The internal status snapshot also shows the timestamp of the latest successful local backup.</p></article>

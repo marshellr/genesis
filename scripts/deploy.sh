@@ -31,8 +31,6 @@ PLATFORM_CONFIG_FILES=(
   infra/monitoring/docker-compose.monitoring.yml
   infra/monitoring/.env.example
   infra/monitoring/prometheus/prometheus.yml
-  infra/monitoring/prometheus/alerts.yml
-  infra/monitoring/alertmanager/alertmanager.yml
   infra/monitoring/grafana/provisioning/datasources/prometheus.yml
   infra/monitoring/grafana/provisioning/datasources/loki.yml
   infra/monitoring/grafana/provisioning/dashboards/dashboards.yml
@@ -193,8 +191,8 @@ restart_platform_services() {
 
   log "Applying monitoring and logging configuration changes"
   docker compose --env-file "$ROOT_DIR/infra/monitoring/.env" -f "$ROOT_DIR/infra/monitoring/docker-compose.monitoring.yml" config >/dev/null || return 1
-  docker compose --env-file "$ROOT_DIR/infra/monitoring/.env" -f "$ROOT_DIR/infra/monitoring/docker-compose.monitoring.yml" restart prometheus alertmanager grafana || return 1
-  docker compose --env-file "$ROOT_DIR/infra/monitoring/.env" -f "$ROOT_DIR/infra/monitoring/docker-compose.monitoring.yml" up -d --no-build --wait prometheus alertmanager grafana || return 1
+  docker compose --env-file "$ROOT_DIR/infra/monitoring/.env" -f "$ROOT_DIR/infra/monitoring/docker-compose.monitoring.yml" restart prometheus grafana || return 1
+  docker compose --env-file "$ROOT_DIR/infra/monitoring/.env" -f "$ROOT_DIR/infra/monitoring/docker-compose.monitoring.yml" up -d --no-build --remove-orphans --wait || return 1
 
   docker compose --env-file "$ROOT_DIR/infra/logging/.env" -f "$ROOT_DIR/infra/logging/docker-compose.logging.yml" config >/dev/null || return 1
   docker compose --env-file "$ROOT_DIR/infra/logging/.env" -f "$ROOT_DIR/infra/logging/docker-compose.logging.yml" up -d --no-build --remove-orphans --wait loki alloy || return 1
@@ -304,6 +302,8 @@ rollback() {
   docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d --no-deps --no-build --wait "${nginx_recreate[@]}" nginx || return 1
   docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T nginx nginx -t || return 1
   docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T nginx nginx -s reload || return 1
+
+  restart_platform_services || return 1
 
   if healthcheck; then
     log "Rollback completed successfully."
@@ -415,6 +415,9 @@ if ! check_step "nginx startup" docker compose --env-file "$ENV_FILE" -f "$COMPO
     fail "Deployment failed and rollback also failed. Manual intervention required."
   fi
 fi
+
+rm -f -- "$ROOT_DIR/infra/monitoring/prometheus/alerts.yml" "$ROOT_DIR/infra/monitoring/alertmanager/alertmanager.yml"
+sed -i '/^ALERTMANAGER_PORT=/d' "$ROOT_DIR/infra/monitoring/.env"
 
 prune_release_backups
 

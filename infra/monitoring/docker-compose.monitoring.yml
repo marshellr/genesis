@@ -70,34 +70,6 @@ services:
     security_opt:
       - no-new-privileges:true
 
-  alertmanager:
-    image: prom/alertmanager:v0.28.1
-    container_name: ${COMPOSE_PROJECT_NAME:-genesis}-alertmanager
-    restart: unless-stopped
-    command:
-      - --config.file=/etc/alertmanager/alertmanager.yml
-      - --storage.path=/alertmanager
-    ports:
-      - 127.0.0.1:${ALERTMANAGER_PORT:-9093}:9093
-    volumes:
-      - ${PROJECT_ROOT:-/projects/genesis}/infra/monitoring/alertmanager:/etc/alertmanager:ro
-      - ${PROJECT_ROOT:-/projects/genesis}/infra/docker/volumes/alertmanager:/alertmanager
-    networks:
-      - monitoring
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:9093/-/healthy"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 20s
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-    security_opt:
-      - no-new-privileges:true
-
   node-exporter:
     image: prom/node-exporter:v1.9.1@sha256:d00a542e409ee618a4edc67da14dd48c5da66726bbd5537ab2af9c1dfc442c8a
     container_name: ${COMPOSE_PROJECT_NAME:-genesis}-node-exporter
@@ -210,13 +182,6 @@ volumes:
       type: none
       o: bind
       device: ${PROJECT_ROOT:-/projects/genesis}/infra/docker/volumes/uptime-kuma
-
-  alertmanager_data:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ${PROJECT_ROOT:-/projects/genesis}/infra/docker/volumes/alertmanager
 
 networks:
   monitoring:
