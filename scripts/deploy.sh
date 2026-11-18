@@ -405,6 +405,7 @@ if ! check_step "nginx startup" docker compose --env-file "$ENV_FILE" -f "$COMPO
   || ! check_step "origin readiness" python3 "$ROOT_DIR/scripts/check-public-routing.py" --wait-for-origin \
   || ! check_step "monitoring and logging" restart_platform_services \
   || ! check_step "origin routing" python3 "$ROOT_DIR/scripts/check-public-routing.py" --local --rounds 3 --gateway-retries 12 \
+  || ! check_step "security headers" python3 "$ROOT_DIR/scripts/check-security-headers.py" --origin-ip 127.0.0.1 \
   || ! smoke_check "shellr health" "https://shellr.net/health" '"status":"ok"' \
   || ! smoke_check "DMA showcase" "https://dma.shellr.net/" 'DMA Statistics Module'; then
   log "Post-deployment verification failed."

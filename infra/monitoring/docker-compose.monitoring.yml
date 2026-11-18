@@ -2,7 +2,7 @@ name: genesis-monitoring
 
 services:
   prometheus:
-    image: prom/prometheus:v3.6.0
+    image: prom/prometheus:v3.6.0@sha256:76947e7ef22f8a698fc638f706685909be425dbe09bd7a2cd7aca849f79b5f64
     container_name: ${COMPOSE_PROJECT_NAME:-genesis}-prometheus
     restart: unless-stopped
     command:
@@ -10,8 +10,6 @@ services:
       - --storage.tsdb.path=/prometheus/data
       - --storage.tsdb.retention.time=${PROMETHEUS_RETENTION:-7d}
       - --storage.tsdb.retention.size=${PROMETHEUS_RETENTION_SIZE:-1GB}
-      - --web.enable-lifecycle
-      - --web.enable-admin-api
     ports:
       - 127.0.0.1:${PROMETHEUS_PORT:-9090}:9090
     volumes:
@@ -34,7 +32,7 @@ services:
       - no-new-privileges:true
 
   grafana:
-    image: grafana/grafana:12.2.0
+    image: grafana/grafana:12.2.0@sha256:74144189b38447facf737dfd0f3906e42e0776212bf575dc3334c3609183adf7
     container_name: ${COMPOSE_PROJECT_NAME:-genesis}-grafana
     restart: unless-stopped
     depends_on:
@@ -101,7 +99,7 @@ services:
       - no-new-privileges:true
 
   node-exporter:
-    image: prom/node-exporter:v1.9.1
+    image: prom/node-exporter:v1.9.1@sha256:d00a542e409ee618a4edc67da14dd48c5da66726bbd5537ab2af9c1dfc442c8a
     container_name: ${COMPOSE_PROJECT_NAME:-genesis}-node-exporter
     restart: unless-stopped
     command:
@@ -134,7 +132,7 @@ services:
     read_only: true
 
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    image: gcr.io/cadvisor/cadvisor:v0.49.1@sha256:3cde6faf0791ebf7b41d6f8ae7145466fed712ea6f252c935294d2608b1af388
     container_name: ${COMPOSE_PROJECT_NAME:-genesis}-cadvisor
     restart: unless-stopped
     command:

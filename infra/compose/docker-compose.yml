@@ -35,7 +35,7 @@ services:
       - no-new-privileges:true
 
   db:
-    image: mariadb:11.4
+    image: mariadb:11.4@sha256:d1891ede5a559f1086f55053bb8cc1569b0298338c4d72d71725a7f74f6ba620
     container_name: ${COMPOSE_PROJECT_NAME:-genesis}-db
     restart: unless-stopped
     command:
@@ -80,6 +80,17 @@ services:
       dockerfile: Dockerfile
     container_name: ${COMPOSE_PROJECT_NAME:-genesis}-app
     restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,mode=1777
+      - /var/run/apache2:rw,noexec,nosuid,nodev,mode=0755
+      - /var/lock/apache2:rw,noexec,nosuid,nodev,mode=0755
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETUID
+      - SETGID
+      - NET_BIND_SERVICE
     environment:
       PORTFOLIO_BRAND: ${PORTFOLIO_BRAND:-shellr}
       PORTFOLIO_ROLE: ${PORTFOLIO_ROLE:-DevOps / System Engineer}
@@ -115,6 +126,17 @@ services:
       dockerfile: Dockerfile
     container_name: ${COMPOSE_PROJECT_NAME:-genesis}-dma
     restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,mode=1777
+      - /var/run/apache2:rw,noexec,nosuid,nodev,mode=0755
+      - /var/lock/apache2:rw,noexec,nosuid,nodev,mode=0755
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETUID
+      - SETGID
+      - NET_BIND_SERVICE
     depends_on:
       db:
         condition: service_healthy

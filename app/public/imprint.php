@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 $site = require __DIR__ . '/../config/site.php';
+require_once __DIR__ . '/../config/assets.php';
 
 function e(string $value): string
 {
@@ -16,10 +17,10 @@ function e(string $value): string
   <title>Imprint | shellr</title>
   <meta name="description" content="Imprint for shellr.net.">
   <link rel="canonical" href="https://shellr.net/imprint.php">
-  <link rel="icon" type="image/png" href="/assets/favi.png">
-  <link rel="apple-touch-icon" href="/assets/favi.png">
-  <link rel="stylesheet" href="/assets/fonts.css">
-  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="icon" type="image/png" href="<?= asset_url('/assets/favi.png') ?>">
+  <link rel="apple-touch-icon" href="<?= asset_url('/assets/favi.png') ?>">
+  <link rel="stylesheet" href="<?= asset_url('/assets/fonts.css') ?>">
+  <link rel="stylesheet" href="<?= asset_url('/assets/styles.css') ?>">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to content</a>
@@ -30,7 +31,7 @@ function e(string $value): string
   <header class="legal-header legal-shell">
     <a class="brand" href="/" aria-label="shellr home">
       <span class="brand-lockup">
-        <img src="/assets/logo-small.png" srcset="/assets/logo-small.png 160w, /assets/logo.png 320w" sizes="(max-width: 720px) 120px, 160px" alt="shellr" width="160" height="155" decoding="async">
+        <img src="<?= asset_url('/assets/logo-small.png') ?>" srcset="/assets/logo-small.png 160w, /assets/logo.png 320w" sizes="(max-width: 720px) 120px, 160px" alt="shellr" width="160" height="155" decoding="async">
       </span>
       <span class="brand-caption">legal</span>
     </a>
