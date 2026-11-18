@@ -100,7 +100,7 @@ sync_directory() {
   # Keep the target directory inode so Docker bind mounts remain valid.
   mkdir -p "$live_path"
   if [[ "$relative" == dma ]]; then
-    rsync -a --delete --exclude=/inc/env.local.php --exclude=/local/ "$source_path/" "$live_path/"
+    rsync -a --delete --exclude=/inc/env.local.php --exclude=/backend/inc/env.local.php --exclude=/local/ "$source_path/" "$live_path/"
   else
     rsync -a --delete --exclude=/local/ "$source_path/" "$live_path/"
   fi
@@ -405,6 +405,7 @@ if ! check_step "nginx startup" docker compose --env-file "$ENV_FILE" -f "$COMPO
   || ! check_step "origin readiness" python3 "$ROOT_DIR/scripts/check-public-routing.py" --wait-for-origin \
   || ! check_step "monitoring and logging" restart_platform_services \
   || ! check_step "origin routing" python3 "$ROOT_DIR/scripts/check-public-routing.py" --local --rounds 3 --gateway-retries 12 \
+  || ! check_step "DMA boundary" python3 "$ROOT_DIR/scripts/check-dma-boundary.py" --origin-ip 127.0.0.1 \
   || ! check_step "security headers" python3 "$ROOT_DIR/scripts/check-security-headers.py" --origin-ip 127.0.0.1 \
   || ! smoke_check "shellr health" "https://shellr.net/health" '"status":"ok"' \
   || ! smoke_check "DMA showcase" "https://dma.shellr.net/" 'DMA Statistics Module'; then

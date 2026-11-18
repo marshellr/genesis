@@ -3,7 +3,6 @@ set -Eeuo pipefail
 umask 027
 
 LOG_FILE="/projects/genesis/infra/backup/logs/dma-prefetch.log"
-BASE_URL="https://dma.shellr.net/champion-pool.php"
 mkdir -p "$(dirname "$LOG_FILE")"
 
 log() {
@@ -12,7 +11,7 @@ log() {
 
 for elo in emerald_plus diamond_plus master_plus; do
   log "Waerme DMA Champion-Pool Cache fuer ${elo} auf"
-  curl -sk --max-time 45 "${BASE_URL}?elo=${elo}" > /dev/null
+  sudo -n docker exec genesis-dma timeout --kill-after=5s 45s php /opt/dma/backend/prefetch.php "$elo"
 done
 
 log "DMA Champion-Pool Prefetch abgeschlossen"

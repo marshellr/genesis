@@ -56,6 +56,11 @@
         <p>The restore test recovered an offsite snapshot into private staging. The MariaDB dump was imported into an isolated instance and checked against the source. The restored SQLite copies passed integrity checks.</p>
         <p>Verify checksums before extracting a local set. Stage files away from the live tree and test database imports before applying a recovery to production.</p>
       </article>
+      <article class="doc-panel">
+        <h2>Recovery objectives</h2>
+        <p>The confirmed recovery point objective is 25 hours. The recovery time objective is 2 hours for full service restoration to an available replacement VM, with working hardware, network access and access to the backup credentials and keys.</p>
+        <p>The internal status snapshot displays the age of the last completed successful offsite backup. Recovery includes database import, project configuration and verified service health and public routing.</p>
+      </article>
     </main>
   </div>
   <script type="module" src="./app.js"></script>

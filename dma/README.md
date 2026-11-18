@@ -1,64 +1,9 @@
 # DMA
 
-DMA is a legacy PHP workload integrated into the `shellr` platform as a separate runtime surface on [dma.shellr.net](https://dma.shellr.net).
+The public hostname serves the static project showcase from infra/nginx/static/dma.
 
-The project is intentionally kept separate from the main landing page so it can be operated, monitored, and migrated without coupling it to the rest of the public frontdoor.
+Interactive PHP sources, templates and related assets are retained under backend. Docker copies them outside the served web root. The container's HTTP surface contains only public/health.txt and denies PHP requests. The database health check and cache prefetch use CLI entry points.
 
-## What It Does
+The backend uses its existing environment for database and upstream configuration. No operator login is configured. Local overrides under backend/inc/env.local.php remain private.
 
-- serves a dedicated DMA statistics interface
-- runs as its own container behind the shared Nginx reverse proxy
-- uses a dedicated database scope inside the shared MariaDB service
-- participates in platform monitoring and uptime checks
-- prefetches and caches champion-pool stat lookups so live requests stay lighter
-
-## Runtime Architecture
-
-```text
-dma.shellr.net
-  -> Nginx reverse proxy
-  -> DMA PHP container
-  -> MariaDB (dedicated DMA database scope)
-```
-
-## Technologies
-
-- PHP
-- MariaDB
-- Docker
-- Docker Compose
-- Nginx
-
-## Local / Platform Start
-
-DMA is started through the main platform stack:
-
-```bash
-docker compose \
-  --env-file infra/compose/.env \
-  -f infra/compose/docker-compose.yml \
-  up -d dma db nginx
-```
-
-## Configuration
-
-Environment and integration defaults are defined through:
-
-- `infra/compose/.env.example`
-- `dma/inc/env.local.php.example`
-- `dma/inc/env.php`
-
-Runtime secrets should not be committed. They belong in environment files or host-level secret injection.
-
-## Operational Notes
-
-- DMA is exposed on its own subdomain instead of a subpath
-- health checks are part of the platform monitoring model
-- champion-pool winrates prefer the original source and fall back to a cached role-specific upstream lookup when needed
-- the workload is treated as a real runtime surface, not as a static portfolio artifact
-
-## Related Links
-
-- [Main platform](https://shellr.net)
-- [Technical docs](https://docs.shellr.net)
-- [System status](https://status.shellr.net)
+See docs/dma-access.md for the boundary and deployment verification.

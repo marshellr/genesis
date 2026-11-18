@@ -36,6 +36,7 @@ git -C "$TARGET_REPO_DIR" pull --ff-only origin "$TARGET_BRANCH"
 
 rsync -av --delete \
   --exclude ".git" \
+  --exclude ".github/" \
   "$SOURCE_DIR"/ \
   "$TARGET_REPO_DIR"/
 

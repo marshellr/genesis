@@ -3,190 +3,6 @@ declare(strict_types=1);
 
 $site = require __DIR__ . '/../config/site.php';
 require_once __DIR__ . '/../config/assets.php';
-
-$heroHighlights = [
-    'Deployable through staged releases and health checks',
-    'Observable through metrics, logs, and uptime tracking',
-    'Recoverable through backups, restores, and rollback strategies',
-];
-
-$heroGuide = [
-    'Explore the architecture',
-    'View live system components',
-    'Review operational decisions and trade-offs',
-];
-
-$liveComponents = [
-    [
-        'title' => 'shellr.net',
-        'body' => 'Entry point and overview',
-        'href' => 'https://shellr.net',
-    ],
-    [
-        'title' => 'dma.shellr.net',
-        'body' => 'Read-only architecture showcase',
-        'href' => $site['dma_url'],
-    ],
-    [
-        'title' => 'Internal status',
-        'body' => 'Uptime monitoring on the local network',
-        'href' => '',
-    ],
-    [
-        'title' => 'Grafana',
-        'body' => 'Metrics and logs on the local network',
-        'href' => '',
-    ],
-    [
-        'title' => 'docs.shellr.net',
-        'body' => 'Full technical documentation',
-        'href' => $site['docs_url'],
-    ],
-];
-
-$platformSnapshot = [
-    ['title' => 'Host', 'body' => 'Docker Compose runs in a VM on my own Proxmox VE hardware in Germany.'],
-    ['title' => 'Runtime', 'body' => 'Docker networks separate frontend, backend, and monitoring traffic. Pi-hole resolves internal names.'],
-    ['title' => 'Ingress', 'body' => 'Cloudflare Tunnel carries public traffic without inbound ports. TLS protects the edge and origin. Nginx uses a Let’s Encrypt wildcard renewed with DNS-01.'],
-    ['title' => 'Delivery', 'body' => 'GitHub Actions builds and publishes a release. The server pulls it, checks service health, and rolls back if verification fails.'],
-    ['title' => 'Monitoring', 'body' => 'Prometheus, Grafana, Loki, and Uptime Kuma are available only on the internal network.'],
-    ['title' => 'Recovery', 'body' => 'MariaDB dumps and consistent SQLite copies are backed up daily. Restic encrypts the offsite backup. Restores have been tested.'],
-];
-
-$operationalMetrics = [
-    ['title' => 'Portfolio Surfaces', 'body' => 'The portfolio and DMA showcase use Cloudflare Tunnel. The documentation is hosted on GitHub Pages.'],
-    ['title' => 'Network Segments', 'body' => '3 Docker networks separating frontend, backend, and monitoring traffic.'],
-    ['title' => 'Backup Cadence', 'body' => 'Daily database and runtime backup jobs with defined retention.'],
-    ['title' => 'Monitoring Coverage', 'body' => 'Host, container, and application checks are included in the stack.'],
-];
-
-$securityModel = [
-    [
-        'title' => 'Ingress Control',
-        'points' => [
-            'TLS at the Cloudflare edge and at the Nginx origin',
-            'Redirect enforcement and hostname routing',
-            'Request filtering and layered security headers',
-        ],
-    ],
-    [
-        'title' => 'Access Control',
-        'points' => [
-            'Grafana and internal tools behind authentication',
-            'Internal service interfaces are reachable on the local network',
-        ],
-    ],
-    [
-        'title' => 'Isolation',
-        'points' => [
-            'Service separation via Docker networks',
-            'Distinct boundaries between frontend, app, and monitoring',
-        ],
-    ],
-    [
-        'title' => 'Recovery',
-        'points' => [
-            'Regular backups with defined retention',
-            'Restore scripts and documented recovery procedures',
-        ],
-    ],
-];
-
-$operationalFocus = [
-    'Incidents can be detected via metrics and uptime checks',
-    'Logs provide traceability across services',
-    'Deployments are gated by health checks',
-    'Recovery paths are defined and tested',
-];
-
-$featuredProjects = [
-    [
-        'title' => 'Genesis / Self-Hosted Platform',
-        'tag' => 'platform',
-        'lead' => 'Platform used to validate operational decisions under real conditions instead of theoretical setups.',
-        'points' => [
-            'Focus: Deployability',
-            'Focus: Observability',
-            'Focus: Recoverability',
-        ],
-        'stack' => ['Linux', 'Docker Compose', 'Nginx', 'GitHub Actions'],
-        'href' => $site['docs_url'] . '/case-studies.html',
-        'label' => 'Read case studies',
-    ],
-    [
-        'title' => 'DMA Statistics Module',
-        'tag' => 'project showcase',
-        'lead' => 'A contained PHP and MariaDB workload for match-statistics analysis, retained as a read-only architecture showcase.',
-        'points' => [
-            'Separates application routing, database state, and health behavior',
-            'Uses external match data and role-based statistics',
-            'Public access exposes project context, not administrative controls',
-        ],
-        'stack' => ['PHP', 'MariaDB', 'Health checks', 'Monitoring'],
-        'href' => $site['dma_url'],
-        'label' => 'Open project showcase',
-    ],
-    [
-        'title' => 'Automated Web Analytics with AWStats',
-        'tag' => 'reporting',
-        'lead' => 'Reference reporting workflow for generating lightweight webserver reports without adding a heavy analytics stack.',
-        'points' => [
-            'Provides a documented AWStats configuration and cron-ready generator',
-            'Requires an intentional access-log source before activation',
-            'Fits the resource limits of a small single-host platform',
-        ],
-        'stack' => ['AWStats', 'Shell scripts', 'Cron', 'Reporting'],
-        'href' => $site['docs_url'] . '/projects.html',
-        'label' => 'Read project overview',
-    ],
-    [
-        'title' => 'Web Platform Migration and Hardening',
-        'tag' => 'operations',
-        'lead' => 'Moves containerized web services from a cloud VM to a Proxmox homelab.',
-        'points' => [
-            'Moves public ingress to Cloudflare Tunnel',
-            'Transfers databases and files with a planned cutover',
-            'Verifies restores and internal DNS',
-        ],
-        'stack' => ['Proxmox VE', 'Docker Compose', 'Cloudflare Tunnel', 'Restic'],
-        'href' => $site['docs_url'] . '/case-studies.html#cloud-vm-to-homelab',
-        'label' => 'Read migration case study',
-    ],
-    [
-        'title' => 'Inventory Tracking Application',
-        'tag' => 'stateful application',
-        'lead' => 'Database-backed CRUD application for tracking stock and inventory changes under normal operational constraints.',
-        'points' => [
-            'Models relational inventory and stock state',
-            'Supports create, update, and delete workflows',
-            'Validates backup and restore behavior against persistent data',
-        ],
-        'stack' => ['PHP', 'MariaDB', 'CRUD', 'Health checks'],
-        'href' => $site['docs_url'] . '/projects.html',
-        'label' => 'Read project notes',
-    ],
-    [
-        'title' => 'Vulnerability Relevance Automation',
-        'tag' => 'security automation',
-        'lead' => 'Current security automation work for turning vulnerability feeds into actionable, asset-relevant review tasks.',
-        'points' => [
-            'Maps ENISA EUVD records against an asset inventory',
-            'Adds CVSS, KEV, and EPSS context before review',
-            'Focuses on repeatable triage instead of manual feed scanning',
-        ],
-        'stack' => ['ENISA EUVD API', 'SQLite', 'Automation', 'Freshservice'],
-        'href' => $site['docs_url'] . '/projects.html',
-        'label' => 'Read project overview',
-    ],
-];
-
-$docsIncludes = [
-    'Architecture',
-    'Deployment flow',
-    'Monitoring setup',
-    'Backup and restore strategy',
-];
-
 $githubUrl = $site['github_url'] !== '' ? $site['github_url'] : 'https://github.com/marshellr/genesis';
 
 function e(string $value): string
@@ -248,230 +64,92 @@ function e(string $value): string
       <span class="brand-caption">platform frontdoor</span>
     </a>
     <nav class="site-nav" aria-label="Primary">
-      <a href="#live-components">Live Systems</a>
-      <a href="#metrics">Metrics</a>
-      <a href="#security-model">Security</a>
       <a href="#projects">Projects</a>
-      <a href="#documentation">Docs</a>
+      <a href="#platform-facts">Platform facts</a>
+      <a href="#documentation">Documentation and contact</a>
     </nav>
   </header>
 
   <main id="main-content">
-    <section class="hero" id="top">
+    <section class="hero hero-portfolio" id="top">
       <div class="hero-copy" data-reveal>
         <p class="eyebrow">Marlin Scheler &middot; Junior DevOps / System Engineer</p>
-        <h1>Self-hosted platform demonstrating real-world system operation.</h1>
-
-        <ul class="outcome-list">
-          <?php foreach ($heroHighlights as $item): ?>
-          <li><?= e($item) ?></li>
-          <?php endforeach; ?>
-        </ul>
-
-        <div class="hero-note">
-          <p class="hero-note-title">What you can do here:</p>
-          <ul class="hero-guide-list">
-            <?php foreach ($heroGuide as $item): ?>
-            <li><?= e($item) ?></li>
-            <?php endforeach; ?>
-          </ul>
-        </div>
-
+        <h1>I operate a self-hosted platform on my own hardware.</h1>
+        <p class="hero-summary">I use it to test deployments, service isolation and recovery under real operating conditions.</p>
+        <p class="hero-summary">My work covers Linux administration, Docker Compose, reverse-proxy configuration, monitoring and backup verification. The repository and documentation show the implementation and the checks used to operate it.</p>
         <div class="hero-actions">
-          <a class="button primary" href="<?= e($site['docs_url'] . '/architecture.html') ?>">View Architecture</a>
-          <a class="button secondary" href="<?= e($site['dma_url']) ?>">View DMA Showcase</a>
-          <a class="button secondary" href="<?= e($site['docs_url']) ?>">Read Documentation</a>
-        </div>
-      </div>
-
-      <aside class="hero-panel" data-reveal>
-        <div class="hero-panel-header">
-          <span>platform scope</span>
-          <strong>real services, measured responsibility</strong>
-        </div>
-
-        <div class="surface-list">
-          <article>
-            <span>runtime</span>
-            <strong>Single-VM platform</strong>
-            <p>Proxmox VE hosts the Docker VM. The documentation is hosted separately on GitHub Pages.</p>
-          </article>
-          <article>
-            <span>operations</span>
-            <strong>Monitoring and logging included</strong>
-            <p>Host, service, and application visibility are built into the platform instead of added later.</p>
-          </article>
-          <article>
-            <span>documentation</span>
-            <strong>Reviewer-friendly path</strong>
-            <p>Architecture, deployment, monitoring, and backup documentation are linked directly from the landing page.</p>
-          </article>
-        </div>
-      </aside>
-    </section>
-
-    <section class="section" id="live-components">
-      <div class="section-heading" data-reveal>
-        <p class="eyebrow">Live System Components</p>
-        <h2>Public entry points and restricted operations surfaces.</h2>
-      </div>
-
-      <div class="link-grid">
-        <?php foreach ($liveComponents as $component): ?>
-        <?php if ($component['href'] !== ''): ?>
-        <a class="link-card" href="<?= e($component['href']) ?>" data-reveal>
-          <span>live component</span>
-          <strong><?= e($component['title']) ?></strong>
-          <p><?= e($component['body']) ?></p>
-        </a>
-        <?php else: ?>
-        <article class="link-card" data-reveal>
-          <span>restricted</span>
-          <strong><?= e($component['title']) ?></strong>
-          <p><?= e($component['body']) ?></p>
-        </article>
-        <?php endif; ?>
-        <?php endforeach; ?>
-      </div>
-    </section>
-
-    <section class="section snapshot-section" id="snapshot">
-      <div class="section-heading" data-reveal>
-        <p class="eyebrow">Platform Snapshot</p>
-        <h2>Concrete operating characteristics of the platform.</h2>
-      </div>
-
-      <div class="snapshot-grid" data-reveal>
-        <?php foreach ($platformSnapshot as $item): ?>
-        <article class="snapshot-card">
-          <strong><?= e($item['title']) ?></strong>
-          <p><?= e($item['body']) ?></p>
-        </article>
-        <?php endforeach; ?>
-      </div>
-    </section>
-
-    <section class="section" id="metrics">
-      <div class="section-heading" data-reveal>
-        <p class="eyebrow">Operational Metrics</p>
-        <h2>Measured platform scope and operational coverage.</h2>
-      </div>
-
-      <div class="snapshot-grid" data-reveal>
-        <?php foreach ($operationalMetrics as $item): ?>
-        <article class="snapshot-card">
-          <strong><?= e($item['title']) ?></strong>
-          <p><?= e($item['body']) ?></p>
-        </article>
-        <?php endforeach; ?>
-      </div>
-    </section>
-
-    <section class="section" id="security-model">
-      <div class="section-heading" data-reveal>
-        <p class="eyebrow">Security Model</p>
-        <h2>TLS, access control, and service isolation.</h2>
-      </div>
-
-      <div class="work-grid">
-        <?php foreach ($securityModel as $group): ?>
-        <article class="work-panel" data-reveal>
-          <h3><?= e($group['title']) ?></h3>
-          <ul>
-            <?php foreach ($group['points'] as $point): ?>
-            <li><?= e($point) ?></li>
-            <?php endforeach; ?>
-          </ul>
-        </article>
-        <?php endforeach; ?>
-      </div>
-    </section>
-
-    <section class="section" id="operations">
-      <div class="section-heading" data-reveal>
-        <p class="eyebrow">Operational Focus</p>
-        <h2>This platform is designed to be operated, not just deployed.</h2>
-      </div>
-
-      <div class="platform-grid">
-        <article class="work-panel" data-reveal>
-          <ul>
-            <?php foreach ($operationalFocus as $item): ?>
-            <li><?= e($item) ?></li>
-            <?php endforeach; ?>
-          </ul>
-        </article>
-
-        <div class="platform-diagram" data-reveal>
-          <div class="platform-diagram-header">
-            <span>service map</span>
-            <strong>one ingress layer, containerized services, monitored operations</strong>
-          </div>
-          <pre>Internet
-   |
-Cloudflare edge and Tunnel
-   |
-Nginx in the Docker VM
-   |
-Public web services
-
-Local DNS: Pi-hole
-LAN access: internal services
-Docker VM → Encrypted offsite backups</pre>
+          <a class="button primary" href="#projects">View projects</a>
+          <a class="button secondary" href="<?= e($site['docs_url'] . '/architecture.html') ?>">Read the architecture</a>
+          <a class="button secondary" href="<?= e($githubUrl) ?>">Open GitHub</a>
         </div>
       </div>
     </section>
 
     <section class="section" id="projects">
-      <div class="section-heading" data-reveal>
-        <p class="eyebrow">Projects</p>
-        <h2>Projects framed by concrete system behavior and operational value.</h2>
-      </div>
-
+      <div class="section-heading" data-reveal><h2>Projects</h2></div>
       <div class="project-grid">
-        <?php foreach ($featuredProjects as $project): ?>
         <article class="project-card" data-reveal>
           <div class="project-card-top">
-            <span class="project-tag"><?= e($project['tag']) ?></span>
-            <h3><?= e($project['title']) ?></h3>
+            <span class="project-tag">Running in production</span>
+            <h3>Genesis</h3>
           </div>
-          <p class="project-lead"><?= e($project['lead']) ?></p>
-          <ul class="project-points">
-            <?php foreach ($project['points'] as $point): ?>
-            <li><?= e($point) ?></li>
-            <?php endforeach; ?>
-          </ul>
-          <ul class="project-stack">
-            <?php foreach ($project['stack'] as $item): ?>
-            <li><?= e($item) ?></li>
-            <?php endforeach; ?>
-          </ul>
-          <a class="text-link" href="<?= e($project['href']) ?>"><?= e($project['label']) ?></a>
+          <div class="project-detail">
+            <h4>Problem</h4>
+            <p>Move containerized services from a cloud VM to an operator-owned homelab while preserving data and keeping the public and internal interfaces separate.</p>
+          </div>
+          <div class="project-detail">
+            <h4>Implementation</h4>
+            <p>The platform runs on Proxmox VE with Docker Compose. Public traffic reaches Nginx through Cloudflare Tunnel. Internal interfaces use local DNS. Separate Docker networks carry frontend, database and monitoring traffic.</p>
+            <p>A push to main produces a versioned release. The server downloads it, verifies its checksum and creates a database backup before deployment. Nginx configuration, origin readiness and application responses are checked before the server confirms the deployed commit. A failed verification restores the previous release.</p>
+          </div>
+          <div class="project-detail">
+            <h4>Verification and result</h4>
+            <p>Production checks cover the portfolio, the DMA showcase and restricted operational interfaces. Recovery tests import logical database dumps into an isolated instance and check the restored SQLite databases. The repository contains the deployment and verification scripts.</p>
+          </div>
+          <a class="text-link" href="<?= e($site['docs_url'] . '/case-studies.html') ?>">Read case studies</a>
         </article>
-        <?php endforeach; ?>
+        <article class="project-card" data-reveal>
+          <div class="project-card-top">
+            <span class="project-tag">Read-only public showcase</span>
+            <h3>DMA</h3>
+          </div>
+          <div class="project-detail">
+            <h4>Problem</h4>
+            <p>Present a PHP and MariaDB match-statistics project while keeping its administrative functions behind a separate access boundary.</p>
+          </div>
+          <div class="project-detail">
+            <h4>Implementation</h4>
+            <p>The public hostname serves static project context. The PHP service has no published host port. The PHP logic is kept outside the served web root. Database checks and cache prefetch run through CLI entry points.</p>
+          </div>
+          <div class="project-detail">
+            <h4>Verification and result</h4>
+            <p>Deployment checks verify that PHP endpoints return HTTP 404 at the origin and through the public route. The application remains available as a read-only architecture showcase.</p>
+          </div>
+          <a class="text-link" href="<?= e($site['dma_url']) ?>">Open project showcase</a>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="platform-facts">
+      <div class="section-heading" data-reveal><h2>Platform facts</h2></div>
+      <div class="work-panel" data-reveal>
+        <ul>
+          <li>Three Docker networks separate frontend, backend and monitoring traffic.</li>
+          <li>The nightly backup creates logical database dumps and consistent SQLite copies before encrypted offsite transfer.</li>
+          <li>Release confirmation is written after host verification. A failed deploy retains the previous confirmation.</li>
+          <li>Monitoring combines metrics, logs and availability checks on internal interfaces.</li>
+        </ul>
       </div>
     </section>
 
     <section class="section cta-section" id="documentation">
       <div class="cta-panel" data-reveal>
-        <p class="eyebrow">Documentation</p>
-        <h2>Full documentation available: docs.shellr.net</h2>
-        <p>
-          The documentation site is the full technical record for the platform. It connects the landing page
-          with architecture, deployment, monitoring, and recovery details.
-        </p>
-        <div class="docs-note">
-          <p class="hero-note-title">Includes:</p>
-          <ul class="hero-guide-list">
-            <?php foreach ($docsIncludes as $item): ?>
-            <li><?= e($item) ?></li>
-            <?php endforeach; ?>
-          </ul>
-        </div>
+        <h2>Documentation and contact</h2>
+        <p>Architecture, deployment and recovery procedures are documented alongside the source. The documentation links to the implementation and records operational limits.</p>
         <div class="hero-actions">
-          <a class="button primary" href="<?= e($site['docs_url']) ?>">Read Documentation</a>
-          <a class="button secondary" href="<?= e($site['docs_url'] . '/architecture.html') ?>">View Architecture</a>
-          <a class="button secondary" href="<?= e($githubUrl) ?>">Open Repository</a>
+          <a class="button primary" href="<?= e($site['docs_url']) ?>">Read documentation</a>
+          <a class="button secondary" href="<?= e($githubUrl) ?>">Open repository</a>
+          <a class="button secondary" href="mailto:<?= e($site['contact_email']) ?>">Contact by email</a>
         </div>
       </div>
     </section>

@@ -9,6 +9,7 @@ node_modules
 vendor
 coverage
 inc/env.local.php
+backend/inc/env.local.php
 *.key
 *.pem
 cache/

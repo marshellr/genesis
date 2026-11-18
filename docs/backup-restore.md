@@ -56,7 +56,13 @@ A separate nightly Restic job writes encrypted offsite snapshots. Its hook suppl
 
 The internal status snapshot displays the last completed successful offsite run and its age. It reads the existing backup unit's completion state and preserves the previous success when a later run is active or fails. An age above 25 hours requires operator attention. This check adds no backup schedule.
 
-The online SQLite snapshot helper copies a complete consistent snapshot in one backup step. Invoke it with an external time limit so a busy source or failed storage cannot hold the shared backup lock indefinitely. The host hook must be explicitly connected to this helper before relying on it for scheduled backups.
+The host hook creates each online SQLite snapshot in one backup step, with a 60-second limit and a five-second termination reserve. The shared backup lock serializes pre-deployment dumps and the nightly offsite backup.
+
+## Recovery objectives
+
+The confirmed recovery point objective is 25 hours. The confirmed recovery time objective is 2 hours for full service restoration to an available replacement VM. Recovery assumes working hardware, network access and access to the backup credentials and keys.
+
+The recovery point is measured from the selected successful offsite snapshot. Restore the logical databases and project configuration, start the services and verify their health and public routing before declaring recovery complete. A database-only restore test measures one part of the full recovery objective.
 
 ## Staged recovery
 

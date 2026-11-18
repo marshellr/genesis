@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-require __DIR__ . '/../../dma/inc/write-auth.php';
+require __DIR__ . '/../../dma/backend/inc/write-auth.php';
 
 $file = tempnam(sys_get_temp_dir(), 'dma-auth-test-');
 if ($file === false) {

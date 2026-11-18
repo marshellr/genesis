@@ -166,3 +166,5 @@ jobs:
           exit 1
       - name: Verify public security headers
         run: python3 scripts/check-security-headers.py
+      - name: Verify public DMA boundary
+        run: python3 scripts/check-dma-boundary.py

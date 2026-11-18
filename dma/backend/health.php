@@ -23,4 +23,7 @@ try {
         'status' => 'error',
         'service' => 'dma',
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    if (PHP_SAPI === 'cli') {
+        exit(1);
+    }
 }

@@ -920,6 +920,26 @@ main,
   transform: translateY(0);
 }
 
+.hero-portfolio {
+  grid-template-columns: 1fr;
+}
+
+.hero-portfolio h1 {
+  max-width: 21ch;
+  font-size: clamp(2.5rem, 5.4vw, 5.2rem);
+  line-height: 1.02;
+}
+
+.project-detail h4 {
+  margin: 0 0 8px;
+  color: var(--accent);
+  font-size: 0.9rem;
+}
+
+.project-detail p + p {
+  margin-top: 14px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

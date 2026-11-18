@@ -10,6 +10,7 @@ infra/backup/restic.env
 
 # Secrets and credentials
 /dma/inc/env.local.php
+/dma/backend/inc/env.local.php
 *.pem
 *.key
 *.crt

@@ -153,8 +153,6 @@ services:
       DB_PASS: ${DMA_DB_PASSWORD}
       DB_NAME: ${DMA_DB_NAME}
       DMA_COOKIE_PATH: ${DMA_COOKIE_PATH:-/}
-      DMA_WRITE_USERNAME: ${DMA_WRITE_USERNAME:-}
-      DMA_WRITE_PASSWORD_HASH_FILE: ${DMA_WRITE_PASSWORD_HASH_FILE:-}
       MATCH_TIME_TOLERANCE: ${DMA_MATCH_TIME_TOLERANCE:-10800}
       MIN_MATCH_DURATION: ${DMA_MIN_MATCH_DURATION:-15}
       RIOT_SYNC_COOLDOWN: ${DMA_RIOT_SYNC_COOLDOWN:-300}
@@ -162,7 +160,7 @@ services:
     networks:
       - backend
     healthcheck:
-      test: ["CMD-SHELL", "php -r 'exit(@file_get_contents(\"http://127.0.0.1/health.php\") === false ? 1 : 0);'"]
+      test: ["CMD", "php", "/opt/dma/backend/health.php"]
       interval: 30s
       timeout: 5s
       retries: 3

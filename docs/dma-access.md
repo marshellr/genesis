@@ -1,9 +1,9 @@
-# DMA write access
+# DMA backend boundary
 
-The public DMA hostname serves the static showcase. The PHP service has no published host port.
+The public DMA hostname serves the static project showcase. PHP paths return HTTP 404. Unrecognised static paths also return HTTP 404.
 
-The champion-pool write operations require an explicitly configured operator, verified by PHP with HTTP Basic credentials. Only POST requests may write. CSRF validation follows successful authentication. Read requests cannot bootstrap champion records, including requests with valid operator credentials.
+The interactive PHP sources live under dma/backend. The image copies them to /opt/dma/backend, outside Apache's /var/www/html web root. The web root contains only a static health marker. Apache denies PHP files as a second boundary.
 
-Provide the operator name through `DMA_WRITE_USERNAME` and the path to a PHP `password_hash` value through `DMA_WRITE_PASSWORD_HASH_FILE`. Mount the hash file read-only. The local `dma/inc/env.local.php` override accepts the same keys and is excluded from Git, image builds, and release synchronization.
+No operator account is required. The backend has no published host port. Database health is checked through PHP CLI. The existing prefetch job invokes a bounded CLI command inside the backend container, using the existing environment and temporary cache.
 
-Without both settings, writes return HTTP 401. Proxy-supplied user headers grant no permissions. The existing disabled public synchronization paths remain disabled.
+Local backend overrides are excluded from Git, images and release synchronization. Deploy verification and CI probe the public boundary. Keep all backend PHP outside the web root when extending the application.
