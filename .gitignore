@@ -81,3 +81,4 @@ infra/nginx/static/local/
 
 # Local audit exports and snapshots
 .audit/
+/infra/nginx/snippets/local/
