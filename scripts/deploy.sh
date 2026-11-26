@@ -404,6 +404,7 @@ if ! check_step "nginx startup" docker compose --env-file "$ENV_FILE" -f "$COMPO
   || ! check_step "nginx reload" docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T nginx nginx -s reload \
   || ! check_step "origin readiness" python3 "$ROOT_DIR/scripts/check-public-routing.py" --wait-for-origin \
   || ! check_step "monitoring and logging" restart_platform_services \
+  || ! check_step "Grafana nonce headers" python3 "$ROOT_DIR/scripts/check-grafana-headers.py" \
   || ! check_step "origin routing" python3 "$ROOT_DIR/scripts/check-public-routing.py" --local --rounds 3 --gateway-retries 12 \
   || ! check_step "DMA boundary" python3 "$ROOT_DIR/scripts/check-dma-boundary.py" --origin-ip 127.0.0.1 \
   || ! check_step "security headers" python3 "$ROOT_DIR/scripts/check-security-headers.py" --origin-ip 127.0.0.1 \
