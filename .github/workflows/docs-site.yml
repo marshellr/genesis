@@ -9,6 +9,8 @@ on:
       - "README.md"
       - "docs/**"
       - ".github/workflows/docs-site.yml"
+      - "scripts/check-docs-links.py"
+      - "scripts/tests/test_docs_links.py"
   workflow_dispatch:
 
 permissions:
@@ -29,3 +31,5 @@ jobs:
           test -f docs/site/index.html
           test -f docs/site/CNAME
           ! rg -n -i "schowo|sinna" docs/site
+          python3 scripts/check-docs-links.py docs/site
+          python3 -m unittest discover -s scripts/tests -p test_docs_links.py
