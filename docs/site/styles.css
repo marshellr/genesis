@@ -374,6 +374,8 @@ h1 {
   display: block;
   width: 100%;
   min-width: 600px;
+  max-width: 720px;
+  margin-inline: auto;
   height: auto;
 }
 
