@@ -85,7 +85,7 @@ jobs:
           for image in genesis-app genesis-dma; do
             docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
               -v "$HOME/.cache/trivy:/root/.cache/trivy" \
-              -v "$PWD/.trivyignore.yaml:/policy/ignore.yaml:ro" \
+              -v "$PWD/infra/security/trivy-ignore.yaml:/policy/ignore.yaml:ro" \
               aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb \
               image --scanners vuln --skip-db-update --severity CRITICAL --ignore-unfixed \
               --ignorefile /policy/ignore.yaml --exit-code 1 "$image:$GITHUB_SHA"

@@ -7,7 +7,7 @@
       "package_version": "1:1.2.13.dfsg-1",
       "owner": "Manu / platform operator",
       "reviewed_at": "2026-11-27",
-      "expired_at": "2026-12-04",
+      "expired_at": "2026-12-04T00:00:00Z",
       "source": "https://security-tracker.debian.org/tracker/CVE-2023-45853",
       "statement": "Reviewed Debian Bookworm zlib1g does not build contrib/minizip. Restrict to this exact package/version; retain raw findings in reports."
     }

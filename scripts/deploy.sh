@@ -25,7 +25,7 @@ SYSTEMD_UNITS=(
 )
 RELEASE_BACKUP_RETENTION="${RELEASE_BACKUP_RETENTION:-10}"
 
-SYNC_DIRS=(app dma docs scripts .github infra/nginx/conf.d infra/nginx/snippets infra/nginx/static infra/backup/cron infra/systemd)
+SYNC_DIRS=(app dma docs scripts .github infra/nginx/conf.d infra/nginx/snippets infra/nginx/static infra/backup/cron infra/systemd infra/security)
 SYNC_FILES=(infra/nginx/nginx.conf infra/compose/docker-compose.yml infra/compose/.env.example infra/monitoring/logrotate/uptime-kuma.conf)
 PLATFORM_CONFIG_FILES=(
   infra/monitoring/docker-compose.monitoring.yml
@@ -40,7 +40,7 @@ PLATFORM_CONFIG_FILES=(
   infra/logging/loki/config.yml
   infra/logging/alloy/config.alloy
 )
-BACKUP_ITEMS=(app dma docs scripts .github infra/nginx/nginx.conf infra/nginx/conf.d infra/nginx/snippets infra/nginx/static infra/compose/docker-compose.yml infra/compose/.env infra/compose/.env.example infra/monitoring infra/logging infra/backup/cron infra/systemd)
+BACKUP_ITEMS=(app dma docs scripts .github infra/nginx/nginx.conf infra/nginx/conf.d infra/nginx/snippets infra/nginx/static infra/compose/docker-compose.yml infra/compose/.env infra/compose/.env.example infra/monitoring infra/logging infra/backup/cron infra/systemd infra/security)
 PLATFORM_CONFIG_CHANGED=0
 NGINX_CONFIG_CHANGED=0
 
