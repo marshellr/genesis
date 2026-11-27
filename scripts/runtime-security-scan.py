@@ -112,6 +112,9 @@ def main():
     if os.statvfs(state).f_bavail * os.statvfs(state).f_frsize < 3 * 1024**3:
         raise ValueError('insufficient_scanner_workspace')
     now = datetime.now(timezone.utc)
+    receipt = root / 'infra/nginx/static/local/deployed.json'
+    if args.if_due and receipt.exists() and recent(json.loads(receipt.read_text()).get('verified_at'), now, days=180 / 86400):
+        return
     previous = json.loads((public / 'security-status.json').read_text()) if (public / 'security-status.json').exists() else {}
     status = {'schema': 1, 'checked_at': now.isoformat(), 'last_success_at': previous.get('last_success_at'), 'image_count': 0, 'scanned_count': 0, 'critical': 0, 'high': 0, 'blocking': 0, 'inventory_matches': False, 'error': 'scan_incomplete'}
     try:

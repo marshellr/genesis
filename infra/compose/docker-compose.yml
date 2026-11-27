@@ -15,6 +15,12 @@ services:
       - ${PROJECT_ROOT:-/projects/genesis}/infra/nginx/snippets:/etc/nginx/snippets:ro
       - ${PROJECT_ROOT:-/projects/genesis}/infra/nginx/auth:/etc/nginx/auth:ro
       - ${PROJECT_ROOT:-/projects/genesis}/infra/nginx/static:/usr/share/nginx/html/shellr:ro
+      - type: bind
+        source: ${PROJECT_ROOT:-/projects/genesis}/infra/runtime/security/public
+        target: /run/genesis-status
+        read_only: true
+        bind:
+          create_host_path: false
       - ${PROJECT_ROOT:-/projects/genesis}/infra/nginx/certbot/www:/var/www/certbot
       - ${PROJECT_ROOT:-/projects/genesis}/infra/nginx/certbot/conf:/etc/letsencrypt
     networks:
