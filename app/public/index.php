@@ -127,6 +127,25 @@ function e(string $value): string
           </div>
           <a class="text-link" href="<?= e($site['dma_url']) ?>">Open project showcase</a>
         </article>
+        <article class="project-card" data-reveal>
+          <div class="project-card-top">
+            <span class="project-tag">Conceptual overview</span>
+            <h3>EVC — ENISA Vulnerability Check</h3>
+          </div>
+          <div class="project-detail">
+            <h4>Problem</h4>
+            <p>Security advisories only become actionable once they are matched to the systems actually in use.</p>
+          </div>
+          <div class="project-detail">
+            <h4>Implementation</h4>
+            <p>The workflow retrieves vulnerability records from ENISA EUVD, normalises product and version information, and compares it with an asset inventory. Relevant matches are enriched with CVSS severity, EPSS exploitation probability and evidence of known exploitation.</p>
+            <p>A structured report preserves the matching evidence and prioritisation criteria for human review. The approach combines API integration, version matching, vulnerability enrichment and repeatable report generation.</p>
+          </div>
+          <div class="project-detail">
+            <h4>Verification and result</h4>
+            <p>A traceable review process connects an advisory to a potentially affected system and makes the reasons for its priority visible. Product and version matches remain subject to validation.</p>
+          </div>
+        </article>
       </div>
     </section>
 

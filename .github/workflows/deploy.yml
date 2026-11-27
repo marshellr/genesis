@@ -236,3 +236,5 @@ jobs:
         run: python3 scripts/check-security-headers.py
       - name: Verify public DMA boundary
         run: python3 scripts/check-dma-boundary.py
+      - name: Verify bounded public security surfaces
+        run: python3 scripts/check-public-surface.py
