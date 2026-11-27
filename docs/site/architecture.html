@@ -39,19 +39,8 @@
         <p class="eyebrow">Architecture</p>
         <h1>How the homelab is organized.</h1>
         <p>Proxmox VE runs on operator-owned hardware in Germany. A Docker VM runs the web, database, monitoring, and logging services with Docker Compose. GitHub Pages serves the documentation independently.</p>
-        <div class="mermaid">
-flowchart TD
-    Visitor["Internet client"] --> Edge["Cloudflare edge"]
-    Edge --> Tunnel["Cloudflare Tunnel"]
-    subgraph VM["Docker VM on Proxmox VE"]
-      Tunnel --> Nginx["Nginx"]
-      Nginx --> Apps["Public web services"]
-      Apps --> DB["MariaDB"]
-      Nginx --> Tools["Internal monitoring interfaces"]
-    end
-    Client["LAN client"] --> DNS["Pi-hole internal DNS"]
-    DNS --> Nginx
-    Visitor --> Pages["Documentation on GitHub Pages"]
+        <div class="diagram-scroll" role="region" aria-label="How the homelab is organized." tabindex="0">
+          <img class="architecture-diagram" src="./architecture.svg" alt="How the homelab is organized." width="720" height="880">
         </div>
       </article>
 

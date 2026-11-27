@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 880" width="720" height="880" role="img" aria-labelledby="title">
+  <title id="title">How the homelab is organized.</title>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0 0L10 5L0 10" fill="#18211f"/></marker>
+    <style>
+      .node{fill:#d4efe9;stroke:#0f766e;stroke-width:2}
+      .edge{fill:none;stroke:#18211f;stroke-width:2;marker-end:url(#arrow)}
+      text{fill:#18211f;font:16px monospace;text-anchor:middle}
+    </style>
+  </defs>
+  <rect x="20" y="375" width="680" height="475" rx="12" fill="#ebe4d8" stroke="#0f766e" stroke-width="2" stroke-dasharray="7 5"/>
+  <text x="360" y="825">Docker VM on Proxmox VE</text>
+  <g class="edge">
+    <path d="M460 39H510"/><path d="M360 68V120"/><path d="M360 178V230"/>
+    <path d="M115 178V230"/><path d="M210 269H230V459H260"/>
+    <path d="M360 288V430"/><path d="M360 488V570"/><path d="M360 628V710"/>
+    <path d="M460 459H605V570"/>
+  </g>
+  <rect class="node" x="260" y="10" width="200" height="58" rx="7"/>
+  <text x="360" y="46">Internet client</text>
+  <rect class="node" x="510" y="10" width="190" height="78" rx="7"/>
+  <text x="605" y="38"><tspan x="605">Documentation</tspan><tspan x="605" dy="25">on GitHub Pages</tspan></text>
+  <rect class="node" x="260" y="120" width="200" height="58" rx="7"/>
+  <text x="360" y="156">Cloudflare edge</text>
+  <rect class="node" x="260" y="230" width="200" height="58" rx="7"/>
+  <text x="360" y="266">Cloudflare Tunnel</text>
+  <rect class="node" x="20" y="120" width="190" height="58" rx="7"/>
+  <text x="115" y="156">LAN client</text>
+  <rect class="node" x="20" y="230" width="190" height="78" rx="7"/>
+  <text x="115" y="259"><tspan x="115">Pi-hole</tspan><tspan x="115" dy="25">internal DNS</tspan></text>
+  <rect class="node" x="260" y="430" width="200" height="58" rx="7"/>
+  <text x="360" y="466">Nginx</text>
+  <rect class="node" x="260" y="570" width="200" height="58" rx="7"/>
+  <text x="360" y="606">Public web services</text>
+  <rect class="node" x="260" y="710" width="200" height="58" rx="7"/>
+  <text x="360" y="746">MariaDB</text>
+  <rect class="node" x="510" y="570" width="190" height="90" rx="7"/>
+  <text x="605" y="596"><tspan x="605">Internal</tspan><tspan x="605" dy="24">monitoring</tspan><tspan x="605" dy="24">interfaces</tspan></text>
+</svg>
