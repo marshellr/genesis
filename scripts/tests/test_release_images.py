@@ -27,6 +27,11 @@ def image(item):
 
 
 class ReleaseImagesTests(unittest.TestCase):
+    def test_host_docker_uses_sudo_as_an_executable_not_a_shell_function(self):
+        with patch.object(images, 'DOCKER', ['sudo', '-n', 'docker']), patch.object(images, 'command', return_value='{}') as execute:
+            images.docker('image', 'inspect', 'synthetic')
+            execute.assert_called_once_with(['sudo', '-n', 'docker', 'image', 'inspect', 'synthetic'])
+
     def test_mutable_wrong_commit_platform_registry_and_scan_are_rejected(self):
         value = manifest()
         self.assertEqual(images.validate(value, COMMIT), value)

@@ -153,7 +153,7 @@ restore_platform_services
 
 if [[ -f "$ROOT_DIR/infra/security/release-images.json" ]]; then
   restored_sha="$(awk -F= '/^APP_IMAGE_TAG=/{print $2}' "$ENV_FILE" | tail -n1)"
-  python3 "$ROOT_DIR/scripts/release-images.py" verify "$ROOT_DIR/infra/security/release-images.json" "$restored_sha"
+  python3 "$ROOT_DIR/scripts/release-images.py" verify "$ROOT_DIR/infra/security/release-images.json" "$restored_sha" --sudo-docker
 fi
 
 if healthcheck; then

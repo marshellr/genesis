@@ -307,7 +307,7 @@ rollback() {
   restart_platform_services || return 1
 
   if [[ -f "$ROOT_DIR/infra/security/release-images.json" ]]; then
-    python3 "$ROOT_DIR/scripts/release-images.py" verify "$ROOT_DIR/infra/security/release-images.json" "$PREVIOUS_IMAGE_TAG" || return 1
+    python3 "$ROOT_DIR/scripts/release-images.py" verify "$ROOT_DIR/infra/security/release-images.json" "$PREVIOUS_IMAGE_TAG" --sudo-docker || return 1
   fi
 
   if healthcheck; then
@@ -364,19 +364,20 @@ PREVIOUS_DMA_IMAGE_REPOSITORY="${PREVIOUS_DMA_IMAGE_REPOSITORY:-genesis-dma}"
 if [[ "$PREVIOUS_IMAGE_REPOSITORY" != genesis-app || "$PREVIOUS_DMA_IMAGE_REPOSITORY" != genesis-dma ]]; then
   fail "Release image repositories must match the verified local deployment tags."
 fi
-case "$EMERGENCY_HOST_BUILD" in
-  0)
-    log "Pulling the scanned registry digests before changing live files"
-    python3 "$RELEASE_DIR/scripts/release-images.py" prepare "$RELEASE_DIR/infra/security/release-images.json" "$RELEASE_SHA" || fail "Scanned release images are unavailable or do not match."
-    ;;
-  1) log "Explicit emergency host-build requested; this bypasses CI image provenance." ;;
-  *) fail "GENESIS_EMERGENCY_HOST_BUILD must be 0 or 1." ;;
-esac
 
 log "Creating backup in $BACKUP_DIR"
 for item in "${BACKUP_ITEMS[@]}"; do
   backup_item "$item"
 done
+
+case "$EMERGENCY_HOST_BUILD" in
+  0)
+    log "Pulling the scanned registry digests before changing live files"
+    python3 "$RELEASE_DIR/scripts/release-images.py" prepare "$RELEASE_DIR/infra/security/release-images.json" "$RELEASE_SHA" --sudo-docker || fail "Scanned release images are unavailable or do not match."
+    ;;
+  1) log "Explicit emergency host-build requested; this bypasses CI image provenance." ;;
+  *) fail "GENESIS_EMERGENCY_HOST_BUILD must be 0 or 1." ;;
+esac
 
 log "Syncing release files into live tree"
 for item in "${SYNC_DIRS[@]}"; do
@@ -419,7 +420,7 @@ if (( NGINX_CONFIG_CHANGED == 1 )); then
   # nginx.conf is a file bind mount. Recreate nginx to pick up the new inode.
   nginx_recreate=(--force-recreate)
 fi
-if ! { [[ "$EMERGENCY_HOST_BUILD" == 1 ]] || check_step "scanned runtime image digests" python3 "$ROOT_DIR/scripts/release-images.py" verify "$ROOT_DIR/infra/security/release-images.json" "$RELEASE_SHA"; } \
+if ! { [[ "$EMERGENCY_HOST_BUILD" == 1 ]] || check_step "scanned runtime image digests" python3 "$ROOT_DIR/scripts/release-images.py" verify "$ROOT_DIR/infra/security/release-images.json" "$RELEASE_SHA" --sudo-docker; } \
   || ! check_step "nginx startup" docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d --no-deps --no-build --wait "${nginx_recreate[@]}" nginx \
   || ! check_step "nginx config test" docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T nginx nginx -t \
   || ! check_step "nginx reload" docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T nginx nginx -s reload \

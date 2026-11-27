@@ -9,6 +9,7 @@ from pathlib import Path
 
 DIGEST = re.compile(r'sha256:[a-f0-9]{64}')
 SOURCE = 'https://github.com/marshellr/genesis'
+DOCKER = ['docker']
 
 
 def command(args):
@@ -19,7 +20,7 @@ def command(args):
 
 
 def docker(*args):
-    return command(['docker', *args])
+    return command([*DOCKER, *args])
 
 
 def validate(value, commit):
@@ -116,7 +117,12 @@ def main():
     parser.add_argument('manifest', type=Path)
     parser.add_argument('commit')
     parser.add_argument('--reports', type=Path, default=Path('.scan'))
+    parser.add_argument('--sudo-docker', action='store_true', help='Host reader uses non-interactive sudo for Docker only')
     args = parser.parse_args()
+    if args.sudo_docker:
+        if args.operation == 'publish':
+            raise ValueError('CI publishing must use its selected Docker daemon')
+        DOCKER[:] = ['sudo', '-n', 'docker']
     if not re.fullmatch(r'[a-f0-9]{40}', args.commit):
         raise ValueError('invalid_release_commit')
     if args.operation == 'publish':
