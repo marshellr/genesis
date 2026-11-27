@@ -17,7 +17,7 @@ SYSTEMD_UNITS=(
   genesis-weekly-maintenance.timer
 )
 
-BACKUP_ITEMS=(app dma docs scripts .github infra/nginx/nginx.conf infra/nginx/conf.d infra/nginx/snippets infra/nginx/static infra/compose/docker-compose.yml infra/compose/.env infra/compose/.env.example infra/monitoring infra/logging infra/backup/cron infra/systemd)
+BACKUP_ITEMS=(app dma docs scripts .github infra/nginx/nginx.conf infra/nginx/conf.d infra/nginx/snippets infra/nginx/static infra/compose/docker-compose.yml infra/compose/.env infra/compose/.env.example infra/monitoring infra/logging infra/backup/cron infra/systemd infra/security)
 
 log() {
   printf '[rollback] %s\n' "$*"
@@ -150,6 +150,11 @@ if [[ "$INSTALL_HOST_INTEGRATION" == 1 ]]; then
   restore_host_integration
 fi
 restore_platform_services
+
+if [[ -f "$ROOT_DIR/infra/security/release-images.json" ]]; then
+  restored_sha="$(awk -F= '/^APP_IMAGE_TAG=/{print $2}' "$ENV_FILE" | tail -n1)"
+  python3 "$ROOT_DIR/scripts/release-images.py" verify "$ROOT_DIR/infra/security/release-images.json" "$restored_sha"
+fi
 
 if healthcheck; then
   log "Rollback completed successfully."

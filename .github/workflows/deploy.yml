@@ -17,6 +17,9 @@ jobs:
   build:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout repository
@@ -56,10 +59,23 @@ jobs:
             php:8.3-cli-alpine@sha256:e7699f91d3b46283a49bde02379266dd98d87844e08aed1ff7ea6a7d1f031268 \
             sh -ec 'find /repo/dma -type f -name "*.php" -print0 | xargs -0 -r -n1 php -l; php /repo/scripts/tests/dma-write-auth.php; php /repo/scripts/tests/dma-html.php'
 
+      - name: Select a classic Docker image store for registry config identity
+        uses: docker/setup-docker-action@3f1ab1ab0e29231562e4db4ca600c1a49653bac6
+        with:
+          version: v29.9.3
+          set-host: true
+          daemon-config: |
+            {"features":{"containerd-snapshotter":false}}
+
       - name: Build application image
         run: |
-          docker build --platform linux/amd64 --provenance=false --sbom=false -t genesis-app:${{ github.sha }} app
-          docker build --platform linux/amd64 --provenance=false --sbom=false -t genesis-dma:${{ github.sha }} dma
+          docker info --format 'Engine={{.ServerVersion}} Driver={{.Driver}} DriverStatus={{json .DriverStatus}}' >> "$GITHUB_STEP_SUMMARY"
+          docker build --platform linux/amd64 --provenance=false --sbom=false \
+            --label org.opencontainers.image.source=https://github.com/marshellr/genesis \
+            --label org.opencontainers.image.revision="$GITHUB_SHA" -t genesis-app:${{ github.sha }} app
+          docker build --platform linux/amd64 --provenance=false --sbom=false \
+            --label org.opencontainers.image.source=https://github.com/marshellr/genesis \
+            --label org.opencontainers.image.revision="$GITHUB_SHA" -t genesis-dma:${{ github.sha }} dma
 
       - name: Verify minimal PHP runtime images
         run: |
@@ -74,6 +90,7 @@ jobs:
             docker run --rm --network none --read-only --tmpfs /tmp \
               -v "$PWD:/repo:ro" --entrypoint php \
               "genesis-dma:$GITHUB_SHA" "/repo/scripts/tests/$test"
+          done
 
       - name: Scan application images
         run: |
@@ -115,6 +132,22 @@ jobs:
           retention-days: 7
           if-no-files-found: error
 
+      - name: Publish exactly the scanned images
+        env:
+          REGISTRY_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          trap 'docker logout ghcr.io >/dev/null 2>&1' EXIT
+          printf '%s' "$REGISTRY_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          python3 scripts/release-images.py publish infra/security/release-images.json "$GITHUB_SHA"
+          # Production pulls anonymously. A private or inaccessible package blocks this release.
+          for component in app dma; do
+            reference=$(jq -r --arg component "$component" '.images[$component].reference' infra/security/release-images.json)
+            anonymous=$(mktemp -d)
+            DOCKER_CONFIG="$anonymous" docker buildx imagetools inspect "$reference" >/dev/null
+            rm -rf -- "$anonymous"
+          done
+
       - name: Create release bundle
         run: |
           set -euo pipefail
@@ -126,6 +159,7 @@ jobs:
             fi
           done
           git archive --format=tar HEAD -- "${paths[@]}" | tar -xf - -C .release/payload
+          cp infra/security/release-images.json .release/payload/infra/security/release-images.json
           printf '%s\n' "$GITHUB_SHA" > .release/payload/app/public/deploy-version.txt
           tar -C .release/payload -czf .release/release.tgz .
           (cd .release && sha256sum release.tgz > SHA256SUMS)

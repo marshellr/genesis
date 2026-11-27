@@ -18,6 +18,7 @@ LOGROTATE_TARGET="/etc/logrotate.d/genesis-uptime-kuma"
 SYSTEMD_SOURCE_DIR="$ROOT_DIR/infra/systemd"
 SYSTEMD_TARGET_DIR="/etc/systemd/system"
 readonly INSTALL_HOST_INTEGRATION="${GENESIS_INSTALL_HOST_INTEGRATION:-0}"
+readonly EMERGENCY_HOST_BUILD="${GENESIS_EMERGENCY_HOST_BUILD:-0}"
 SYSTEMD_UNITS=(
   genesis-post-reboot-health.service
   genesis-weekly-maintenance.service
@@ -305,6 +306,10 @@ rollback() {
 
   restart_platform_services || return 1
 
+  if [[ -f "$ROOT_DIR/infra/security/release-images.json" ]]; then
+    python3 "$ROOT_DIR/scripts/release-images.py" verify "$ROOT_DIR/infra/security/release-images.json" "$PREVIOUS_IMAGE_TAG" || return 1
+  fi
+
   if healthcheck; then
     log "Rollback completed successfully."
     return 0
@@ -356,6 +361,18 @@ PREVIOUS_IMAGE_REPOSITORY="${PREVIOUS_IMAGE_REPOSITORY:-genesis-app}"
 PREVIOUS_DMA_IMAGE_TAG="${PREVIOUS_DMA_IMAGE_TAG:-manual}"
 PREVIOUS_DMA_IMAGE_REPOSITORY="${PREVIOUS_DMA_IMAGE_REPOSITORY:-genesis-dma}"
 
+if [[ "$PREVIOUS_IMAGE_REPOSITORY" != genesis-app || "$PREVIOUS_DMA_IMAGE_REPOSITORY" != genesis-dma ]]; then
+  fail "Release image repositories must match the verified local deployment tags."
+fi
+case "$EMERGENCY_HOST_BUILD" in
+  0)
+    log "Pulling the scanned registry digests before changing live files"
+    python3 "$RELEASE_DIR/scripts/release-images.py" prepare "$RELEASE_DIR/infra/security/release-images.json" "$RELEASE_SHA" || fail "Scanned release images are unavailable or do not match."
+    ;;
+  1) log "Explicit emergency host-build requested; this bypasses CI image provenance." ;;
+  *) fail "GENESIS_EMERGENCY_HOST_BUILD must be 0 or 1." ;;
+esac
+
 log "Creating backup in $BACKUP_DIR"
 for item in "${BACKUP_ITEMS[@]}"; do
   backup_item "$item"
@@ -389,8 +406,11 @@ upsert_env_value DMA_IMAGE_TAG "$RELEASE_SHA"
 log "Validating Compose configuration"
 docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" config >/dev/null
 
-log "Building app image tag ${RELEASE_SHA}"
-docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" build app dma
+if [[ "$EMERGENCY_HOST_BUILD" == 1 ]]; then
+  log "Emergency building app image tag ${RELEASE_SHA}"
+  docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" build app dma
+  rm -f -- "$ROOT_DIR/infra/security/release-images.json"
+fi
 
 log "Starting updated services"
 docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d --no-build --wait db app dma
@@ -399,7 +419,8 @@ if (( NGINX_CONFIG_CHANGED == 1 )); then
   # nginx.conf is a file bind mount. Recreate nginx to pick up the new inode.
   nginx_recreate=(--force-recreate)
 fi
-if ! check_step "nginx startup" docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d --no-deps --no-build --wait "${nginx_recreate[@]}" nginx \
+if ! { [[ "$EMERGENCY_HOST_BUILD" == 1 ]] || check_step "scanned runtime image digests" python3 "$ROOT_DIR/scripts/release-images.py" verify "$ROOT_DIR/infra/security/release-images.json" "$RELEASE_SHA"; } \
+  || ! check_step "nginx startup" docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d --no-deps --no-build --wait "${nginx_recreate[@]}" nginx \
   || ! check_step "nginx config test" docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T nginx nginx -t \
   || ! check_step "nginx reload" docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T nginx nginx -s reload \
   || ! check_step "origin readiness" python3 "$ROOT_DIR/scripts/check-public-routing.py" --wait-for-origin \
