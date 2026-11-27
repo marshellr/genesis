@@ -6,12 +6,11 @@ import hashlib
 import importlib.util
 import json
 import os
-import resource
 import subprocess
 import tempfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from time import monotonic
+from time import monotonic, sleep
 
 
 def command(args, timeout=30):
@@ -86,7 +85,27 @@ def atomic(path, value, mode=0o600, group=None):
 
 def limits():
     os.nice(10)
-    resource.setrlimit(resource.RLIMIT_FSIZE, (16 * 1024**2, 16 * 1024**2))
+
+
+def bounded_scan(command, output, timeout):
+    """Bound only the JSON report; the vulnerability DB is substantially larger."""
+    process = subprocess.Popen(command, stdout=output, stderr=subprocess.DEVNULL,
+                               env={**os.environ, 'GOMAXPROCS': '2'}, preexec_fn=limits)
+    deadline = monotonic() + timeout
+    try:
+        while process.poll() is None:
+            if os.fstat(output.fileno()).st_size > 16 * 1024**2:
+                raise ValueError('runtime_report_too_large')
+            if monotonic() >= deadline:
+                raise subprocess.TimeoutExpired(command, timeout)
+            sleep(0.1)
+        if os.fstat(output.fileno()).st_size > 16 * 1024**2:
+            raise ValueError('runtime_report_too_large')
+        return process.returncode
+    finally:
+        if process.poll() is None:
+            process.kill()
+        process.wait()
 
 
 def main():
@@ -137,8 +156,8 @@ def main():
                     os.fchmod(fd, 0o600)
                     flags = ['--skip-db-update'] if updated_db else []
                     with os.fdopen(fd, 'wb') as output:
-                        result = subprocess.run([str(binary), '--cache-dir', str(private / 'cache'), 'image', '--image-src', 'docker', '--scanners', 'vuln', '--ignorefile', '', '--disable-telemetry', '--parallel', '1', '--timeout', '3m', *flags, '--format', 'json', '--exit-code', '0', image_id], stdout=output, stderr=subprocess.DEVNULL, timeout=min(180, max(1, deadline-monotonic())), env={**os.environ, 'GOMAXPROCS': '2'}, preexec_fn=limits)
-                    if result.returncode:
+                        result = bounded_scan([str(binary), '--cache-dir', str(private / 'cache'), 'image', '--image-src', 'docker', '--scanners', 'vuln', '--ignorefile', '', '--disable-telemetry', '--parallel', '1', '--timeout', '3m', *flags, '--format', 'json', '--exit-code', '0', image_id], output, min(180, max(1, deadline-monotonic())))
+                    if result:
                         continue
                     report = json.loads(Path(temporary).read_text())
                     if not report_matches(report, image):

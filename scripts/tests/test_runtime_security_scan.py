@@ -1,5 +1,7 @@
 import importlib.util
 import unittest
+import sys
+import tempfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import patch
@@ -10,6 +12,17 @@ spec.loader.exec_module(scan)
 
 
 class RuntimeSecurityScanTests(unittest.TestCase):
+    def test_large_database_is_allowed_but_large_report_is_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            cache = Path(directory) / 'database'
+            with tempfile.TemporaryFile() as output:
+                code = 'from pathlib import Path; import sys; Path(sys.argv[1]).write_bytes(b"x"*17000000); print("{}")'
+                self.assertEqual(scan.bounded_scan([sys.executable, '-c', code, str(cache)], output, 10), 0)
+                self.assertGreater(cache.stat().st_size, 16*1024**2)
+            with tempfile.TemporaryFile() as output:
+                with self.assertRaises(ValueError):
+                    scan.bounded_scan([sys.executable, '-c', 'import sys; sys.stdout.buffer.write(b"x"*17000000)'], output, 10)
+
     def test_cache_age_is_not_advanced_by_reading_it(self):
         now = datetime(2026, 11, 27, tzinfo=timezone.utc)
         self.assertTrue(scan.recent((now - timedelta(days=6)).isoformat(), now))
