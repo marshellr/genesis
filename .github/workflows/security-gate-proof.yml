@@ -1,0 +1,49 @@
+name: Isolated security gate proof
+on:
+  push:
+    branches: [audit/security-gate-proof]
+permissions:
+  contents: read
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Create synthetic fixed critical finding
+        run: |
+          mkdir -p .scan
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          report = {'SchemaVersion': 2, 'ArtifactName': 'synthetic-gate-proof', 'ArtifactType': 'container_image', 'Metadata': {'ImageID': 'sha256:' + 'a'*64, 'OS': {'Family': 'debian', 'Name': '12'}}, 'Results': [{'Target': 'synthetic (debian 12)', 'Class': 'os-pkgs', 'Type': 'debian', 'Vulnerabilities': [{'VulnerabilityID': 'CVE-2099-12345', 'PkgName': 'synthetic-package', 'InstalledVersion': '1.0', 'FixedVersion': '2.0', 'Status': 'affected', 'Severity': 'CRITICAL', 'Title': 'Synthetic gate regression fixture', 'PkgIdentifier': {'PURL': 'pkg:deb/debian/synthetic-package@1.0'}}]}]}
+          Path('.scan/synthetic.json').write_text(json.dumps(report))
+          PY
+      - name: Prove both gates reject the fixed critical finding
+        run: |
+          set +e
+          python3 scripts/check-vulnerability-policy.py .scan/synthetic.json --output .scan/review-summary.json
+          policy_result=$?
+          docker run --rm --network none -v "$PWD/.scan:/scan:ro" \
+            aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb \
+            convert --format table --severity CRITICAL --ignorefile "" --exit-code 1 /scan/synthetic.json
+          native_result=$?
+          printf '{"synthetic":true,"policy_exit":%s,"trivy_exit":%s}\n' "$policy_result" "$native_result" > .scan/gate-proof.json
+          test "$policy_result" -eq 1 && test "$native_result" -eq 1 || exit 2
+          echo 'Expected gate failure: fixed critical finding rejected; dependent publish must be skipped.'
+          exit 1
+      - name: Preserve report despite blocked gate
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: synthetic-security-gate-proof
+          path: .scan/*.json
+          include-hidden-files: true
+          retention-days: 7
+  publish:
+    needs: gate
+    runs-on: ubuntu-latest
+    steps:
+      - run: exit 99
