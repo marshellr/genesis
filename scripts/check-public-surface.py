@@ -33,15 +33,30 @@ def validate_hidden(status, headers, body):
         raise ValueError('public_error_discloses_runtime_version')
 
 
-def main():
-    count = 0
-    for host in HOSTS:
+def legacy_protocol_refused(result):
+    # A local OpenSSL policy failure does not establish a server-side protocol limit.
+    return result.returncode != 0 and b'alert protocol version' in (result.stdout + result.stderr).lower()
+
+
+def check_tls(host):
+    for version in [ssl.TLSVersion.TLSv1_2, ssl.TLSVersion.TLSv1_3]:
         context = ssl.create_default_context()
-        context.minimum_version = ssl.TLSVersion.TLSv1_2
+        context.minimum_version = context.maximum_version = version
         with socket.create_connection((host, 443), timeout=4) as stream:
             with context.wrap_socket(stream, server_hostname=host) as tls:
                 if tls.version() not in ('TLSv1.2', 'TLSv1.3'):
                     raise ValueError('public_tls_version_or_certificate_invalid')
+    for flag in ['-tls1', '-tls1_1']:
+        result = subprocess.run(['openssl', 's_client', '-connect', host + ':443', '--servername', host,
+                                 flag, '-cipher', 'ALL:@SECLEVEL=0', '-brief'], input=b'', capture_output=True, timeout=8)
+        if not legacy_protocol_refused(result):
+            raise ValueError('public_legacy_tls_rejection_not_proven')
+
+
+def main():
+    count = 0
+    for host in HOSTS:
+        check_tls(host)
         for path in HIDDEN:
             validate_hidden(*response('https://' + host + path))
             count += 1
