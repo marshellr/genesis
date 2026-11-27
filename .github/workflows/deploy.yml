@@ -58,8 +58,22 @@ jobs:
 
       - name: Build application image
         run: |
-          docker build -t genesis-app:${{ github.sha }} app
-          docker build -t genesis-dma:${{ github.sha }} dma
+          docker build --platform linux/amd64 --provenance=false --sbom=false -t genesis-app:${{ github.sha }} app
+          docker build --platform linux/amd64 --provenance=false --sbom=false -t genesis-dma:${{ github.sha }} dma
+
+      - name: Verify minimal PHP runtime images
+        run: |
+          set -euo pipefail
+          for component in app dma; do
+            docker run --rm --network none --read-only --tmpfs /tmp \
+              --tmpfs /var/run/apache2 --tmpfs /var/lock/apache2 \
+              -v "$PWD/scripts:/checks:ro" --entrypoint sh \
+              "genesis-$component:$GITHUB_SHA" /checks/check-php-runtime.sh "$component"
+          done
+          for test in dma-write-auth.php dma-html.php; do
+            docker run --rm --network none --read-only --tmpfs /tmp \
+              -v "$PWD:/repo:ro" --entrypoint php \
+              "genesis-dma:$GITHUB_SHA" "/repo/scripts/tests/$test"
 
       - name: Scan application images
         run: |
