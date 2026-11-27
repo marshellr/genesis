@@ -96,8 +96,11 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p .scan
+          docker_host="${DOCKER_HOST:-unix:///var/run/docker.sock}"
+          docker_socket="${docker_host#unix://}"
+          [[ "$docker_socket" == /* && -S "$docker_socket" ]]
           for image in genesis-app genesis-dma; do
-            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            docker run --rm -v "$docker_socket:/var/run/docker.sock" \
               -v "$HOME/.cache/trivy:/root/.cache/trivy" \
               aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb \
               image --scanners vuln --ignorefile "" --format json --exit-code 0 \
@@ -113,8 +116,11 @@ jobs:
         run: |
           set -euo pipefail
           python3 scripts/check-vulnerability-policy.py .scan/genesis-app.json .scan/genesis-dma.json --output .scan/review-summary.json
+          docker_host="${DOCKER_HOST:-unix:///var/run/docker.sock}"
+          docker_socket="${docker_host#unix://}"
+          [[ "$docker_socket" == /* && -S "$docker_socket" ]]
           for image in genesis-app genesis-dma; do
-            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            docker run --rm -v "$docker_socket:/var/run/docker.sock" \
               -v "$HOME/.cache/trivy:/root/.cache/trivy" \
               -v "$PWD/infra/security/trivy-ignore.yaml:/policy/ignore.yaml:ro" \
               aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb \
