@@ -69,6 +69,7 @@ jobs:
 
       - name: Build application image
         run: |
+          printf '%s\n' "$GITHUB_SHA" > app/public/deploy-version.txt
           docker info --format 'Engine={{.ServerVersion}} Driver={{.Driver}} DriverStatus={{json .DriverStatus}}' >> "$GITHUB_STEP_SUMMARY"
           docker build --platform linux/amd64 --provenance=false --sbom=false \
             --label org.opencontainers.image.source=https://github.com/marshellr/genesis \

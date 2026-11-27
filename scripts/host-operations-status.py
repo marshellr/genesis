@@ -47,7 +47,7 @@ def backup(spec, previous, now):
             if not path.is_absolute() or not any(path.is_relative_to(prefix) for prefix in [Path('/projects'), Path('/srv')]):
                 raise ValueError('unexpected_marker_location')
             info = path.stat()
-            if not stat.S_ISREG(info.st_mode) or info.st_size > 65536:
+            if not stat.S_ISREG(info.st_mode) or (source['type'] != 'file' and info.st_size > 65536):
                 raise ValueError('invalid_marker_file')
             if source['type'] == 'file':
                 if info.st_size == 0:
@@ -83,7 +83,16 @@ def main():
     previous = json.loads(output.read_text()) if output.exists() else {}
     old = {item['id']: item for item in previous.get('backups', [])}
     now = datetime.now(timezone.utc)
-    value = {'schema': 1, 'checked_at': now.isoformat(), 'backups': [backup(spec, old.get(spec['id'], {}), now) for spec in config['backups']]}
+    components = []
+    for item in config.get('components', []):
+        if not re.fullmatch(r'[a-z0-9-]{1,64}', item['id']) or not re.fullmatch(r'[A-Za-z0-9_.-]{1,100}', item['container']) or not 1 <= len(item['label']) <= 80:
+            raise ValueError('invalid_component_mapping')
+        result = subprocess.run(['docker', 'inspect', '--format', '{{.State.Running}} {{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}', item['container']], capture_output=True, text=True, timeout=3)
+        fields = result.stdout.split()
+        components.append({'id': item['id'], 'label': item['label'], 'ok': result.returncode == 0 and len(fields) == 2 and fields[0] == 'true' and fields[1] in ('none', 'healthy')})
+    if len(components) > 24 or len({item['id'] for item in components}) != len(components):
+        raise ValueError('invalid_component_count')
+    value = {'schema': 1, 'checked_at': now.isoformat(), 'backups': [backup(spec, old.get(spec['id'], {}), now) for spec in config['backups']], 'components': components}
     if len({item['id'] for item in value['backups']}) != len(value['backups']):
         raise ValueError('duplicate_backup_stream')
     fd, temporary = tempfile.mkstemp(prefix='.operations-', dir=output.parent)

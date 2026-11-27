@@ -27,6 +27,13 @@ def image(item):
 
 
 class ReleaseImagesTests(unittest.TestCase):
+    def test_image_marker_must_match_release_before_registry_publication(self):
+        with patch.object(images, 'docker', return_value=COMMIT + '\n') as execute:
+            images.verify_embedded_commit('synthetic', COMMIT)
+            self.assertIn('--network', execute.call_args.args)
+        with patch.object(images, 'docker', return_value='previous-commit\n'):
+            with self.assertRaises(ValueError): images.verify_embedded_commit('synthetic', COMMIT)
+
     def test_host_docker_uses_sudo_as_an_executable_not_a_shell_function(self):
         with patch.object(images, 'DOCKER', ['sudo', '-n', 'docker']), patch.object(images, 'command', return_value='{}') as execute:
             images.docker('image', 'inspect', 'synthetic')

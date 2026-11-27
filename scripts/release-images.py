@@ -74,6 +74,8 @@ def publish(commit, reports):
         report = json.loads(report_path.read_bytes())
         if report.get('Metadata', {}).get('ImageID') != image['Id']:
             raise ValueError('scan_does_not_match_published_image')
+        if component == 'app':
+            verify_embedded_commit(local, commit)
         repository = 'ghcr.io/marshellr/genesis-' + component
         docker('tag', local, repository + ':' + commit)
         docker('push', repository + ':' + commit)
@@ -89,6 +91,12 @@ def publish(commit, reports):
                                       'config_digest': config_digest, 'rootfs': image['RootFS']['Layers'],
                                       'scan_report_sha256': hashlib.sha256(report_path.read_bytes()).hexdigest()}
     return validate(value, commit)
+
+
+def verify_embedded_commit(image, commit):
+    marker = docker('run', '--rm', '--network', 'none', '--entrypoint', 'cat', image, '/var/www/html/public/deploy-version.txt')
+    if marker.strip() != commit:
+        raise ValueError('image_version_marker_does_not_match_release_commit')
 
 
 def prepare(value, commit):
