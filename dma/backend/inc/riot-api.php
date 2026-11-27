@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/safe-html.php';
+
 /**
  * Riot Data Dragon API Helper
  * Holt aktuelle Patch-Version und Champion-Daten
@@ -178,29 +180,21 @@ function metasrc_get_champion_stats(string $elo = 'emerald_plus'): array
     $url = "https://www.metasrc.com/lol/stats?ranks={$metaRanksParam}&patch={$patch}";
     error_log("MetaSrc: Scraping URL: " . $url);
 
-    $ch = curl_init($url);
-    curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT => 15,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTPHEADER => [
+    $html = dma_fetch_html($url, [
             'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
             'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
             'Accept-Language: en-US,en;q=0.9'
-        ]
     ]);
 
-    $html = curl_exec($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-    curl_close($ch);
-
-    if ($httpCode !== 200 || empty($html)) {
-        error_log("MetaSrc scraping failed: HTTP $httpCode, HTML empty: " . (empty($html) ? 'true' : 'false') . ". Falling back to JSON API.");
+    if ($html === null) {
+        error_log("MetaSrc scraping unavailable or oversized. Falling back to JSON API.");
         return metasrc_try_json_api($singleRankForJsonApi, $patch);
     }
 
-    $dom = new DOMDocument();
-    @$dom->loadHTML($html);
+    $dom = dma_parse_html($html);
+    if ($dom === null) {
+        return metasrc_try_json_api($singleRankForJsonApi, $patch);
+    }
     $xpath = new DOMXPath($dom);
 
     $stats = [];
@@ -411,9 +405,10 @@ function leagueofgraphs_get_champion_slug_map(): array
     }
 
     $map = [];
-    $dom = new DOMDocument();
-    libxml_use_internal_errors(true);
-    @$dom->loadHTML($html);
+    $dom = dma_parse_html($html);
+    if ($dom === null) {
+        return [];
+    }
     $xpath = new DOMXPath($dom);
 
     foreach ($xpath->query('//li[@data-name]') as $item) {
@@ -449,29 +444,11 @@ function leagueofgraphs_get_champion_slug_map(): array
 
 function leagueofgraphs_fetch_html(string $url): ?string
 {
-    $ch = curl_init($url);
-    curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT => 15,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTPHEADER => [
+    return dma_fetch_html($url, [
             'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
             'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
             'Accept-Language: en-US,en;q=0.9',
-        ],
     ]);
-
-    $html = curl_exec($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-    $error = curl_error($ch);
-    curl_close($ch);
-
-    if ($html === false || $httpCode !== 200 || empty($html)) {
-        error_log("LeagueOfGraphs: Fetch failed for {$url} (HTTP {$httpCode}) {$error}");
-        return null;
-    }
-
-    return $html;
 }
 
 function leagueofgraphs_extract_winrate(string $html): ?float
