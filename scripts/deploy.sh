@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
+export PYTHONDONTWRITEBYTECODE=1
 
 ROOT_DIR="/projects/genesis"
 RELEASE_SHA="${1:-}"
@@ -345,6 +346,11 @@ for unit in "${SYSTEMD_UNITS[@]}"; do
 done
 [[ -f "$RELEASE_DIR/scripts/check-public-routing.py" ]] || fail "Release is missing routing verification"
 [[ -f "$ENV_FILE" ]] || fail "Compose env file missing: $ENV_FILE"
+
+# Detect unreadable/unwritable generated directories before any release file changes.
+while IFS= read -r -d '' release_directory; do
+  [[ -r "$release_directory" && -w "$release_directory" && -x "$release_directory" ]] || fail "Release-managed directory is not writable by the deploy user."
+done < <(find "$ROOT_DIR/app" "$ROOT_DIR/dma" "$ROOT_DIR/docs" "$ROOT_DIR/scripts" "$ROOT_DIR/.github" -type d -print0)
 
 mkdir -p "$RUNTIME_DIR" "$BACKUP_ROOT"
 

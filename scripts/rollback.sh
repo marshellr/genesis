@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
+export PYTHONDONTWRITEBYTECODE=1
 
 ROOT_DIR="/projects/genesis"
 COMPOSE_FILE="$ROOT_DIR/infra/compose/docker-compose.yml"
