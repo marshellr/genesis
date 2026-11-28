@@ -1,0 +1,68 @@
+// Operator-private environment supplies host identity and the restricted TLS endpoint.
+logging {
+  level = "warn"
+}
+
+loki.relabel "auth" {
+  forward_to = []
+  rule {
+    source_labels = ["__journal_syslog_identifier"]
+    regex = "sshd|sshd-session|sudo|su|login|systemd-logind|pvedaemon|pveproxy"
+    action = "keep"
+  }
+  rule {
+    source_labels = ["__journal_syslog_identifier"]
+    target_label = "service"
+  }
+}
+
+loki.source.journal "auth" {
+  max_age = "1h"
+  relabel_rules = loki.relabel.auth.rules
+  labels = { host = sys.env("HOST_LABEL"), job = "host_auth" }
+  forward_to = [loki.process.auth.receiver]
+}
+
+loki.process "auth" {
+  // Retain authentication outcomes, never entire sudo command arguments.
+  stage.replace {
+    expression = "COMMAND=.*"
+    replace = "COMMAND=[redacted]"
+  }
+  stage.replace {
+    expression = "(?i)(password|passwd|token|authorization|api[-_]?key)[=: ]+[^[:space:]]+"
+    replace = "credential=[redacted]"
+  }
+  stage.static_labels {
+    values = { job = "host_auth" }
+  }
+  forward_to = [loki.write.host.receiver]
+}
+
+loki.source.journal "maintenance" {
+  matches = "SYSLOG_IDENTIFIER=homelab-maintenance"
+  max_age = "30m"
+  labels = { host = sys.env("HOST_LABEL"), job = "maintenance" }
+  forward_to = [loki.process.maintenance.receiver]
+}
+
+loki.process "maintenance" {
+  stage.static_labels {
+    values = { job = "maintenance" }
+  }
+  forward_to = [loki.write.host.receiver]
+}
+
+loki.write "host" {
+  endpoint {
+    url = sys.env("LOKI_PUSH_URL")
+    follow_redirects = false
+    remote_timeout = "5s"
+    batch_size = "256KiB"
+    max_backoff_period = "30s"
+    max_backoff_retries = 3
+    tls_config {
+      server_name = sys.env("LOKI_TLS_NAME")
+    }
+  }
+}

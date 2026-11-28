@@ -2,7 +2,7 @@ name: genesis-logging
 
 services:
   loki:
-    image: grafana/loki:3.6.0@sha256:6a705de65df88aa0d90a44779606b0042722c86637335a73858f65f9fe9f9557
+    image: grafana/loki:3.6.23@sha256:2ec89e3d043b0d2a869f3db6747a417869cb9ee28b32904615bedc0f4bca87d8
     container_name: genesis-logging-loki
     command:
       - -config.file=/etc/loki/config.yml
