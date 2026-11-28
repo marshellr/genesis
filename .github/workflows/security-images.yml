@@ -1,0 +1,91 @@
+name: Build patched infrastructure images
+
+on:
+  push:
+    branches: [main]
+    paths: ['infra/security-images/**', '.github/workflows/security-images.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: patched-infrastructure-images
+  cancel-in-progress: false
+
+jobs:
+  build-scan-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        component: [mariadb, uptime-kuma]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: docker/setup-docker-action@3f1ab1ab0e29231562e4db4ca600c1a49653bac6
+        with:
+          version: v29.9.3
+          set-host: true
+          daemon-config: |
+            {"features":{"containerd-snapshotter":false}}
+      - name: Build once and test targeted runtime changes
+        env:
+          COMPONENT: ${{ matrix.component }}
+        run: |
+          set -euo pipefail
+          docker build --platform linux/amd64 --provenance=false --sbom=false \
+            --target "$COMPONENT" -f infra/security-images/Dockerfile \
+            --label org.opencontainers.image.source=https://github.com/marshellr/genesis \
+            --label "org.opencontainers.image.revision=$GITHUB_SHA" \
+            -t "ghcr.io/marshellr/genesis-$COMPONENT:r14-$GITHUB_SHA" .
+          if [[ "$COMPONENT" == mariadb ]]; then
+            docker run --rm --network none --read-only --entrypoint gosu \
+              "ghcr.io/marshellr/genesis-$COMPONENT:r14-$GITHUB_SHA" nobody id -u | grep -qx 65534
+          fi
+      - name: Scan the exact image and enforce the critical gate
+        env:
+          COMPONENT: ${{ matrix.component }}
+        run: |
+          set -euo pipefail
+          mkdir -p .scan
+          docker_socket="${DOCKER_HOST:-unix:///var/run/docker.sock}"
+          docker_socket="${docker_socket#unix://}"
+          [[ "$docker_socket" == /* && -S "$docker_socket" ]]
+          docker run --rm -v "$docker_socket:/var/run/docker.sock" \
+            aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb \
+            image --scanners vuln --ignorefile "" --format json --exit-code 0 \
+            "ghcr.io/marshellr/genesis-$COMPONENT:r14-$GITHUB_SHA" > ".scan/$COMPONENT.json"
+          python3 scripts/check-vulnerability-policy.py ".scan/$COMPONENT.json" --output .scan/review-summary.json
+      - name: Publish without rebuilding
+        env:
+          COMPONENT: ${{ matrix.component }}
+          REGISTRY_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          trap 'docker logout ghcr.io >/dev/null 2>&1' EXIT
+          image="ghcr.io/marshellr/genesis-$COMPONENT:r14-$GITHUB_SHA"
+          before=$(docker image inspect -f '{{.Id}}' "$image")
+          printf '%s' "$REGISTRY_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          docker push "$image"
+          [[ $(docker image inspect -f '{{.Id}}' "$image") == "$before" ]]
+          reference=$(docker image inspect -f '{{index .RepoDigests 0}}' "$image")
+          anonymous=$(mktemp -d)
+          DOCKER_CONFIG="$anonymous" docker buildx imagetools inspect "$reference" >/dev/null
+          rm -rf -- "$anonymous"
+          printf '%s\n' "$reference" > ".scan/$COMPONENT.reference"
+          echo "$COMPONENT: $reference" >> "$GITHUB_STEP_SUMMARY"
+      - name: Retain reports even on failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: patched-${{ matrix.component }}
+          path: .scan/*
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
