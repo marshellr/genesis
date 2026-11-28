@@ -2,7 +2,7 @@ name: genesis-monitoring
 
 services:
   prometheus:
-    image: prom/prometheus:v3.6.0@sha256:76947e7ef22f8a698fc638f706685909be425dbe09bd7a2cd7aca849f79b5f64
+    image: prom/prometheus:v3.13.5@sha256:aafa9d694e6a883c02db516d9f6e5b84e14195f49a2a6456a4cca815edda72b9
     container_name: ${COMPOSE_PROJECT_NAME:-genesis}-prometheus
     restart: unless-stopped
     command:
@@ -72,7 +72,7 @@ services:
       - no-new-privileges:true
 
   node-exporter:
-    image: prom/node-exporter:v1.9.1@sha256:d00a542e409ee618a4edc67da14dd48c5da66726bbd5537ab2af9c1dfc442c8a
+    image: prom/node-exporter:v1.13.1@sha256:7296504d4ada44b7d7ab4431e27e9f9900d8488f8d55842f4b12ae2704e16dfe
     container_name: ${COMPOSE_PROJECT_NAME:-genesis}-node-exporter
     restart: unless-stopped
     command:
@@ -105,7 +105,7 @@ services:
     read_only: true
 
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor:v0.49.1@sha256:3cde6faf0791ebf7b41d6f8ae7145466fed712ea6f252c935294d2608b1af388
+    image: ghcr.io/google/cadvisor:v0.61.1@sha256:4929b70e82079d001d0028b85d6a4dd25ad4666b719455c9542b983489963916
     container_name: ${COMPOSE_PROJECT_NAME:-genesis}-cadvisor
     restart: unless-stopped
     command:
