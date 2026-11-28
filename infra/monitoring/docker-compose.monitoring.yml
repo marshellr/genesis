@@ -139,7 +139,7 @@ services:
       - no-new-privileges:true
 
   uptime-kuma:
-    image: louislam/uptime-kuma:2.5.12@sha256:8e4b6bef96417ec98a35dc103c99cc64fc229a01e584e56d95d9004d2003c02a
+    image: louislam/uptime-kuma:2.5.12-slim@sha256:f2a9bc853deb2a6f37df229649f96d62efc3cb24e38b08eee79234f76613d063
     container_name: ${COMPOSE_PROJECT_NAME:-genesis}-uptime-kuma
     restart: unless-stopped
     ports:
