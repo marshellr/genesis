@@ -1,15 +1,21 @@
-# Container hardening
+# Container Hardening
 
-Application images copy source as root-owned files. Directories are mode 0755 and files are mode 0644. The PHP services use a read-only root filesystem. Apache runtime directories, PHP sessions and DMA caches use dedicated temporary filesystems. The application source has no writable mount.
+## Build and runtime boundary
 
-Both PHP services drop all capabilities and add only SETUID, SETGID and NET_BIND_SERVICE for Apache startup and worker privileges. The existing no-new-privileges setting remains enabled.
+Both PHP applications use multi-stage builds. Compilers, development packages and kernel headers stay in the build stage. The runtime contains Apache, PHP, required extensions and their linked libraries. Runtime checks verify extensions, shared-library resolution, Apache configuration, and the absence of build packages. SQLite and XML libraries remain where PHP actually requires them.
 
-Base and platform images use version tags with immutable digests. Dependabot checks the PHP Dockerfiles weekly. To update a platform image, select its supported release, inspect the registry digest, update the version and digest together, and validate Compose and service health. Database and monitoring upgrades require a backup and a tested rollback path.
+Source files are root-owned inside the images, with directories 0755 and files 0644. PHP services have a read-only root filesystem. Dedicated temporary filesystems hold writable runtime state. Both services drop all capabilities, adding only SETUID, SETGID and NET_BIND_SERVICE for Apache startup. No-new-privileges remains enabled.
 
-For a runtime verification, render the active Compose model with its existing environment file and all required profiles. Compare each running container's configured image reference and actual image ID with the locally resolved image ID of that model. Release-built applications must also match the verified release manifest. A matching tag alone is insufficient. Do not print resolved environments or secrets. Keep the full inventory in the private operations record; public documentation contains only the result. Confirm configured health checks and application readiness after any update. Retained stateful containers may still carry labels pointing to an older release directory; compare those against the active model before deciding to recreate them.
+## Image identity and security gates
 
-The public ingress proxy serves both the outbound tunnel and LAN virtual hosts. Database and internal monitoring backends do not need generally published host ports. Frontend, data and monitoring memberships are reviewed by required service-to-service traffic. Router and host firewall controls require separate evidence, including an independent IPv6 test; container health does not establish network isolation.
+Base and platform images are pinned by digest. CI builds and scans application images once, publishes immutable registry digests and records the scanned identity in the release manifest. The host pulls those digests and checks the running image, configuration identity, filesystem layers and commit before confirming deployment. A matching mutable tag alone is insufficient.
 
-CI scans the complete Git history with Gitleaks and scans both built PHP images with Trivy. Critical findings are counted in the job summary and retained as short-lived vulnerability reports. Review the affected package, distribution advisory and fixed version before changing the image. A scanner finding may refer to code that the distribution does not ship. Keep that assessment explicit in the private audit record.
+Gitleaks checks repository history. Trivy reports HIGH and CRITICAL findings independently of the release gate. Relevant fixable CRITICAL findings block publication. Exceptions are limited to reviewed package versions, have an owner and expiry, and fail closed when invalid or expired. Accepted unfixed findings remain visible for re-evaluation when a fix appears.
 
-The portfolio generates asset query parameters from each file's SHA-256. Content changes produce a new URL without editing Nginx configuration.
+The bounded runtime scan derives its image set from active Compose models, verifies actual running identities and retains reports privately. Aggregate findings are visible in the operator dashboard without alert delivery. A scanner label is reviewed against the distribution advisory and the reachable application code before a package is removed or an exception is introduced.
+
+## Isolation and updates
+
+Frontend, database and monitoring traffic use separate Docker networks. Internal database and monitoring backends do not require generally published host ports. The ingress proxy serves tunnel and LAN traffic; router and firewall boundaries require their own evidence, including an external IPv6 test.
+
+For an update, select a supported version and registry digest, back up affected state, verify Compose references and actual running identities, then check readiness and rollback. Stateful upgrades need a tested data rollback. Full inventories, firewall exceptions, host addresses and credentials belong in the private operations record.

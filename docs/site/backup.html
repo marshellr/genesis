@@ -36,30 +36,24 @@
         <span>Backup</span>
       </nav>
       <article class="doc-panel">
-        <p class="eyebrow">Backup</p>
-        <h1>Local backup sets and encrypted offsite snapshots.</h1>
-        <p>Daily local backups contain a MariaDB dump, project files, and consistent SQLite copies. Each set has a timestamped manifest and SHA-256 checksums. The newest seven complete sets are retained.</p>
-      </article>
-
-      <article class="doc-panel">
-        <h2>What goes offsite</h2>
-        <p>A separate nightly Restic job encrypts and uploads snapshots to offsite storage. Its pre-backup hook creates the logical MariaDB dump and consistent SQLite copies. The raw MariaDB backing directory and the duplicate local dump and archive sets are excluded.</p>
-        <ul class="plain-list">
-          <li>The local job reserves at least 2 GiB of free space in addition to the estimated archive and staged runtime data.</li>
-          <li>Local files use a partial suffix until promotion. Interrupted runs are cleaned up.</li>
-          <li>Short-lived metrics and log stores are excluded from the offsite snapshot.</li>
-        </ul>
-      </article>
-
-      <article class="doc-panel">
-        <h2>Restore verification</h2>
-        <p>The restore test recovered an offsite snapshot into private staging. The MariaDB dump was imported into an isolated instance and checked against the source. The restored SQLite copies passed integrity checks.</p>
-        <p>Verify checksums before extracting a local set. Stage files away from the live tree and test database imports before applying a recovery to production.</p>
+        <h1>Separate local evidence and encrypted offsite recovery.</h1>
+        <p>Logical database dumps and consistent SQLite copies are prepared before encrypted offsite snapshots. A shared lock prevents the pre-deploy hook and nightly backup from running concurrently.</p>
       </article>
       <article class="doc-panel">
-        <h2>Recovery objectives</h2>
-        <p>The confirmed recovery point objective is 25 hours. The recovery time objective is 2 hours for full service restoration to an available replacement VM, with working hardware, network access and access to the backup credentials and keys.</p>
-        <p>The internal status snapshot displays the age of the last completed successful offsite backup. Recovery includes database import, project configuration and verified service health and public routing.</p>
+        <h2>Backup boundaries</h2>
+        <p>MariaDB is restored from its logical dump. Raw database backing data, duplicate local archive sets and short-lived metrics and log stores are excluded from the application offsite snapshot.</p>
+        <p>Local archives retain seven complete sets with checksums and manifests; partial artifacts are not promoted. Local dumps, archives, hypervisor backups and encrypted offsite snapshots have separate success evidence. The internal dashboard evaluates local and external freshness independently.</p>
+      </article>
+      <article class="doc-panel">
+        <h2>Restore evidence: 27 November 2026</h2>
+        <p>The selected offsite snapshot was 19.66 hours old. SQL was imported into a separate MariaDB instance, application tables were checked and both restored SQLite copies passed integrity checks.</p>
+        <p>Both PHP applications ran on an internal test network with the restored data and no published ports. HTTP health, the portfolio database adapter and DMA database queries succeeded. Production credentials and data were not changed; temporary data, containers and the test network were removed.</p>
+        <p>Retrieval, logical restore and application checks took 19.6 seconds on an already available Docker host with the required images. Replacement hardware or VM provisioning, certificate recovery and tunnel restoration are outside this timing.</p>
+      </article>
+      <article class="doc-panel">
+        <h2>Recovery objectives and limits</h2>
+        <p>The confirmed recovery point objective is 25 hours. The recovery time objective is 2 hours for complete service restoration to an available replacement VM, assuming working hardware, network and backup credentials.</p>
+        <p>The measured exercise covers logical data and application startup. It does not establish a complete replacement-infrastructure timing result. Restore to private staging, verify checksums and data integrity, then check configuration, image identity, health and public routing before declaring recovery complete.</p>
       </article>
     </main>
   </div>

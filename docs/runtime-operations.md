@@ -1,41 +1,15 @@
-# Runtime Operations Notes
+# Runtime Operations
 
-## Pruefung
+## Release review
 
-```bash
-docker --version
-docker compose version
-docker info
-sudo systemctl status docker --no-pager
-sudo systemctl status containerd --no-pager
-```
+Compare the deployment receipt, release commit and scanned image manifest with running image identities. Read current container health, public routing and origin readiness before calling a release successful. Keep failed-deployment and rollback evidence.
 
-## Netzwerke
+## Resource and evidence review
 
-```bash
-docker network ls
-docker network inspect genesis_frontend
-docker network inspect genesis_backend
-docker network inspect genesis_monitoring
-```
+Review thinpool and hard-disk utilisation separately from provisioned disk promises. Guest filesystem usage is measured independently. Inspect the timestamp and source status of each local and external backup stream; missing evidence is unknown.
 
-## Disk Management
+Retain the previous recoverable release and avoid unreviewed image cleanup during an incident. Restore to private staging and isolated databases before changing production state. Keep credentials and full inventories in the private operations record.
 
-```bash
-docker system df
-df -h
-sudo du -sh /var/lib/docker
-sudo journalctl --disk-usage
-```
+## Accepted operating limit
 
-## Sichere Routine
-
-- Nur benoetigte Images behalten
-- Alte Images regelmaessig entfernen
-- Keine ungebundenen Host-Port-Mappings fuer interne Services
-- Monitoring- und Log-Retention spaeter klein konfigurieren
-- Backups nicht dauerhaft lokal ansammeln lassen
-
-## Vorsicht
-
-Bei Docker koennen veroeffentlichte Container-Ports UFW umgehen. Spaeter nur oeffentlich gewollte Ports an den Host binden.
+There is no alert delivery and no external notifying monitor. Host, power or Internet failure can also remove access to the internal dashboard. Detection depends on the next operator check.

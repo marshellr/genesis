@@ -1,75 +1,27 @@
 # Backup and Restore
 
-## Scope
+## Logical data and encrypted offsite snapshots
 
-Backups are centered on `/projects/genesis`.
+The pre-backup hook creates a logical MariaDB dump and consistent SQLite copies. The pre-deploy hook and nightly offsite backup share a lock. A failed pre-deploy hook prevents deployment.
 
-The current backup design captures:
+The nightly Restic job encrypts application files, configuration and prepared logical database copies before offsite storage. Raw MariaDB backing data, duplicate local archive sets and short-lived Prometheus, Loki and Alloy stores are excluded. MariaDB recovery uses its logical dump.
 
-- both application databases (`genesis_inventory` and `dma`) in one logical MariaDB dump
-- project files as a compressed archive
-- integrity-checked SQLite snapshots for Grafana and Uptime Kuma inside the file archive
-- optional host-local project snapshots under `external/`
-- timestamped, checksummed artifacts with manifests and count-based local retention
+Local archive tooling retains seven complete sets with checksums and manifests. Partial artifacts are not promoted. It reserves at least 2 GiB beyond its estimated working data. Pre-deployment dumps, local archives, hypervisor backups and offsite snapshots have distinct purposes and success evidence.
 
-## Why Logical Backups
+## Evidence freshness
 
-The MariaDB data is restored from SQL dumps, not raw volume snapshots. That keeps the procedure easier to inspect and safer to restore on a small single-host setup.
+The internal dashboard evaluates local and offsite success independently with a 25-hour limit. Failed or unavailable evidence preserves the last known success and marks its uncertainty. A missing external hypervisor-archive success is not inferred from successful application backups. These state checks add no backup schedule or notification channel.
 
-## Backup Artifacts
+## Restore exercise on 27 November 2026
 
-- database dumps under `/projects/genesis/infra/backup/db`
-- file archives under `/projects/genesis/infra/backup/files`
-- backup logs under `/projects/genesis/infra/backup/logs`
-- restore extraction targets under `/projects/genesis/infra/backup/restore`
+The selected offsite snapshot was 19.66 hours old. Logical SQL and SQLite copies were recovered into private staging. The SQL was imported into a separate MariaDB instance, application tables were checked, and both SQLite copies passed integrity checks.
 
-## Explicit Exclusions
+Both PHP applications were then started on an internal test network without published ports. The portfolio HTTP health response and its database adapter worked against restored data; DMA's health and database queries also succeeded. Only synthetic test credentials were created in the isolated database. Production data and credentials were not changed. Test containers, their data and the staging directory were removed afterwards.
 
-The local file archive excludes:
-
-- `/projects/genesis/infra/backup`
-- `/projects/genesis/infra/docker/volumes` as a live tree
-- selected runtime state is added back in from staged SQLite snapshots
-- `/projects/genesis/docs/publish`
-- `/projects/genesis/releases`
-
-## Rotation
-
-- the newest 7 complete local backup sets are retained
-- incomplete and unreferenced artifacts are removed automatically
-- restore work directories older than 7 days are removed
-
-Every run reserves at least 2 GiB of free space in addition to the estimated archive and staged runtime-state size. Outputs remain `*.partial` until the dump and file archive are complete.
-
-## Restore Model
-
-- database restore uses a dedicated restore script
-- the combined SQL dump restores both application databases
-- file restore uses a dedicated extraction script and does not overwrite `/projects/genesis` by default
-- recovery remains procedural and transparent, not hidden in backup tooling
-
-## Local and offsite schedules
-
-The local job runs daily at 03:17 in the host timezone. Archives and dumps are mode 0600. SQLite is snapshotted through the online backup API. Each staged database must pass PRAGMA integrity_check before publication.
-
-A separate nightly Restic job writes encrypted offsite snapshots. Its hook supplies a logical MariaDB dump and consistent SQLite copies. Restic excludes the raw MariaDB backing directory and duplicate local dump and archive sets, as well as the short-lived Prometheus, Loki, and Alloy stores. An offsite restore test imported MariaDB into an isolated instance and verified the restored SQLite copies.
-
-The internal status snapshot displays the last completed successful offsite run and its age. It reads the existing backup unit's completion state and preserves the previous success when a later run is active or fails. An age above 25 hours requires operator attention. This check adds no backup schedule.
-
-The host hook creates each online SQLite snapshot in one backup step, with a 60-second limit and a five-second termination reserve. The shared backup lock serializes pre-deployment dumps and the nightly offsite backup.
+Offsite retrieval, logical restore and the application checks took 19.6 seconds on an already available Docker host with the required images. This measurement does not include replacement hardware or VM provisioning, certificate recovery or public tunnel restoration.
 
 ## Recovery objectives
 
-The confirmed recovery point objective is 25 hours. The confirmed recovery time objective is 2 hours for full service restoration to an available replacement VM. Recovery assumes working hardware, network access and access to the backup credentials and keys.
+The confirmed recovery point objective is 25 hours. The recovery time objective is 2 hours for full service restoration to an available replacement VM, assuming working hardware, network and access to backup credentials and keys. The measured exercise covers logical data and application startup; it is not a complete replacement-infrastructure timing result.
 
-The recovery point is measured from the selected successful offsite snapshot. Restore the logical databases and project configuration, start the services and verify their health and public routing before declaring recovery complete. A database-only restore test measures one part of the full recovery objective.
-
-## Staged recovery
-
-```bash
-/projects/genesis/scripts/restore-files.sh /projects/genesis/infra/backup/files/<archive>.tar.gz
-```
-
-The command creates a fresh private staging directory and preserves original numeric owners through sudo. `--in-place` is rejected to prevent overwriting active SQLite databases. Verify the manifest's SHA-256 lines with `sha256sum -c` before recovery. Inspect the staged databases with `sudo sqlite3 <staged-database> 'PRAGMA integrity_check;'`.
-
-Host-local projects and their recovery instructions live under `infra/local/`. These files and `infra/nginx/conf.d/local/` are excluded from Git but included in local backups. Deployment and rollback preserve `local/` directories. Optional `backup.sh` and `health.sh` hooks extend backup and health checks without publishing private project configuration. Only trusted operator-maintained scripts belong there.
+Stage restores away from active databases. Verify artifact checksums and database integrity, restore configuration through the private operations procedure, then check image identity, application health and public routing before declaring recovery complete.

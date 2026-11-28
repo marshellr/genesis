@@ -31,8 +31,8 @@ flowchart TD
 - Docker Compose runtime on a Proxmox VE VM
 - Cloudflare Tunnel and HTTPS to the Nginx origin
 - PHP application workloads with MariaDB
-- GitHub Actions release publishing with host-initiated pull, health checks, and rollback
-- Monitoring through Prometheus, Grafana, Node Exporter, cAdvisor, and Uptime Kuma
+- CI-built and scanned registry images, immutable-digest pull deployment, health checks, and rollback
+- Internal metrics, logs and dashboard state; Uptime Kuma remains during the comparison period
 - Logging through Loki and Grafana Alloy
 - Daily database and SQLite backups with encrypted offsite Restic snapshots
 
@@ -47,58 +47,18 @@ flowchart TD
     nginx/              reverse proxy and TLS config
     monitoring/         Prometheus, Grafana, Kuma, cAdvisor
     logging/            Loki and Grafana Alloy
-    analytics/          AWStats reference configuration and report generator
     backup/             backup artifacts and cron definitions
   scripts/              deploy, backup, restore, and helper scripts
   docs/                 technical documentation and GitHub Pages source
 ```
 
-## Getting Started
+## Operating model
 
-### 1. Create the required Docker networks
+Production follows the [verified release flow](docs/deployment-flow.md): CI builds and scans the application images once, publishes immutable registry digests, and the host pulls those exact images. The deployment receipt changes only after running-image, routing, health and header verification. An explicit emergency host-build path remains documented; it is never an automatic fallback.
 
-```bash
-docker network create genesis_frontend || true
-docker network create genesis_backend || true
-docker network create genesis_monitoring || true
-```
+Initial provisioning requires operator-managed environment files, persistent storage, certificate state and private credentials. The aggregate-status bind directory must exist before bootstrapping the stack. Those private files and host mappings are not supplied by the public repository. Host integration in the deploy script remains disabled: normal deployment does not install or enable cron jobs, timers or certificate tooling. Existing backup schedules and certificate renewal remain separately managed.
 
-### 2. Prepare environment files
-
-```bash
-cp infra/compose/.env.example infra/compose/.env
-cp infra/monitoring/.env.example infra/monitoring/.env
-cp infra/logging/.env.example infra/logging/.env
-```
-
-Fill in real secrets before starting the platform.
-
-### 3. Start the main platform
-
-```bash
-docker compose \
-  --env-file infra/compose/.env \
-  -f infra/compose/docker-compose.yml \
-  up -d --build
-```
-
-### 4. Start monitoring
-
-```bash
-docker compose \
-  --env-file infra/monitoring/.env \
-  -f infra/monitoring/docker-compose.monitoring.yml \
-  up -d
-```
-
-### 5. Start logging
-
-```bash
-docker compose \
-  --env-file infra/logging/.env \
-  -f infra/logging/docker-compose.logging.yml \
-  up -d
-```
+No alert delivery or external notifying monitor is configured. Host, power or Internet failure can also make the internal dashboard unavailable; detection depends on the next operator check. Local and offsite backup evidence is evaluated independently.
 
 ## Documentation
 

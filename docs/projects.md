@@ -1,68 +1,31 @@
 # Projects
 
-## Overview
+## Genesis
 
-The project set behind `shellr.net` is not just a list of code exercises. It combines live platform work, legacy workload integration, reporting automation, migration and hardening work, and current security automation.
+Status: Running in production.
 
-## Genesis / self-hosted platform
+The public portfolio runs on a Docker Compose platform hosted on operator-owned hardware. Cloudflare Tunnel provides public ingress, with separate frontend, database and monitoring networks. CI-scanned registry images, host verification, rollback and encrypted offsite restore are part of the operating model.
 
-Docker Compose on a Proxmox VE homelab with Cloudflare Tunnel, internal monitoring, and verified recovery.
+## DMA
 
-### Focus
+Status: Read-only public showcase.
 
-- public entrypoints routed through Nginx
-- Compose-managed service separation on one host
-- bounded observability and backup strategy
-- operational documentation and rollback paths
+The public hostname serves static project context. Interactive PHP sources stay outside the served web root and have no published host port. Database checks and bounded cache prefetch use CLI entry points.
 
-## DMA statistics module
+## EVC — ENISA Vulnerability Check
 
-API-based dashboard for match and performance data, implemented as a separate PHP runtime on `dma.shellr.net`.
+Status: Conceptual overview.
 
-### Focus
+### Problem
 
-- aggregation of JSON-based external data
-- isolated runtime, database scope, and health behavior
-- live workload that can be monitored and operated on the wider platform
+Security advisories only become actionable once they are matched to the systems actually in use.
 
-## Automated web analytics with AWStats
+### Implementation
 
-Reference reporting workflow for access and usage patterns derived from webserver logs.
+The workflow retrieves vulnerability records from ENISA EUVD, normalises product and version information, and compares it with an asset inventory. Relevant matches are enriched with CVSS severity, EPSS exploitation probability and evidence of known exploitation.
 
-### Focus
+A structured report preserves the matching evidence and prioritisation criteria for human review. The approach combines API integration, version matching, vulnerability enrichment and repeatable report generation.
 
-- sanitised AWStats configuration and cron-ready generator
-- explicit access-log source required before production activation
-- lightweight reporting model that fits a single-VM environment
+### Verification and result
 
-## Web platform migration and hardening
-
-Migration of web workloads onto Linux-based infrastructure with stronger security and more predictable operations.
-
-### Focus
-
-- controlled migration instead of one-shot changes
-- host hardening, access control, and stable reachability
-- separation of public surfaces and runtime responsibilities
-
-## Inventory tracking application
-
-Web-based inventory application used as a practical CRUD workload inside the wider platform model.
-
-### Focus
-
-- PHP and relational database stack
-- structured display and management of stock data
-- useful proving ground for deployment, monitoring, and backup behavior
-
-
-## Current security automation work: vulnerability relevance
-
-Current automation work centered on vulnerability ingestion and asset-relevance matching.
-
-### Focus
-
-- ENISA EUVD API as upstream data source
-- comparison with asset inventory data
-- CVSS, KEV, and EPSS enrichment
-- reduction of manual triage through repeatable automation
+A traceable review process connects an advisory to a potentially affected system and makes the reasons for its priority visible. Product and version matches remain subject to validation.

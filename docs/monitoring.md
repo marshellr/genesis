@@ -1,22 +1,30 @@
 # Monitoring
 
-The monitoring and logging interfaces are available on the internal network.
+## Current roles
 
-- Prometheus collects service and host metrics from Node Exporter, cAdvisor, and application endpoints.
-- Grafana provides authenticated access to metrics and logs.
-- Grafana Alloy forwards logs to Loki, which retains them for 72 hours.
-- Uptime Kuma checks service availability, including public routing through Cloudflare. The internal status snapshot shows the last successful local backup and the age of the last completed offsite backup.
+- Prometheus collects host, container and service metrics from Node Exporter, cAdvisor and configured endpoints.
+- Grafana provides authenticated metrics and log views. Grafana Alloy forwards logs to Loki, with a 72-hour retention period.
+- The internal dashboard shows service checks, resource utilisation, backup evidence, runtime image-scan counts and operator-visible warnings.
+- Uptime Kuma remains in service during the comparison period. Retirement requires the operator's review of that comparison; it is not treated as already completed.
 
-During an incident, compare the public request with an origin probe, inspect Prometheus targets and container health, and use Loki to correlate relevant logs.
+No push, email or other alert delivery is configured. No external notifying availability monitor is configured. Host, power or Internet failure can also make the internal dashboard unavailable. A failure may remain unnoticed until the next operator check; this is an accepted operating trade-off.
 
-## Grafana headers and password state
+## Visible state and thresholds
 
-Grafana emits its own CSP with a fresh response nonce (`GF_SECURITY_CONTENT_SECURITY_POLICY=true`), using the pinned version's unchanged default template. nginx must not add a second CSP, X-Frame-Options or X-Content-Type-Options to this virtual host; it keeps the remaining proxy headers and Basic Auth. Other virtual hosts retain their existing policies. `scripts/check-grafana-headers.py` runs during deployment and rejects a proxy policy, duplicated headers, or bootstrap scripts without the matching nonce.
+Local and offsite backup success are evaluated separately. A recent local dump does not establish offsite success, and application offsite backups do not establish hypervisor archive coverage. Missing evidence remains explicitly unknown.
 
-The admin-password environment setting initializes an empty Grafana database; it does not reset existing credentials. Password changes belong in Grafana and persist in its data volume. The separate nginx htpasswd file is local state, ignored by Git and outside deployment synchronization. Deployments and rollbacks must neither regenerate this file nor reset Grafana users.
+The backup freshness limit is 25 hours. Resource defaults are 90 percent host RAM, 80 percent thinpool utilisation, and 85 percent hard-disk or guest-filesystem utilisation. Guest usage at 95 percent is critical. Guest filesystem data is read using the existing hypervisor audit access; unavailable measurements remain unknown.
 
-## Uptime Kuma upgrades
+Most warnings need two consecutive samples to enter or recover, with a one-minute sampling interval. The API-outage threshold is five minutes. Stale-sampler warnings remain time-dependent so that a stopped sampler cannot hide its own failure. Container-process checks are labelled separately from complete application-function checks.
 
-The container is pinned to a version and image digest. Before a major upgrade, test migration against a separate data copy with networking disabled. Stop the production container and archive its entire data directory before recreating it. Compare monitor definitions and notification mappings after migration. A rollback restores the complete pre-upgrade directory together with the old image.
+Actual running images are checked against active Compose definitions and scanned at least weekly. Raw reports remain private; the dashboard receives aggregate counts, completeness and timestamps. Fixable critical findings take priority for remediation. Fixable HIGH findings are prioritised ahead of routine unfixed HIGH review. Accepted unfixed package risks retain a dated review, rather than suppressing future fixes.
 
-Follow the [v1-to-v2 migration guide](https://github.com/louislam/uptime-kuma/wiki/Migration-From-v1-To-v2). Use the regular image for this migration.
+## Grafana policy and password state
+
+Grafana owns its nonce-based CSP and bootstrap scripts. Nginx retains Basic Auth and the remaining proxy headers without adding a second CSP, X-Frame-Options or X-Content-Type-Options. Deployment checks exercise both the unauthenticated challenge and the authenticated origin response, including fresh matching nonces and duplicate-header rejection. The probe reads a protected host credential and never publishes it.
+
+The Grafana administrator-password setting initialises an empty database; it does not reset existing users. Password changes remain database state. The separate nginx password file is operator-local state and is preserved during deployments and rollbacks.
+
+## Incident review
+
+Compare public requests with origin responses, check service and resource evidence, and correlate relevant short-retention logs. Check the age and completeness of evidence before treating a previous success as current. Recovery is confirmed by fresh successful checks; a stored historical success is not a current availability guarantee.

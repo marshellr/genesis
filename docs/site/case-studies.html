@@ -37,91 +37,26 @@
       </nav>
 
       <article class="doc-panel">
-        <p class="eyebrow">Case Studies</p>
-        <h1>Concrete platform decisions under real constraints.</h1>
-        <p>
-          These case studies describe the platform as an operating system, not as a design exercise.
-          Each one focuses on a real problem, the constraints on a small single-VM host, the technical
-          implementation choice that was made, and the operational outcome.
-        </p>
-        <div class="meta-strip">
-          <span>Last reviewed: November 2026</span>
-          <span>Format: problem, constraints, implementation, outcome</span>
-        </div>
+        <h1>Operational decisions and measured boundaries.</h1>
+        <p>These cases separate recorded checks from recovery objectives and conceptual project descriptions.</p>
       </article>
-
-      <section class="case-study-grid">
-        <article class="case-study">
-          <header>
-            <div>
-              <p class="eyebrow">Case 01</p>
-              <h3>From portfolio page to operable platform frontdoor</h3>
-            </div>
-            <div class="case-study-meta">
-              <span>shellr.net</span>
-              <span>Nginx</span>
-              <span>Docker Compose</span>
-            </div>
-          </header>
-          <p><strong>Problem:</strong> A portfolio landing page can look polished and still say very little about whether the operator understands delivery, failure handling, or runtime separation.</p>
-          <p><strong>Constraints:</strong> One VM, limited disk, no orchestration layer, and no room for decorative infrastructure.</p>
-          <p><strong>Implementation:</strong> The main site became the public frontdoor of a live platform with links to architecture, source, and public services.</p>
-          <p><strong>Outcome:</strong> Reviewers can move from positioning to proof: architecture, deployment flow, and repository structure are accessible from the landing page.</p>
-        </article>
-
-        <article class="case-study">
-          <header>
-            <div>
-              <p class="eyebrow">Case 02</p>
-              <h3>Isolating DMA as its own runtime surface</h3>
-            </div>
-            <div class="case-study-meta">
-              <span>dma.shellr.net</span>
-              <span>PHP</span>
-              <span>MariaDB</span>
-            </div>
-          </header>
-          <p><strong>Problem:</strong> Legacy PHP workloads become operational blind spots when they are embedded into a wider site without clear boundaries.</p>
-          <p><strong>Constraints:</strong> Existing codebase, existing data model, and a need to preserve usefulness while improving runtime clarity.</p>
-          <p><strong>Implementation:</strong> DMA was moved behind its own subdomain, container, cookie scope, database boundary, and health behavior instead of being treated as a path-level add-on. Its public endpoint now presents the architecture as a read-only showcase.</p>
-          <p><strong>Outcome:</strong> The application is easier to route, test, monitor, and reason about, while still remaining usable as a live statistics tool.</p>
-        </article>
-
-        <article class="case-study">
-          <header>
-            <div>
-              <p class="eyebrow">Case 03</p>
-              <h3>Observability without turning a single VM into a cluster</h3>
-            </div>
-            <div class="case-study-meta">
-              <span>Prometheus</span>
-              <span>Grafana</span>
-              <span>Loki</span>
-            </div>
-          </header>
-          <p><strong>Problem:</strong> Small hosts still need visibility, but full observability stacks quickly become disproportionate in memory, disk, and maintenance effort.</p>
-          <p><strong>Constraints:</strong> 8 GB RAM, 40 GB disk, and a goal of staying understandable for one operator path.</p>
-          <p><strong>Implementation:</strong> Prometheus, Grafana, Uptime Kuma, cAdvisor, Loki, and Grafana Alloy are kept on intentionally short retention and bounded storage instead of aiming for long-term analytics.</p>
-          <p><strong>Outcome:</strong> The platform stays observable enough for incidents and review without pretending to be a multi-team observability platform.</p>
-        </article>
-
-        <article class="case-study">
-          <header>
-            <div>
-              <p class="eyebrow">Case 04</p>
-              <h3>Reducing vulnerability-feed noise through asset relevance</h3>
-            </div>
-            <div class="case-study-meta">
-              <span>ENISA EUVD</span>
-              <span>SQLite</span>
-              <span>Freshservice</span>
-            </div>
-          </header>
-          <p><strong>Problem:</strong> Raw vulnerability feeds create review noise because new records do not directly identify the systems that are actually present in an environment.</p>
-          <p><strong>Constraints:</strong> Upstream API availability, incomplete product naming, repeated records, and the need to avoid duplicate notifications.</p>
-          <p><strong>Implementation:</strong> The current automation work maps ENISA EUVD records to an asset inventory, enriches relevant findings with CVSS, KEV, and EPSS context, and records revisions for repeatable review.</p>
-          <p><strong>Outcome:</strong> The design moves vulnerability review from broad feed scanning toward a focused, asset-relevant daily workflow while keeping incomplete matches visible for manual validation.</p>
-        </article>
+      <article class="doc-panel">
+        <h2>Deploy the image that was checked</h2>
+        <p>A host rebuild can diverge from a CI image even when the source commit is the same. The release now carries the immutable identity of the scanned registry image, and host verification compares it with the running container.</p>
+        <p>A missing embedded commit was detected by the independent host check during this change. The host rolled back and retained the previous deployment receipt. The pipeline now embeds and checks the marker before publishing the image.</p>
+      </article>
+      <article class="doc-panel">
+        <h2>Start applications against restored data</h2>
+        <p>The offsite exercise on 27 November 2026 checked SQL tables and SQLite integrity, then started both PHP applications against the recovered data. The measured data-and-application exercise took 19.6 seconds on an available host; full infrastructure replacement was outside that measurement.</p>
+      </article>
+      <article class="doc-panel">
+        <h2>EVC — ENISA Vulnerability Check</h2>
+        <p>Status: Conceptual overview.</p>
+        <p>Security advisories only become actionable once they are matched to the systems actually in use.</p>
+        <p>The workflow retrieves vulnerability records from ENISA EUVD, normalises product and version information, and compares it with an asset inventory. Relevant matches are enriched with CVSS severity, EPSS exploitation probability and evidence of known exploitation.</p>
+        <p>A structured report preserves the matching evidence and prioritisation criteria for human review. The approach combines API integration, version matching, vulnerability enrichment and repeatable report generation.</p>
+        <p>A traceable review process connects an advisory to a potentially affected system and makes the reasons for its priority visible. Product and version matches remain subject to validation.</p>
+      </article>
         <article class="case-study" id="cloud-vm-to-homelab">
           <header>
             <div>
@@ -144,7 +79,6 @@
             <li><strong>IPv6 DNS:</strong> FRITZ!Box still advertised its own IPv6 resolvers after IPv4 DNS moved to Pi-hole. Verify both resolver lists on a client before removing temporary DNS entries.</li>
           </ul>
         </article>
-      </section>
     </main>
   </div>
   <script type="module" src="./app.js"></script>

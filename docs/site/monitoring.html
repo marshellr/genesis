@@ -36,24 +36,23 @@
         <span>Monitoring</span>
       </nav>
       <article class="doc-panel">
-        <p class="eyebrow">Monitoring</p>
-        <h1>Internal monitoring for host, containers, and services.</h1>
-        <p>Prometheus, Grafana, Loki, and Uptime Kuma are available only on the internal network. Uptime checks also exercise the public Cloudflare path.</p>
-        <div class="doc-grid">
-          <article><h3>Prometheus</h3><p>Collects metrics from Node Exporter, cAdvisor, and service endpoints.</p></article>
-          <article><h3>Grafana</h3><p>Displays host, container, and service metrics alongside logs. The internal interface requires authentication.</p></article>
-          <article><h3>Loki</h3><p>Receives logs through Grafana Alloy. Logs have a 72-hour retention period.</p></article>
-          <article><h3>Uptime Kuma</h3><p>Checks service availability. The internal status snapshot also shows the timestamp of the latest successful local backup.</p></article>
-        </div>
+        <h1>Internal metrics, logs and explicit state.</h1>
+        <p>Prometheus and Grafana provide metrics, Alloy forwards logs to Loki, and the internal dashboard evaluates service, capacity, backup and image-scan evidence. Uptime Kuma remains during the comparison period.</p>
       </article>
-
       <article class="doc-panel">
-        <h2>First checks during an incident</h2>
-        <ol>
-          <li>Compare the availability check with a direct request through Cloudflare and an origin probe.</li>
-          <li>Check Grafana and Prometheus for resource pressure, failed targets, and container restarts.</li>
-          <li>Use Loki to correlate the event with short-retention logs, then confirm the affected service has recovered.</li>
-        </ol>
+        <h2>State and freshness</h2>
+        <p>Local and external backup success are separate signals with a 25-hour freshness limit. Missing evidence remains unknown. Guest filesystem utilisation is read with existing hypervisor audit access; unavailable measurements remain visible.</p>
+        <p>Default resource limits are 90 percent host RAM, 80 percent thinpool, and 85 percent hard-disk or guest-filesystem utilisation. Guest usage at 95 percent is critical. Most warnings need two consecutive failure or recovery samples. The API-outage limit is five minutes; stale-sampler checks remain time-dependent.</p>
+        <p>Monitoring-process and container-health status is identified separately from full application verification. Actual runtime images are compared with active Compose models and scanned at least weekly. Only aggregate findings and timestamps reach the dashboard.</p>
+      </article>
+      <article class="doc-panel">
+        <h2>Grafana authentication and headers</h2>
+        <p>Grafana owns its nonce-based CSP. The proxy retains Basic Auth without duplicating Grafana headers. Deployment checks both the unauthenticated challenge and an authenticated origin response with fresh matching bootstrap nonces.</p>
+        <p>Grafana user passwords remain database state. The proxy password file remains private operator state; deploys and rollbacks do not regenerate it.</p>
+      </article>
+      <article class="doc-panel">
+        <h2>Accepted detection limit</h2>
+        <p>No push, email or other alert delivery is configured, and there is no external notifying monitor. Host, power or Internet failure can also make the dashboard unavailable. Detection depends on the next operator check.</p>
       </article>
     </main>
   </div>

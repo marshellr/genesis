@@ -1,61 +1,9 @@
 # Docker Platform Baseline
 
-Diese VM nutzt Docker Engine mit Compose Plugin als schlanke Runtime-Basis fuer das Projekt unter `/projects/genesis`.
+The platform uses Docker Engine, the Compose plugin and containerd. Frontend, database and monitoring networks separate service responsibilities. Stateful data has dedicated storage and is not mixed with application source.
 
-## Installierte Runtime
+Application images are built in CI for linux/amd64 and are deployed by immutable registry digest. The current host uses Docker's containerd image store; CI publishing uses the classic store. Verification accounts for configuration and manifest identities and confirms the actual running image rather than assuming both stores report the same identifier.
 
-- Docker Engine
-- Docker Compose Plugin
-- containerd
+Container logging is size-limited and rotated. The standard application setting is 10 MiB per file with three files; Loki retains collected logs for 72 hours. Exact private-project overrides remain in the private operations record.
 
-## Docker-Netzwerke
-
-- `genesis_frontend`
-  - Nur fuer oeffentlich erreichbare Services wie spaeter Reverse Proxy oder App-Frontend
-- `genesis_backend`
-  - Fuer interne Services wie App-API, DMA, Datenbank
-- `genesis_monitoring`
-  - Fuer Monitoring- und Logging-Komponenten
-
-## Infrastrukturstruktur
-
-```text
-/projects/genesis/infra/
-  backup/
-  compose/
-  docker/
-    networks/
-    volumes/
-      backups/
-      grafana/
-      loki/
-      postgres/
-      prometheus/
-  env/
-  logging/
-  monitoring/
-  nginx/
-  runtime/
-  shared/
-```
-
-## Logging-Defaults
-
-Docker ist global auf `json-file` mit Rotation gesetzt:
-
-- `max-size=10m`
-- `max-file=3`
-- `compress=true`
-
-Das begrenzt den Log-Verbrauch pro Container auf grob etwa 30 MB plus Kompression.
-
-## Volume-Strategie
-
-- Persistente Daten spaeter nur fuer zustandsbehaftete Services
-- Trennung nach Verantwortung statt gemischter Sammel-Volumes
-- Monitoring-Volumes bewusst klein halten
-- Backup-Zwischenstaende getrennt unter `volumes/backups/`
-
-## Wichtiger Betriebsaspekt
-
-Docker-Portfreigaben koennen UFW-Regeln umgehen. Container-Ports sollten spaeter nur gezielt veroeffentlicht werden. Interne Dienste bleiben auf benannten Docker-Netzwerken ohne Host-Port-Binding.
+Docker-published ports can bypass assumptions based only on host firewall tools. Expose only required ingress, keep internal backends private, and verify router, host, hypervisor and external reachability separately.

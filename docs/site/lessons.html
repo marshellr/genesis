@@ -36,55 +36,24 @@
         <span>Lessons</span>
       </nav>
       <article class="doc-panel">
-        <p class="eyebrow">Lessons Learned</p>
-        <h1>What changed once the platform became real.</h1>
-        <div class="meta-strip">
-          <span>Last reviewed: September 2026</span>
-          <span>Focus: trade-offs, not slogans</span>
-        </div>
-        <div class="doc-grid">
-          <article>
-            <h3>Hostnames beat subpaths for app separation</h3>
-            <p>We started with path-based thinking, but dedicated subdomains made routing, cookies, redirects, and ownership much easier to reason about.</p>
-          </article>
-          <article>
-            <h3>Retention is part of reliability</h3>
-            <p>Keeping too much data on a 40 GB host is not observability maturity. Short retention is part of staying healthy.</p>
-          </article>
-          <article>
-            <h3>Simple CI/CD ages better</h3>
-            <p>GitHub-hosted Actions plus SSH deploy proved easier to audit, review, and recover than a local runner would have been for this size of platform.</p>
-          </article>
-          <article>
-            <h3>Documentation is operational work</h3>
-            <p>Runbooks, routing maps, and rollback notes reduce ambiguity later. Documentation is not extra polish once the platform is live.</p>
-          </article>
-        </div>
+        <h1>Checks need explicit scope and failure evidence.</h1>
+        <p>The operating model uses immutable artifacts, bounded state and recorded recovery tests.</p>
       </article>
-
       <article class="doc-panel">
-        <p class="eyebrow">Incident Patterns</p>
-        <h2>Failures that changed the platform shape.</h2>
-        <div class="incident-grid">
-          <article class="incident-card">
-            <h3>Frontend content hidden by reveal styling</h3>
-            <p><strong>Trigger:</strong> the public landing page loaded with animation-dependent visibility rules while the intended JS path was not guaranteed.</p>
-            <p><strong>What changed:</strong> visibility now defaults to readable content, and animation only enhances the page when the JS path actually succeeds.</p>
-            <p><strong>Why it matters:</strong> the public surface should degrade gracefully instead of treating presentation logic as a hard dependency.</p>
-          </article>
-          <article class="incident-card">
-            <h3>An internal status page needs a readable fallback</h3>
-            <p><strong>Trigger:</strong> an operator needs a quick status and backup overview even when browser scripts are unavailable.</p>
-            <p><strong>What changed:</strong> the internal status entry serves a static snapshot alongside Uptime Kuma.</p>
-            <p><strong>Why it matters:</strong> the basic service and backup state remains readable without JavaScript.</p>
-          </article>
-          <article class="incident-card">
-            <h3>Production proof has to be translated, not just implemented</h3>
-            <p><strong>Trigger:</strong> real routing, monitoring, and backup existed, but the public documentation and landing pages initially exposed too much internal jargon.</p>
-            <p><strong>What changed:</strong> the platform now surfaces guided entry points, case studies, and clearer reviewer-facing language.</p>
-            <p><strong>Why it matters:</strong> technical substance only becomes a trust signal when visitors can decode it quickly.</p>
-          </article>
-        </div>
+        <h2>Artifact identity</h2>
+        <p>Build and scan once, deploy the registry digest and verify the running image and embedded commit. A failed attempt retains evidence and the previous confirmation.</p>
+      </article>
+      <article class="doc-panel">
+        <h2>Retention and resource limits</h2>
+        <p>Metrics, logs, images and backup staging need explicit limits. Provisioned capacity and measured filesystem usage are separate signals.</p>
+      </article>
+      <article class="doc-panel">
+        <h2>Recovery scope</h2>
+        <p>A data import and an application startup test are useful evidence. Their timing does not measure replacement hardware, a new VM or restored public ingress. Keep those assumptions visible beside the recovery objectives.</p>
+      </article>
+      <article class="doc-panel">
+        <h2>Visibility without notification</h2>
+        <p>The internal dashboard shows current evidence and warnings, while Uptime Kuma remains in service during the comparison period. No alert delivery or external notifying monitor is configured. A host, power or Internet failure can remove the dashboard itself; detection depends on the next operator check.</p>
       </article>
     </main>
   </div>

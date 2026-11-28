@@ -37,25 +37,28 @@
       </nav>
 
       <article class="doc-panel">
-        <p class="eyebrow">Deployment Flow</p>
-        <h1>Build, publish, pull, verify.</h1>
-        <p>A push to <code>main</code> triggers GitHub Actions. It validates the configuration, builds the application, and publishes a versioned release bundle with SHA-256 checksums.</p>
+        <h1>Build once, scan, publish, pull, verify.</h1>
+        <p>The production host runs the immutable registry images scanned in CI.</p>
       </article>
-
       <article class="doc-panel">
-        <h2>From release to production</h2>
-        <ol>
-          <li>A timer on the VM polls GitHub for a new release using a read-only credential and conditional requests.</li>
-          <li>The VM checks the release identity and checksums, stages the bundle, and takes a local database backup before applying it.</li>
-          <li>Docker Compose builds and updates the services. Nginx validates and reloads its configuration. Origin readiness, public routing, and container health are checked.</li>
-          <li>After the host checks pass, the VM publishes a confirmation with the deployed commit and verification time. GitHub Actions reads <code>/deployed.json</code> over HTTPS and waits up to 15 minutes.</li>
-        </ol>
+        <h2>Release and image identity</h2>
+        <p>CI validates source and Compose, embeds the commit, and builds both PHP images once for linux/amd64. Complete vulnerability reports are separate from the blocking critical gate; reports remain available when the gate fails.</p>
+        <p>Reviewed package exceptions have owners and expiry dates. Relevant fixable CRITICAL findings block publication; HIGH and unfixed findings remain visible for review.</p>
+        <p>The release manifest records registry and configuration digests, filesystem layers, commit and report checksums. The host verifies the bundle, prepares logical database backups, pulls both digests, and checks identity before changing live files. It does not rebuild normal releases.</p>
       </article>
-
       <article class="doc-panel">
-        <h2>Rollback and operator checks</h2>
-        <p>A failed verification restores the previous release and retains its deployment confirmation. The VM records the failed release and waits for a newer one. To diagnose a deploy, compare the GitHub jobs, the host journal, the deployed commit, and the container health checks.</p>
-        <p>The VM initiates every release download. GitHub can verify the public endpoint without SSH access to the host.</p>
+        <h2>Host verification and rollback</h2>
+        <p>The host checks running images against the scanned manifest, tests and reloads Nginx, waits for origin readiness, and checks routing, headers, the static DMA boundary and authenticated Grafana nonce handling.</p>
+        <p>Only passed host verification changes the deployment receipt. GitHub verifies it over HTTPS for up to 15 minutes. A failed attempt retains the previous receipt and failure history; rollback restores the previous files, images and deployment state.</p>
+        <p>The host initiates downloads. The workflow needs no inbound SSH access. Host cron jobs, timers and certificate tooling are not installed by deployment.</p>
+      </article>
+      <article class="doc-panel">
+        <h2>Explicit emergency path</h2>
+        <p>The former host build remains an explicit operator recovery option, disabled by default. It requires the established full backup, retained previous images and reconciliation of deployment state. It is not claimed as normal CI-image provenance, and a registry failure never selects it automatically.</p>
+      </article>
+      <article class="doc-panel">
+        <h2>Recorded verification</h2>
+        <p>On 27 November 2026, release bbd5594 passed the registry-identity, host and public checks. A synthetic fixable critical finding separately proved that the security gate blocks publication while retaining the report. These are recorded checks, not a blanket availability or vulnerability-free claim.</p>
       </article>
     </main>
   </div>

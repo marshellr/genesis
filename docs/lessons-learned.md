@@ -1,21 +1,21 @@
 # Lessons Learned
 
-## 1. Subdomains scale better than subpaths for mixed apps
+## Hostname boundaries
 
-Using `dma.shellr.net` is operationally cleaner than forcing DMA under `/dma` on the main site.
+Dedicated hostnames keep routing and access control understandable. The public DMA surface is a static showcase; its interactive backend is outside the web root.
 
-## 2. Small hosts need hard limits everywhere
+## Resource limits
 
-Log retention, metric retention, image cleanup, and backup scope all need explicit boundaries on a 40 GB VM.
+Log retention, metrics, images and backup staging need explicit limits. Capacity promises and measured filesystem usage are different signals.
 
-## 3. A reverse proxy is an architecture surface, not just a convenience
+## Verify the artifact that runs
 
-Clean hostnames, redirects, access control, and TLS handling shape how professional the platform feels and how safely it can be operated.
+A successful CI build does not prove a later host rebuild is identical. Build and scan once, deploy the immutable digest, then check the running image and embedded commit before writing the deployment receipt.
 
-## 4. Docs should not compete with production resources
+## Restore applications as well as data
 
-Serving `docs.shellr.net` from GitHub Pages keeps the VM focused on runtime workloads and makes documentation versioned by default.
+An import and integrity check establish data evidence. Start the applications against the recovered data and state the timing assumptions explicitly. A fast database exercise does not measure full replacement-infrastructure recovery.
 
-## 5. Protected observability is still observability
+## State visibility has a detection limit
 
-Grafana does not need to be public to be useful. Putting it behind Nginx access control is the right default.
+Internal state cards help an operator review services, capacity and backup freshness. Without alert delivery or an external notifying monitor, a failure may remain unnoticed and may also make the dashboard unavailable.
