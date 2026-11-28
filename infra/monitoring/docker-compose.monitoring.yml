@@ -32,7 +32,7 @@ services:
       - no-new-privileges:true
 
   grafana:
-    image: grafana/grafana:12.2.0@sha256:74144189b38447facf737dfd0f3906e42e0776212bf575dc3334c3609183adf7
+    image: grafana/grafana:12.4.16@sha256:982fa6bf18cc38280a30bf08c3b673486067d4805b25a9d4756688a689a993c7
     container_name: ${COMPOSE_PROJECT_NAME:-genesis}-grafana
     restart: unless-stopped
     depends_on:
